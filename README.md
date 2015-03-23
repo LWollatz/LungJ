@@ -9,11 +9,15 @@ This README would normally document whatever steps are necessary to get your app
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### How do I get set up? ###
+
 **Easy**
+
 * The main directory includes the latest build
 * copy the .jar file into the Fiji ./*plugins* directory
 * restart Fiji
+
 **For Developers**
+
 * Java sourcecode is in the *src* folder
 * Fiji configuration file (for menu creation) is under *config*
 * run javac (comes with Fiji) on the *src* folder to create compiled java classes in the *class* folder
