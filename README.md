@@ -11,7 +11,7 @@ This README would normally document whatever steps are necessary to get your app
 ### How do I get set up? ###
 **Easy**
 * The main directory includes the latest build
-* copy the .jar file into the Fiji *./plugins* directory
+* copy the .jar file into the Fiji ./*plugins* directory
 * restart Fiji
 **For Developers**
 * Java sourcecode is in the *src* folder
