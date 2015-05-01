@@ -1,7 +1,6 @@
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
 import ij.plugin.*;
 import ij.gui.GenericDialog;
 import ij.gui.DialogListener;
@@ -16,10 +15,12 @@ import java.util.*;
 
 /**
 * LungJ code for probability map creation
-* run("Apply Weka Classifier","...");
-* TEST TEST TEST
+* run("Apply Weka Classifier", "directory=[C:\\mydirectory\\images] filename=imgname.end class=[C:\\mydirectory\\classifiers] class=classifiername.model class=1");
 *
-* threshold is defined as a percentage between Min and Max
+* directory is a string specifying the directory of the input image
+* filename is a string specifying the filename of the input image
+* class_directory is a string specifying the directory of the classifier
+* class_filename is a string specifying the filename of the classifier
 * output image is true binary (0 or 1) but remains the same bit-depth as the input image
 * window-size and threshold are automatically adjusted and LUT set to grayscale
 * this means that the output map clearly shows foreground and background and is ideal for mathematical operations!
@@ -31,6 +32,7 @@ import java.util.*;
 public class Apply_Weka_Classifier implements PlugIn{
 	/** plugin's name */
 	public static final String PLUGIN_NAME = "LungJ";
+	
 	private static String LJ_srcDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\tests";
 	private static String LJ_srcFilename = "250x250x250x16bit.tif";
 	private static String LJ_clsDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\run02";
@@ -48,12 +50,12 @@ public class Apply_Weka_Classifier implements PlugIn{
 			LJ_srcFilename = image.getTitle();
 		}*/
 		
-		GenericDialog gd = new GenericDialog(command+"...");
+		GenericDialog gd = new GenericDialog(command+" Apply Weka Classifier");
 		//gd.addString("Threshold", LJ_srcDirectory, 3);
 		gd.addStringField("Directory", LJ_srcDirectory, 100);
 		gd.addStringField("Filename", LJ_srcFilename, 100);
-		gd.addStringField("Class Directory", LJ_clsDirectory, 100);
-		gd.addStringField("Class Filename", LJ_clsFilename, 100);
+		gd.addStringField("Classifier_Directory", LJ_clsDirectory, 100);
+		gd.addStringField("Classifier_Filename", LJ_clsFilename, 100);
 		gd.addNumericField("Class No", 1, 0);
 		gd.showDialog();
 		if (gd.wasCanceled()){
@@ -87,9 +89,9 @@ public class Apply_Weka_Classifier implements PlugIn{
 		int nChannels = 2; //how do I obtain this?
 		AC_channel = (AC_channel < 0) ? 0 : AC_channel;
 		AC_channel = (AC_channel > nChannels) ? nChannels : AC_channel;
-		//IJ.run("Slice Remover", "first="+AC_channel+" last="+nSlices+" increment="+nChannels);
-		IJ.showStatus("first="+AC_channel+" last="+nSlices+" increment="+nChannels);
-		//IJ.showStatus("Probability map created.");
-		//IJ.showProgress(100, 100);
+		IJ.run("Slice Remover", "first="+AC_channel+" last="+nSlices+" increment="+nChannels);
+		//IJ.showStatus("first="+AC_channel+" last="+nSlices+" increment="+nChannels);
+		IJ.showStatus("Probability map created.");
+		IJ.showProgress(100, 100);
 	}
 }
