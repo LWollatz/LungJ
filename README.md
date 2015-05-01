@@ -3,7 +3,7 @@
 ### What is this repository for? ###
 
 * providing a Plug-In for Fiji / ImageJ for segmenting micro-CT scans of Lung Tissues
-* 0.0.1
+* 0.2.0
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### How do I get set up? ###
