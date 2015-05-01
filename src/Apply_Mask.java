@@ -42,9 +42,10 @@ public class Apply_Mask implements PlugIn{
 		if (gd.wasCanceled()){
         	return;
         }
-		String AM_srcTitle = gd.getNextChoice();
-		String AM_maskTitle = gd.getNextChoice();
+		int AM_srcID = lstImageIds[gd.getNextChoiceIndex()];
+		int AM_maskID = lstImageIds[gd.getNextChoiceIndex()];
 		
+		/*
 		int AM_srcID = 0;
 		int AM_maskID = 0;
 		for (int i = 0; i < Nimg; i++){
@@ -55,7 +56,7 @@ public class Apply_Mask implements PlugIn{
 			if(temp == AM_maskTitle){
 				AM_maskID = lstImageIds[i];
 			}
-		}
+		}*/
 		
 		ImagePlus image = WindowManager.getImage(AM_srcID);
 		ImagePlus mask = WindowManager.getImage(AM_maskID);
