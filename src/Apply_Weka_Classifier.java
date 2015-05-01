@@ -17,6 +17,7 @@ import java.util.*;
 /**
 * LungJ code for probability map creation
 * run("Apply Weka Classifier","...");
+* TEST TEST TEST
 *
 * threshold is defined as a percentage between Min and Max
 * output image is true binary (0 or 1) but remains the same bit-depth as the input image
