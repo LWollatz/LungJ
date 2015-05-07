@@ -48,8 +48,8 @@ public class Set_Up  implements PlugIn {
 		*/
 	}
 	
-	public static Color getColor(){
-		Color selColor = JColorChooser.showDialog(null, "Farbauswahl", null);
+	public static Color getColor(String label, Color defaultCol){
+		Color selColor = JColorChooser.showDialog(null, label, defaultCol);
 		System.out.println(selColor);
 		return selColor;
 	}
