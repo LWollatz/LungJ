@@ -33,6 +33,8 @@ public class Apply_Weka_Classifier implements PlugIn{
 	/** plugin's name */
 	public static final String PLUGIN_NAME = "LungJ";
 	
+	public static final String TWS_version = "v2.2.1";
+	
 	private static String LJ_srcDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\tests";
 	private static String LJ_srcFilename = "250x250x250x16bit.tif";
 	private static String LJ_clsDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\run02";
@@ -68,11 +70,13 @@ public class Apply_Weka_Classifier implements PlugIn{
 		AC_channel = (int)gd.getNextNumber();
 		//--Load WEKA--
 		IJ.showStatus("Opening Trainable Weka Segmentation...");
+		//TODO: import library to make direct calls
 		IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"]");
+		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=[Ljava.lang.String;@3f094d0a");
 		IJ.showProgress(5, 100);
 		//--Load Classifier--
 		IJ.showStatus("Loading classifier...");
-		IJ.runMacro("selectWindow('Trainable Weka Segmentation v2.2.0'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"\\\\"+LJ_clsFilename.replace("\\","\\\\")+"');");
+		IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"\\\\"+LJ_clsFilename.replace("\\","\\\\")+"');");
 		IJ.showProgress(20, 100);
 		//--Get Probability Map--
 		IJ.showStatus("Getting Probability Map...");
@@ -81,7 +85,7 @@ public class Apply_Weka_Classifier implements PlugIn{
 		IJ.showProgress(90, 100);
 		//--post processing--
 		IJ.showStatus("Finishing...");
-		IJ.runMacro("selectWindow('Trainable Weka Segmentation v2.2.0'); close(); selectWindow('Probability maps');");
+		IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); close(); selectWindow('Probability maps');");
 		//--remove background channel-- NEED TO MAKE THIS INDEPENDANT OF IMAGE SIZE!
 		ImagePlus image = WindowManager.getCurrentImage();
 		int[] properties = image.getDimensions(); //width, height, nChannels, nSlices, nFrames

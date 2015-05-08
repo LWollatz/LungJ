@@ -6,6 +6,7 @@ import ij.gui.GenericDialog;
 import ij.plugin.ImageCalculator;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
+import ij.util.Tools;
 
 import java.awt.Color;
 
@@ -14,21 +15,33 @@ public class Colorize_ implements PlugIn{
 	static Color[] LJColors = new Color[5];
 	
 	public void run(String command){
+		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions
+			return;
 		IJ.showStatus("Colorizing Image...");
 		IJ.register(this.getClass());
 		//TODO: make recordable
+		
+		String arguments = "";
 		if (IJ.isMacro() && Macro.getOptions() != null && !Macro.getOptions().trim().isEmpty()) { 
-			String [] arguments = Macro.getOptions().trim().split(" ");
-			int Narg = arguments.length;
-			System.out.println(arguments[0]);
+			System.out.println("hello\n");
+			arguments = Macro.getOptions().trim();
+			System.out.println(arguments);
 		}
 		Thread initThread = Thread.currentThread();
 		
 		
 		String options = "";
 		
-		//get active image:
-		ImagePlus image = WindowManager.getCurrentImage();
+		ImagePlus image;
+		if (IJ.isMacro()){
+			//get active image:
+			String title = null;
+			title = LJPrefs.retrieveOption(arguments, "image", title);
+			image = WindowManager.getImage(title);
+		}else{
+			//get active image:
+			image = WindowManager.getCurrentImage();
+		}
 		options += " image="+image.getTitle();
 		
 		int tChannels = image.getNChannels();
@@ -36,19 +49,29 @@ public class Colorize_ implements PlugIn{
 		
 		int tFrames = image.getNFrames();
 		Color[] userColor = new Color[tFrames];
+		String[] keys = new String[tFrames+1];
+		String[] values = new String[tFrames+1];
 		
 		for (int f=1; f<=tFrames; f++){
 			int index = image.getStackIndex(1, 1, f);
 			String label = image.getStack().getShortSliceLabel(index);
-			if (f< 5){
+			if (IJ.isMacro()){
+				System.out.println("I'm a macro\n");
+				userColor[f-1] = LJPrefs.retrieveOption(arguments, "color"+f, userColor[f-1]);
+			}
+            if (f< 5 && userColor[f-1] == null){
 				userColor[f-1] = Set_Up.getColor("Choose color for "+label+" ( frame "+f+")",LJColors[f-1]);
 				LJColors[f-1] = userColor[f-1];
-			}else{
+			}else if(userColor[f-1] == null){
 				userColor[f-1] = Set_Up.getColor("Choose color for "+label+" ( frame "+f+")",LJColors[4]);
 			}
 			options += " color"+f+"="+userColor[f-1];
+			keys[f] = "color"+f;
+			values[f] = ""+Tools.c2hex(userColor[f-1]);
 		}
 		
+		keys[0] = "filename";
+		values[0] = image.getTitle();
 		
 		int tHeight = image.getHeight();
 		int tWidth = image.getWidth();
@@ -85,7 +108,8 @@ public class Colorize_ implements PlugIn{
 		}
 		imgout.show();
 		
-		Macro.setOptions(initThread, options);
+		//Macro.setOptions(initThread, options);
+		LJPrefs.recordRun("Colorize ", keys, values);
 		
 		IJ.showStatus("Image Colorized.");
 	}

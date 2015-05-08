@@ -35,6 +35,7 @@ import ij.plugin.filter.ParticleAnalyzer;
 import ij.process.FloatBlitter;
 import ij.text.TextWindow;
 import ij.util.Tools;
+import ij.plugin.frame.Recorder;
 
 import java.awt.Color;
 /*
@@ -308,4 +309,45 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 		   }
 		}
 	}
+	
+	public static void recordRun(String command, String[] keys, String[] values){
+	 String macrostr = "run(\"" + command + "\",\"";
+	 for (int i=0; i<keys.length; i++){
+		 macrostr += " "+keys[i] + "=["+values[i]+"]";
+	 }
+	 macrostr += "\");\n";
+	 if(Recorder.record)
+	   Recorder.recordString(macrostr);
+	}
+	
+	public static String retrieveOption(String Options, String key, String Default){
+		int a = Options.indexOf(" "+key+"=");
+		if (a < 0){
+			return Default;
+		}
+		a = Options.indexOf("[",a);
+		int b = Options.indexOf("]",a);
+		return Options.substring(a+1, b);
+	}
+	
+	public static Color retrieveOption(String Options, String key, Color Default) {
+		int a = Options.indexOf(" "+key+"=");
+		if (a < 0){
+			return Default;
+		}
+		a = Options.indexOf("[",a);
+		int b = Options.indexOf("]",a);
+		String s = Options.substring(a+1, b);
+		System.out.println(s);
+		Color c = null;
+		if (s!=null && s!= "") {
+			try {c = Color.decode(s);}
+			catch (NumberFormatException e) {c = null;}
+			if (c!=null)
+				return(c);
+		}
+		return Default;
+	}
+	
+	
 }

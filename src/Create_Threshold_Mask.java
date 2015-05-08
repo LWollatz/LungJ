@@ -39,6 +39,9 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 	
 	
 	public int setup(String arg, ImagePlus imp) {
+		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions
+			return DONE;
+		
 		if (arg == "final"){
 		if(imp.getProcessor().getBitDepth() == 8){
 			ImageProcessor ip = imp.getProcessor();
@@ -84,8 +87,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 		IJ.setMinAndMax(0, 1);
     	IJ.setThreshold(0.0,0.5,"BLACK_AND_WHITE_LUT");
 		}
-		if (IJ.versionLessThan("1.42n"))        // generates an error message for older versions
-			return DONE;
+		
 		gimp = imp;
 		return flags;
     }
@@ -156,6 +158,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         				bPixels[p] = (byte)1;
         }else if (ip.getBitDepth() == 16) {
         	short[] bPixels = (short[])ip.getPixels();
+        	//TODO: Min and Max seem to be local not global - need to fix!!!
         	double tmin = ip.convertToFloat().getMin();
         	double tmax = ip.convertToFloat().getMax();
         	float bound = (float)(tmin+(tmax-tmin)*LJ_threshold);
@@ -173,6 +176,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         				
         }else if (ip.getBitDepth() == 32) {
         	float[] bPixels = (float[])ip.getPixels();
+        	//TODO: Min and Max seem to be local not global - need to fix!!!
         	double tmin = ip.convertToFloat().getMin();
         	double tmax = ip.convertToFloat().getMax();
         	float bound = (float)(tmin+(tmax-tmin)*LJ_threshold);

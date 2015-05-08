@@ -8,7 +8,10 @@ import ij.process.ImageProcessor;
 
 
 public class Apply_Mask implements PlugIn{
+	
 	public void run(String command){
+		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions
+			return;
 		IJ.showStatus("Applying Mask...");
 		
 		//get available images:
