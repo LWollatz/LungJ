@@ -71,8 +71,9 @@ public class Apply_Weka_Classifier implements PlugIn{
 		//--Load WEKA--
 		IJ.showStatus("Opening Trainable Weka Segmentation...");
 		//TODO: import library to make direct calls
-		IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"]");
+		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"]");
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=[Ljava.lang.String;@3f094d0a");
+		IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=["+LJ_srcDirectory+"]");
 		IJ.showProgress(5, 100);
 		//--Load Classifier--
 		IJ.showStatus("Loading classifier...");

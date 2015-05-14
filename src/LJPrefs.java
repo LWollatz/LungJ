@@ -18,6 +18,8 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 import ij.IJ;
 import ij.ImageJ;
+import ij.ImagePlus;
+import ij.ImageStack;
 import ij.Menus;
 import ij.Prefs;
 import ij.gui.ImageCanvas;
@@ -33,6 +35,7 @@ import ij.plugin.filter.Analyzer;
 import ij.plugin.filter.Filters;
 import ij.plugin.filter.ParticleAnalyzer;
 import ij.process.FloatBlitter;
+import ij.process.ImageProcessor;
 import ij.text.TextWindow;
 import ij.util.Tools;
 import ij.plugin.frame.Recorder;
@@ -141,6 +144,95 @@ public class LJPrefs{
 		}
 		return defaultValue;
 	}
+	
+	
+	/** FILE I/O **/
+	public static void writeProperties(Properties prefs, String filepath) throws IOException{
+		FileOutputStream fos = new FileOutputStream(filepath);
+		BufferedOutputStream bos = new BufferedOutputStream(fos);
+		prefs.store(bos, "LungJ ImageInfo");
+		bos.close();
+	}
+	
+	public static Properties readProperties(String filepath) throws IOException{
+		Properties prefs = new Properties();
+		System.out.println(filepath);
+		InputStream f = new FileInputStream(filepath);
+		f = new BufferedInputStream(f);
+		prefs.load(f);
+		f.close();
+		/*boolean ok =  loadPrefs(filepath);
+		if (!ok) { // not found
+			System.out.println("preferences not found");
+			savePreferences();
+		}*/
+		return prefs;
+	}
+	
+	/** Uses the keyword <code>key</code> to retrieve a string from the
+	preferences file. Returns <code>defaultValue</code> if the key
+	is not found. */
+	public static String getPref(Properties prefs, String key, String defaultValue) {
+		String value = prefs.getProperty(key);
+		if (value == null)
+			return defaultValue;
+		else
+			return value;
+	}
+
+	/** Uses the keyword <code>key</code> to retrieve an integer from the
+	preferences file. Returns <code>defaultValue</code> if the key
+	is not found. */
+	public static int getPref(Properties prefs, String key, int defaultValue) {
+		String s = prefs.getProperty(key);
+		Double d = null;
+		if (s!=null) {
+			try {d = new Double(s);}
+			catch (NumberFormatException e) {d = null;}
+			if (d!=null)
+				return(d.intValue());
+		}
+		return defaultValue;
+	}
+	
+	/** Uses the keyword <code>key</code> to retrieve a number from the
+	preferences file. Returns <code>defaultValue</code> if the key
+	is not found. */
+	public static double getPref(Properties prefs, String key, double defaultValue) {
+		String s = prefs.getProperty(key);
+		Double d = null;
+		if (s!=null) {
+			try {d = new Double(s);}
+			catch (NumberFormatException e) {d = null;}
+			if (d!=null)
+				return(d.doubleValue());
+		}
+		return defaultValue;
+	}
+
+	/** Uses the keyword <code>key</code> to retrieve a boolean from
+	the preferences file. Returns <code>defaultValue</code> if
+	the key is not found. */
+	public static boolean getPref(Properties prefs, String key, boolean defaultValue) {
+		String value = prefs.getProperty(key);
+		if (value==null)
+			return defaultValue;
+		else
+			return value.equals("true");
+	}
+		
+	public static Color getPref(Properties prefs, String key, Color defaultValue) {
+		String s = prefs.getProperty(key);
+		Color c = null;
+		if (s!=null) {
+			try {c = Color.decode(s);}
+			catch (NumberFormatException e) {c = null;}
+			if (c!=null)
+				return(c);
+		}
+		return defaultValue;
+	}
+
 	
 	/*
 	public static void savePrefs(Properties prefs, String path) throws IOException{
@@ -349,5 +441,41 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 		return Default;
 	}
 	
+	
+	
+	/*** UTILITIES ***/
+	public static float[] getMinMax(ImagePlus imp) {
+		int index=0, z=0;
+		float max = -Float.MAX_VALUE;
+		float min = Float.MAX_VALUE;
+		ImageStack stack = imp.getStack();
+		int width = imp.getWidth();
+		int height = imp.getHeight();
+		int n = width*height;
+		int images = imp.getStackSize();
+		for (int img=1; img<=images; img++) {
+			ImageProcessor ip = stack.getProcessor(img);
+			for (int i=0; i<n; i++) {
+				float v = ip.getf(i);
+				if (v>max) {
+					max = v; 
+					//index = i;
+					//z = img-1;
+				}
+				if (v<min) {
+					min = v;
+				}
+			}
+		}
+		//int x = index%width;
+		//int y = index/width;
+		//int[] pos = new int[3];
+		//pos[0]=x; pos[1]=y; pos[2]=z;
+		//return pos;
+		float[] mm = new float[2];
+		mm[0]=min;
+		mm[1]=max;
+		return mm;
+	}
 	
 }

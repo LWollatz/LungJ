@@ -33,8 +33,11 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 	private static double LJ_threshold = 0.5;           // where to cut off
 	private boolean previewing = false;
     private FloatProcessor previewEdm;
+    private double globMin = 0;
+    private double globMax = 1;
+    
     //private byte[] fPixels;
-	private int flags = DOES_8G|DOES_16|DOES_32|SUPPORTS_MASKING|KEEP_PREVIEW|PARALLELIZE_STACKS|FINAL_PROCESSING;
+	private int flags = DOES_8G|DOES_16|DOES_32|SUPPORTS_MASKING|KEEP_PREVIEW|PARALLELIZE_STACKS|FINAL_PROCESSING; 
 	ImagePlus gimp;
 	
 	
@@ -62,7 +65,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 	        short[] bPixels = (short[])ip.getPixels();
 			for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++){
 	            for (int x=roiRect.x, p=x+y*width; x<roiRect.x+roiRect.width; x++,p++) {
-	                if (bPixels[p] == (short)ip.getMax()){
+	                if (bPixels[p] == (short)globMax){
 	                    bPixels[p] = (short)1;
 	                }else{
 	                	bPixels[p] = (short)0;
@@ -76,7 +79,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 	        float[] bPixels = (float[])ip.getPixels();
 			for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++){
 	            for (int x=roiRect.x, p=x+y*width; x<roiRect.x+roiRect.width; x++,p++) {
-	                if (bPixels[p] == (float)ip.getMax()){
+	                if (bPixels[p] == (float)globMax){
 	                    bPixels[p] = (float)1;
 	                }else{
 	                	bPixels[p] = (float)0;
@@ -103,6 +106,13 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
     		//ImagePlus newimp = ImagePlus("temp8bit", newip);
     		//IJ.run("8-bit");
         }
+    	
+    	float[] minmax = new float[2];
+    	
+    	minmax = LJPrefs.getMinMax(imp);
+    	globMin = (double)minmax[0];
+    	globMax = (double)minmax[1];
+    	
         // The dialog
         GenericDialog gd = new GenericDialog(command+"...");
         gd.addNumericField("Threshold", LJ_threshold, 3);
@@ -159,8 +169,11 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         }else if (ip.getBitDepth() == 16) {
         	short[] bPixels = (short[])ip.getPixels();
         	//TODO: Min and Max seem to be local not global - need to fix!!!
-        	double tmin = ip.convertToFloat().getMin();
-        	double tmax = ip.convertToFloat().getMax();
+        	//double tmin = ip.convertToFloat().getMin();
+        	//double tmax = ip.convertToFloat().getMax();
+        	double tmin = globMin;
+        	double tmax = globMax;
+        	
         	float bound = (float)(tmin+(tmax-tmin)*LJ_threshold);
         	//IJ.log(tmin + "<" + bound + "<" + tmax);
         	for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++)
@@ -177,8 +190,11 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         }else if (ip.getBitDepth() == 32) {
         	float[] bPixels = (float[])ip.getPixels();
         	//TODO: Min and Max seem to be local not global - need to fix!!!
-        	double tmin = ip.convertToFloat().getMin();
-        	double tmax = ip.convertToFloat().getMax();
+        	//double tmin = ip.convertToFloat().getMin();
+        	//double tmax = ip.convertToFloat().getMax();
+        	double tmin = globMin;
+        	double tmax = globMax;
+        	
         	float bound = (float)(tmin+(tmax-tmin)*LJ_threshold);
         	//IJ.log(tmin + "<" + bound + "<" + tmax);
         	for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++)
