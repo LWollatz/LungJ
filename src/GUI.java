@@ -313,7 +313,7 @@ public class GUI extends JFrame {
 		pnlcol1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				LJPrefs.LJ_Color1 = Set_Up.getColor();
+				LJPrefs.LJ_Color1 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color1);
 				pnlcol1.setBackground(LJPrefs.LJ_Color1);
 			}
 		});
@@ -422,7 +422,7 @@ public class GUI extends JFrame {
 		pnlcol2.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				LJPrefs.LJ_Color2 = Set_Up.getColor();
+				LJPrefs.LJ_Color2 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color2);
 				pnlcol2.setBackground(LJPrefs.LJ_Color2);
 			}
 		});
@@ -529,7 +529,7 @@ public class GUI extends JFrame {
 		pnlcol3.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				LJPrefs.LJ_Color3 = Set_Up.getColor();
+				LJPrefs.LJ_Color3 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color3);
 				pnlcol3.setBackground(LJPrefs.LJ_Color3);
 			}
 		});
@@ -637,7 +637,7 @@ public class GUI extends JFrame {
 		pnlcol4.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				LJPrefs.LJ_Color4 = Set_Up.getColor();
+				LJPrefs.LJ_Color4 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color4);
 				pnlcol4.setBackground(LJPrefs.LJ_Color4);
 			}
 		});
@@ -745,7 +745,7 @@ public class GUI extends JFrame {
 		pnlcol5.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				LJPrefs.LJ_Color5 = Set_Up.getColor();
+				LJPrefs.LJ_Color5 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color5);
 				pnlcol5.setBackground(LJPrefs.LJ_Color5);
 			}
 		});

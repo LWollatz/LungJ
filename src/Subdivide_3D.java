@@ -16,13 +16,17 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+import javax.swing.JFileChooser;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
+
 /**
  * @author Lasse Wollatz
  *
  */
 public class Subdivide_3D implements PlugIn{
 	
-	private static String BC_outDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\output";
+	private static String BC_outDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\input";
 	private static int stepX = 250;
 	private static int stepY = 250;
 	private static int stepZ = 250;
@@ -47,6 +51,10 @@ public class Subdivide_3D implements PlugIn{
 		
 		GenericDialog gd = new GenericDialog(command+" Subdivide image and save into directory");
 		gd.addStringField("Output directory", BC_outDirectory, 100);
+		FileFilter filter = new FileNameExtensionFilter("Weka Classifier", "model");
+		JFileChooser chooser = new JFileChooser(LJPrefs.LJ_clsDirectory);
+		chooser.addChoosableFileFilter(filter);
+		gd.add(chooser);
 		gd.addMessage("filename will be 'z'_'y'_'x'.tif");
 		gd.addMessage("Block Properties:");
 		gd.addNumericField("width", stepX, 0);
@@ -55,10 +63,16 @@ public class Subdivide_3D implements PlugIn{
 		gd.addMessage("Other Settings:");
 		gd.addNumericField("z-offset", z_offset, 0, 4,  "(affects filename only)");
 		gd.addCheckbox("save LungJ header", saveProp);
+		IJ.showStatus("Waiting for User Input...");
 		gd.showDialog();
 		if (gd.wasCanceled()){
+			IJ.showProgress(100, 100);
         	return;
         }
+		
+		IJ.showStatus("Creating blocks...");
+		IJ.showProgress(1, 100);
+		
 		BC_outDirectory = gd.getNextString();
 		stepX = (int)gd.getNextNumber();
 		stepY = (int)gd.getNextNumber();
@@ -81,7 +95,8 @@ public class Subdivide_3D implements PlugIn{
 					ImagePlus imgblock = new Duplicator().run(image,z+1,lastSlice);
 					String fileout = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_outDirectory,(z+z_offset),y,x);
 					IJ.saveAsTiff(imgblock,fileout);
-					IJ.showProgress(z, maxZ);
+					IJ.showStatus("Creating blocks...");
+					IJ.showProgress(y+maxY*x+maxY*maxX*z, maxY*maxX*maxZ);
 					IJ.log("saved "+fileout);
 					imgblock = null;
 				}

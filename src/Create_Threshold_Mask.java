@@ -27,7 +27,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 	/** plugin's name */
 	public static final String PLUGIN_NAME = "LungJ";
 	/** plugin's current version */
-	public static final String PLUGIN_VERSION = "v" + "0.2.0";
+	public static final String PLUGIN_VERSION = "v" + "0.2.1";
 	//LungJ_.class.getPackage().getImplementationVersion();
 	
 	private static double LJ_threshold = 0.5;           // where to cut off
@@ -37,7 +37,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
     private double globMax = 1;
     
     //private byte[] fPixels;
-	private int flags = DOES_8G|DOES_16|DOES_32|SUPPORTS_MASKING|KEEP_PREVIEW|PARALLELIZE_STACKS|FINAL_PROCESSING; 
+	private int flags = DOES_8G|DOES_16|DOES_32|SUPPORTS_MASKING|PARALLELIZE_STACKS|FINAL_PROCESSING; //KEEP_PREVIEW
 	ImagePlus gimp;
 	
 	
@@ -46,6 +46,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 			return DONE;
 		
 		if (arg == "final"){
+		if(previewing){
 		if(imp.getProcessor().getBitDepth() == 8){
 			ImageProcessor ip = imp.getProcessor();
 			Rectangle roiRect = ip.getRoi();
@@ -87,6 +88,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 				}
 			}
 		}
+		}
 		IJ.setMinAndMax(0, 1);
     	IJ.setThreshold(0.0,0.5,"BLACK_AND_WHITE_LUT");
 		}
@@ -98,14 +100,14 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 	// Called by ImageJ after setup.
     public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
         
-    	if (!imp.getProcessor().isBinary()) {
+    	//if (!imp.getProcessor().isBinary()) {
             //IJ.error("8-bit binary image (0 and 255) required.");
             //return DONE;
     		//imp.convertToGray8();
     		//ImageProcessor newip = ip.convertToByteProcessor();
     		//ImagePlus newimp = ImagePlus("temp8bit", newip);
     		//IJ.run("8-bit");
-        }
+        //}
     	
     	float[] minmax = new float[2];
     	
@@ -115,7 +117,10 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
     	
         // The dialog
         GenericDialog gd = new GenericDialog(command+"...");
-        gd.addNumericField("Threshold", LJ_threshold, 3);
+        //gd.addNumericField("Threshold", LJ_threshold, 3);
+        gd.addSlider("Threshold (in %)", 0.00, 100.00, LJ_threshold);
+        gd.addNumericField("minimum Value", globMin, 4);
+        gd.addNumericField("maximum Value", globMax, 4);
         gd.addPreviewCheckbox(pfr);             // passing pfr makes the filter ready for preview
         /*if (IJ.getVersion().compareTo("1.42p")>=0)
         	gd.addHelp("http://rsb.info.nih.gov/ij/plugins/erode-demo.html");*/
@@ -132,7 +137,9 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
     
     // Called after modifications to the dialog. Returns true if valid input.
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
-    	LJ_threshold = gd.getNextNumber();
+    	LJ_threshold = gd.getNextNumber()/100;
+    	globMin = gd.getNextNumber();
+    	globMax = gd.getNextNumber();
         return (!gd.invalidNumber() && LJ_threshold>=0 && LJ_threshold<=1);
     }
     
@@ -179,11 +186,11 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         	for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++)
         		for (int x=roiRect.x, p=x+y*width; x<roiRect.x+roiRect.width; x++,p++)
         			if (fPixels[p] <= bound && previewing)
-        				bPixels[p] = (short)ip.getMin();
+        				bPixels[p] = (short)tmin;
         			else if (fPixels[p] <= bound)
         				bPixels[p] = (short)0;
         			else if(previewing)
-        				bPixels[p] = (short)ip.getMax();
+        				bPixels[p] = (short)tmax;
         			else
         				bPixels[p] = (short)1;
         				
@@ -200,11 +207,11 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         	for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++)
         		for (int x=roiRect.x, p=x+y*width; x<roiRect.x+roiRect.width; x++,p++)
         			if (fPixels[p] <= bound && previewing)
-        				bPixels[p] = (float)ip.getMin();
+        				bPixels[p] = (float)tmin;
         			else if (fPixels[p] <= bound)
         				bPixels[p] = (float)0;
         			else if(previewing)
-        				bPixels[p] = (float)ip.getMax();
+        				bPixels[p] = (float)tmax;
         			else
         				bPixels[p] = (float)1;
         }

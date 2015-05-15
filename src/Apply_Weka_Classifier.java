@@ -42,7 +42,8 @@ public class Apply_Weka_Classifier implements PlugIn{
 	private static int AC_channel = 1;
 	
 	public void run(String command){
-		
+		if (IJ.versionLessThan("1.49s"))        // generates an error message for older versions
+			return;
 		IJ.showStatus("Initializing...");
 		IJ.showProgress(0, 100);
 		//selectImage(LJ_srcID);

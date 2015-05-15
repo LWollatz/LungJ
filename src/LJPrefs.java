@@ -20,6 +20,7 @@ import ij.IJ;
 import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
+import ij.Macro;
 import ij.Menus;
 import ij.Prefs;
 import ij.gui.ImageCanvas;
@@ -112,6 +113,11 @@ public class LJPrefs{
 	//public static String[] LJ_classifiers = {"None"};
 	public static List<String> LJ_classifiers = new ArrayList<String>();
 	
+	
+	
+
+/**** LungJ PREFERENCES ****/
+	
 	public static void savePreferences() {
 		Prefs.set("LJCLASSIFIER_DIR", LJ_clsDirectory);
 		Prefs.set("LJSEGNAME1", LJ_segname1);
@@ -133,6 +139,15 @@ public class LJPrefs{
 		Prefs.savePreferences();
 	}
 	
+	
+	
+	/**
+	 * 
+	 * @param key:     String containing the key of the value needed
+	 * @param Default: Default String
+	 * @return Color:  - Color specified by key in ImageJ preferences or
+	 *                 - Color specified by Default if key is not found in ImageJ preferences or does not encode a color
+	 */
 	public static Color getPref(String key, Color defaultValue) {
 		String s = Prefs.get(key, "");
 		Color c = null;
@@ -146,7 +161,89 @@ public class LJPrefs{
 	}
 	
 	
-	/** FILE I/O **/
+	
+	
+	
+/**** WORKING WITH PROPERTIES OBJECTS ****/
+	
+/*** GETTING VALUES ***/
+	
+	/** Uses the keyword <code>key</code> to retrieve a string from the
+	Properties object. Returns <code>defaultValue</code> if the key
+	is not found. */
+	public static String getPref(Properties prefs, String key, String defaultValue) {
+		String value = prefs.getProperty(key);
+		if (value == null)
+			return defaultValue;
+		else
+			return value;
+	}
+
+	/** Uses the keyword <code>key</code> to retrieve an integer from the
+	Properties object. Returns <code>defaultValue</code> if the key
+	is not found. */
+	public static int getPref(Properties prefs, String key, int defaultValue) {
+		String s = prefs.getProperty(key);
+		Double d = null;
+		if (s!=null) {
+			try {d = new Double(s);}
+			catch (NumberFormatException e) {d = null;}
+			if (d!=null)
+				return(d.intValue());
+		}
+		return defaultValue;
+	}
+	
+	/** Uses the keyword <code>key</code> to retrieve a number from the
+	Properties object. Returns <code>defaultValue</code> if the key
+	is not found. */
+	public static double getPref(Properties prefs, String key, double defaultValue) {
+		String s = prefs.getProperty(key);
+		Double d = null;
+		if (s!=null) {
+			try {d = new Double(s);}
+			catch (NumberFormatException e) {d = null;}
+			if (d!=null)
+				return(d.doubleValue());
+		}
+		return defaultValue;
+	}
+
+	/** Uses the keyword <code>key</code> to retrieve a boolean from
+	the Properties object. Returns <code>defaultValue</code> if
+	the key is not found. */
+	public static boolean getPref(Properties prefs, String key, boolean defaultValue) {
+		String value = prefs.getProperty(key);
+		if (value==null)
+			return defaultValue;
+		else
+			return value.equals("true");
+	}
+	
+	/** Uses the keyword <code>key</code> to retrieve a colour from
+	the Properties object. Returns <code>defaultValue</code> if
+	the key is not found. */
+	public static Color getPref(Properties prefs, String key, Color defaultValue) {
+		String s = prefs.getProperty(key);
+		Color c = null;
+		if (s!=null) {
+			try {c = Color.decode(s);}
+			catch (NumberFormatException e) {c = null;}
+			if (c!=null)
+				return(c);
+		}
+		return defaultValue;
+	}
+
+	
+/*** FILE I/O ***/
+	
+	/**
+	 * 
+	 * @param prefs:       Properties object (from java.util.*) to be written to a file
+	 * @param filepath:    full file-path
+	 * @throws IOException
+	 */
 	public static void writeProperties(Properties prefs, String filepath) throws IOException{
 		FileOutputStream fos = new FileOutputStream(filepath);
 		BufferedOutputStream bos = new BufferedOutputStream(fos);
@@ -154,6 +251,12 @@ public class LJPrefs{
 		bos.close();
 	}
 	
+	/**
+	 * 
+	 * @param filepath:    full file-path of text file containing preferences.
+	 * @return             Properties object (from java.util.*)
+	 * @throws IOException
+	 */
 	public static Properties readProperties(String filepath) throws IOException{
 		Properties prefs = new Properties();
 		System.out.println(filepath);
@@ -169,70 +272,8 @@ public class LJPrefs{
 		return prefs;
 	}
 	
-	/** Uses the keyword <code>key</code> to retrieve a string from the
-	preferences file. Returns <code>defaultValue</code> if the key
-	is not found. */
-	public static String getPref(Properties prefs, String key, String defaultValue) {
-		String value = prefs.getProperty(key);
-		if (value == null)
-			return defaultValue;
-		else
-			return value;
-	}
-
-	/** Uses the keyword <code>key</code> to retrieve an integer from the
-	preferences file. Returns <code>defaultValue</code> if the key
-	is not found. */
-	public static int getPref(Properties prefs, String key, int defaultValue) {
-		String s = prefs.getProperty(key);
-		Double d = null;
-		if (s!=null) {
-			try {d = new Double(s);}
-			catch (NumberFormatException e) {d = null;}
-			if (d!=null)
-				return(d.intValue());
-		}
-		return defaultValue;
-	}
 	
-	/** Uses the keyword <code>key</code> to retrieve a number from the
-	preferences file. Returns <code>defaultValue</code> if the key
-	is not found. */
-	public static double getPref(Properties prefs, String key, double defaultValue) {
-		String s = prefs.getProperty(key);
-		Double d = null;
-		if (s!=null) {
-			try {d = new Double(s);}
-			catch (NumberFormatException e) {d = null;}
-			if (d!=null)
-				return(d.doubleValue());
-		}
-		return defaultValue;
-	}
-
-	/** Uses the keyword <code>key</code> to retrieve a boolean from
-	the preferences file. Returns <code>defaultValue</code> if
-	the key is not found. */
-	public static boolean getPref(Properties prefs, String key, boolean defaultValue) {
-		String value = prefs.getProperty(key);
-		if (value==null)
-			return defaultValue;
-		else
-			return value.equals("true");
-	}
-		
-	public static Color getPref(Properties prefs, String key, Color defaultValue) {
-		String s = prefs.getProperty(key);
-		Color c = null;
-		if (s!=null) {
-			try {c = Color.decode(s);}
-			catch (NumberFormatException e) {c = null;}
-			if (c!=null)
-				return(c);
-		}
-		return defaultValue;
-	}
-
+	
 	
 	/*
 	public static void savePrefs(Properties prefs, String path) throws IOException{
@@ -386,21 +427,13 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 		return value.equals("true");
 }*/
 	
-	public static void loadClassifier(){
-		LJ_classifiers.add("--NONE--");
-		File folder = new File(LJ_clsDirectory);
-		File[] listOfFiles = folder.listFiles();
-		System.out.println("Directory: " + LJ_clsDirectory);
-		for (int i = 0; i < listOfFiles.length; i++) {
-		   if (listOfFiles[i].isFile()) {
-			   System.out.println("File: " + listOfFiles[i].getName());
-			   if (listOfFiles[i].getName().endsWith(".model")){
-				   System.out.println("Classifier: " + listOfFiles[i].getName());
-				   LJ_classifiers.add(listOfFiles[i].getName());
-			   }
-		   }
-		}
-	}
+	
+	
+	
+	
+	
+/**** MACRO RECORDING ****/
+	
 	
 	public static void recordRun(String command, String[] keys, String[] values){
 	 String macrostr = "run(\"" + command + "\",\"";
@@ -412,6 +445,14 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	   Recorder.recordString(macrostr);
 	}
 	
+	/**
+	 * 
+	 * @param Options: String returned by Macro.getOptions() (with ij.Macro)
+	 * @param key:     String containing the key of the value needed
+	 * @param Default: Default String
+	 * @return String: - String specified by key in Options or
+	 *                 - String specified by Default if key is not found in Options or does not encode a color
+	 */
 	public static String retrieveOption(String Options, String key, String Default){
 		int a = Options.indexOf(" "+key+"=");
 		if (a < 0){
@@ -422,6 +463,14 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 		return Options.substring(a+1, b);
 	}
 	
+	/**
+	 * 
+	 * @param Options: String returned by Macro.getOptions() (with ij.Macro)
+	 * @param key:     String containing the key of the value needed
+	 * @param Default: Default Color
+	 * @return Color:  - colour specified by key in Options or
+	 *                 - colour specified by Default if key is not found in Options or does not encode a color
+	 */
 	public static Color retrieveOption(String Options, String key, Color Default) {
 		int a = Options.indexOf(" "+key+"=");
 		if (a < 0){
@@ -442,9 +491,45 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	}
 	
 	
+/**** OTHER ****/
 	
-	/*** UTILITIES ***/
+	/**
+	 * read in all classifier files from the LJ_clsDirectory directory and stores them in LJ_classifiers.
+	 */
+	public static void loadClassifier(){
+		LJ_classifiers.add("--NONE--");
+		File folder = new File(LJ_clsDirectory);
+		File[] listOfFiles = folder.listFiles();
+		System.out.println("Directory: " + LJ_clsDirectory);
+		for (int i = 0; i < listOfFiles.length; i++) {
+		   if (listOfFiles[i].isFile()) {
+			   System.out.println("File: " + listOfFiles[i].getName());
+			   if (listOfFiles[i].getName().endsWith(".model")){
+				   System.out.println("Classifier: " + listOfFiles[i].getName());
+				   LJ_classifiers.add(listOfFiles[i].getName());
+			   }
+		   }
+		}
+	}
+	
+	
+/*** UTILITIES ***/
+	
+	/**
+	 * get minimum and maximum pixel value from a 3D image stack
+	 * @param imp: ImagePlus 3D Image
+	 * @return float[2]: [0] minimum pixel value
+	 *                   [1] maximum pixel value
+	 */
 	public static float[] getMinMax(ImagePlus imp) {
+		/*
+		 * float[] = getMinMax(ImagePlus imp)
+		 * INPUT:
+		 * - ImagePlus: 3D Image Stack
+		 * OUTPUT:
+		 * - float[2] with float[0] = minimum pixel value
+		 *                 float[1] = maximum pixel value
+		 */
 		int index=0, z=0;
 		float max = -Float.MAX_VALUE;
 		float min = Float.MAX_VALUE;
@@ -459,8 +544,6 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 				float v = ip.getf(i);
 				if (v>max) {
 					max = v; 
-					//index = i;
-					//z = img-1;
 				}
 				if (v<min) {
 					min = v;

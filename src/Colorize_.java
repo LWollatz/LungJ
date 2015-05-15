@@ -15,7 +15,7 @@ public class Colorize_ implements PlugIn{
 	static Color[] LJColors = new Color[5];
 	
 	public void run(String command){
-		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions
+		if (IJ.versionLessThan("1.49s"))        // generates an error message for older versions
 			return;
 		IJ.showStatus("Colorizing Image...");
 		IJ.register(this.getClass());
