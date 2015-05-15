@@ -7,16 +7,21 @@ import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.*;
 import ij.plugin.*;
+import ij.plugin.frame.Recorder;
 import ij.process.*;
 
 import java.awt.*;
 import java.awt.event.*;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
+import javax.swing.JButton;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -24,7 +29,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
  * @author Lasse Wollatz
  *
  */
-public class Subdivide_3D implements PlugIn{
+public class Subdivide_3D implements PlugIn, ActionListener{
 	
 	private static String BC_outDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\input";
 	private static int stepX = 250;
@@ -34,6 +39,10 @@ public class Subdivide_3D implements PlugIn{
 	private double globMin = 0;
     private double globMax = 1;
 	private static boolean saveProp = true;
+	
+	JButton filebtn;
+	JTextField outdirtxt;
+	GenericDialog gd;
 	
 	public void run(String command){
 		IJ.showStatus("Creating blocks...");
@@ -49,12 +58,21 @@ public class Subdivide_3D implements PlugIn{
 		globMin = (double)minmax[0];
     	globMax = (double)minmax[1];
 		
-		GenericDialog gd = new GenericDialog(command+" Subdivide image and save into directory");
-		gd.addStringField("Output directory", BC_outDirectory, 100);
-		FileFilter filter = new FileNameExtensionFilter("Weka Classifier", "model");
-		JFileChooser chooser = new JFileChooser(LJPrefs.LJ_clsDirectory);
-		chooser.addChoosableFileFilter(filter);
-		gd.add(chooser);
+		gd = new GenericDialog(command+" Subdivide image and save into directory");
+		Font gdFont = gd.getFont();
+		//gd.addStringField("Output directory", BC_outDirectory, 100);
+		JLabel outdirlbl = new JLabel ("Output directory  ", JLabel.RIGHT);
+		outdirlbl.setFont(gdFont);
+		outdirtxt = new JTextField(BC_outDirectory,80);
+		outdirtxt.setFont(gdFont);
+		filebtn = new JButton("...");
+		filebtn.addActionListener(this);
+		
+		gd.add(outdirlbl,-1);
+		gd.add(outdirtxt,-1);
+		gd.add(filebtn,-1);
+		
+		gd.addMessage("     ");
 		gd.addMessage("filename will be 'z'_'y'_'x'.tif");
 		gd.addMessage("Block Properties:");
 		gd.addNumericField("width", stepX, 0);
@@ -66,6 +84,7 @@ public class Subdivide_3D implements PlugIn{
 		IJ.showStatus("Waiting for User Input...");
 		gd.showDialog();
 		if (gd.wasCanceled()){
+			IJ.showStatus("Plug-In aborted...");
 			IJ.showProgress(100, 100);
         	return;
         }
@@ -73,7 +92,9 @@ public class Subdivide_3D implements PlugIn{
 		IJ.showStatus("Creating blocks...");
 		IJ.showProgress(1, 100);
 		
-		BC_outDirectory = gd.getNextString();
+		//BC_outDirectory = gd.getNextString();
+		BC_outDirectory = outdirtxt.getText();
+		Recorder.recordOption("directory", BC_outDirectory);
 		stepX = (int)gd.getNextNumber();
 		stepY = (int)gd.getNextNumber();
 		stepZ = (int)gd.getNextNumber();
@@ -120,9 +141,24 @@ public class Subdivide_3D implements PlugIn{
 				e.printStackTrace();
 			}
 		}
-		
 		IJ.showStatus("Blocks have been saved!");
 		IJ.showProgress(100, 100);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent arg0) {
+		if(arg0.getSource() == this.filebtn ){
+			JFileChooser chooser = new JFileChooser(LJPrefs.LJ_clsDirectory);
+			//FileFilter filter = new FileNameExtensionFilter("Directory", "*.*");
+			//chooser.addChoosableFileFilter(filter);
+			chooser.setFileSelectionMode(1);
+			chooser.setSelectedFile(new File(BC_outDirectory));
+			int returnVal = chooser.showDialog(gd,"Choose Output");
+			if(returnVal == JFileChooser.APPROVE_OPTION)
+	        {
+				this.outdirtxt.setText(chooser.getSelectedFile().getPath());
+	        }
+        }
 	}
 	
 	

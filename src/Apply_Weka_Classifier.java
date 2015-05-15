@@ -55,6 +55,7 @@ public class Apply_Weka_Classifier implements PlugIn{
 		
 		GenericDialog gd = new GenericDialog(command+" Apply Weka Classifier");
 		//gd.addString("Threshold", LJ_srcDirectory, 3);
+		//TODO: combine File Dialog with Generic Dialog
 		gd.addStringField("Directory", LJ_srcDirectory, 100);
 		gd.addStringField("Filename", LJ_srcFilename, 100);
 		gd.addStringField("Classifier_Directory", LJ_clsDirectory, 100);
