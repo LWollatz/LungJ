@@ -1,16 +1,35 @@
 import ij.IJ;
 import ij.ImagePlus;
+import ij.Macro;
 import ij.WindowManager;
 import ij.plugin.*;
+import ij.plugin.frame.Recorder;
 import ij.gui.GenericDialog;
 import ij.gui.DialogListener;
 
 //import trainableSegmentation;
 //import weka.core.Utils;
 
+
+
+
+
+
+
+
+
+
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.util.*;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 /**
@@ -29,17 +48,24 @@ import java.util.*;
 */
 
 
-public class Apply_Weka_Classifier implements PlugIn{
+public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 	/** plugin's name */
-	public static final String PLUGIN_NAME = "LungJ";
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	public static final String VERSION = LJPrefs.VERSION;
 	
 	public static final String TWS_version = "v2.2.1";
 	
-	private static String LJ_srcDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\tests";
+	private static String LJ_srcDirectory = LJPrefs.LJ_srcDirectory;
 	private static String LJ_srcFilename = "250x250x250x16bit.tif";
-	private static String LJ_clsDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\run02";
+	private static String LJ_clsDirectory = LJPrefs.LJ_clsDirectory;
 	private static String LJ_clsFilename = "background.model";
 	private static int AC_channel = 1;
+	
+	JButton clsfilebtn;
+	JTextField clsdirtxt;
+	JButton srcfilebtn;
+	JTextField srcdirtxt;
+	GenericDialog gd;
 	
 	public void run(String command){
 		if (IJ.versionLessThan("1.49s"))        // generates an error message for older versions
@@ -53,33 +79,96 @@ public class Apply_Weka_Classifier implements PlugIn{
 			LJ_srcFilename = image.getTitle();
 		}*/
 		
-		GenericDialog gd = new GenericDialog(command+" Apply Weka Classifier");
-		//gd.addString("Threshold", LJ_srcDirectory, 3);
-		//TODO: combine File Dialog with Generic Dialog
-		gd.addStringField("Directory", LJ_srcDirectory, 100);
-		gd.addStringField("Filename", LJ_srcFilename, 100);
-		gd.addStringField("Classifier_Directory", LJ_clsDirectory, 100);
-		gd.addStringField("Classifier_Filename", LJ_clsFilename, 100);
-		gd.addNumericField("Class No", 1, 0);
-		gd.showDialog();
-		if (gd.wasCanceled()){
-        	return;
-        }
-		LJ_srcDirectory = gd.getNextString();
-		LJ_srcFilename = gd.getNextString();
-		LJ_clsDirectory = gd.getNextString();
-		LJ_clsFilename = gd.getNextString();
-		AC_channel = (int)gd.getNextNumber();
+		String arguments = "";
+		if (IJ.isMacro() && Macro.getOptions() != null && !Macro.getOptions().trim().isEmpty()) { 
+			arguments = Macro.getOptions().trim();
+			System.out.println(arguments);
+		//}
+		
+		//if (IJ.isMacro()){
+			
+			//if (WindowManager.getImageCount() > 0){
+			//	ImagePlus image = WindowManager.getCurrentImage();
+			//	LJ_srcDirectory = image.getTitle();
+			//}
+			
+			LJ_srcDirectory = null;
+			LJ_srcDirectory = LJPrefs.retrieveOption(arguments, "filepath", LJ_srcDirectory);
+			LJ_clsDirectory = LJPrefs.retrieveOption(arguments, "classifier", LJ_clsDirectory);
+			AC_channel = LJPrefs.retrieveOption(arguments, "class", 1);
+		}else{
+		
+			GenericDialog gd = new GenericDialog(command+" Apply Weka Classifier");
+			//gd.addString("Threshold", LJ_srcDirectory, 3);
+			Font gdFont = gd.getFont();
+			
+			JLabel srcdirlbl = new JLabel ("Image Filepath  ", JLabel.RIGHT);
+			srcdirlbl.setFont(gdFont);
+			srcdirtxt = new JTextField(LJ_srcDirectory + "\\" + LJ_srcFilename,50);
+			srcdirtxt.setFont(gdFont);
+			srcfilebtn = new JButton("...");
+			srcfilebtn.addActionListener(this);
+			Panel srcpanel = new Panel();
+			gd.setInsets(10, 10, 0);
+			srcpanel.add(srcdirlbl,-1);
+			srcpanel.add(srcdirtxt,-1);
+			srcpanel.add(srcfilebtn,-1);
+			gd.addPanel(srcpanel);
+			//gd.addStringField("Directory", LJ_srcDirectory, 100);
+			//gd.addStringField("Filename", LJ_srcFilename, 100);
+			JLabel clsdirlbl = new JLabel ("Classifier Directory  ", JLabel.RIGHT);
+			clsdirlbl.setFont(gdFont);
+			clsdirtxt = new JTextField(LJ_clsDirectory,50);
+			clsdirtxt.setFont(gdFont);
+			clsfilebtn = new JButton("...");
+			clsfilebtn.addActionListener(this);
+			Panel clspanel = new Panel();
+			//gd.setInsets(60, 10, 10);
+			clspanel.add(clsdirlbl,-1);
+			clspanel.add(clsdirtxt,-1);
+			clspanel.add(clsfilebtn,-1);
+			gd.addPanel(clspanel);
+			//gd.addStringField("Classifier_Directory", LJ_clsDirectory, 100);
+			//gd.addStringField("Classifier_Filename", LJ_clsFilename, 100);
+			gd.addNumericField("Class No", 1, 0);
+			IJ.showStatus("Waiting for user input...");
+			gd.showDialog();
+			if (gd.wasCanceled()){
+				IJ.showStatus("Plug-In Aborted...");
+				IJ.showProgress(100, 100);
+	        	return;
+	        }
+			IJ.showStatus("Initializing...");
+			
+			//LJ_srcDirectory = gd.getNextString();
+			LJ_srcDirectory = srcdirtxt.getText();
+			Recorder.recordOption("filepath", LJ_srcDirectory);
+			LJPrefs.LJ_srcDirectory = LJ_srcDirectory;
+			//LJ_srcFilename = gd.getNextString();
+			//LJ_clsDirectory = gd.getNextString();
+			LJ_clsDirectory = clsdirtxt.getText();
+			Recorder.recordOption("classifier", LJ_clsDirectory);
+			LJPrefs.LJ_clsDirectory = LJ_clsDirectory;
+			//LJ_clsFilename = gd.getNextString();
+			AC_channel = (int)gd.getNextNumber();
+			LJPrefs.savePreferences();
+		}
+		
+		IJ.log(LJ_srcDirectory);
+		IJ.log(LJ_clsDirectory);
+		
 		//--Load WEKA--
 		IJ.showStatus("Opening Trainable Weka Segmentation...");
 		//TODO: import library to make direct calls
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"]");
-		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=[Ljava.lang.String;@3f094d0a");
-		IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=["+LJ_srcDirectory+"]");
+		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=["+LJ_srcDirectory+"]");
+		IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcDirectory+"]");
+		
 		IJ.showProgress(5, 100);
 		//--Load Classifier--
 		IJ.showStatus("Loading classifier...");
-		IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"\\\\"+LJ_clsFilename.replace("\\","\\\\")+"');");
+		//IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"\\\\"+LJ_clsFilename.replace("\\","\\\\")+"');");
+		IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"');");
 		IJ.showProgress(20, 100);
 		//--Get Probability Map--
 		IJ.showStatus("Getting Probability Map...");
@@ -100,5 +189,35 @@ public class Apply_Weka_Classifier implements PlugIn{
 		//IJ.showStatus("first="+AC_channel+" last="+nSlices+" increment="+nChannels);
 		IJ.showStatus("Probability map created.");
 		IJ.showProgress(100, 100);
+	}
+
+	@Override
+	public void actionPerformed(ActionEvent e) {
+		if(e.getSource() == this.clsfilebtn ){
+			JFileChooser chooser = new JFileChooser(LJ_clsDirectory);
+			FileFilter filter = new FileNameExtensionFilter("Classifier Model", "model");
+			chooser.addChoosableFileFilter(filter);
+			chooser.setFileSelectionMode(0);
+			chooser.setSelectedFile(new File(this.clsdirtxt.getText()));
+			int returnVal = chooser.showDialog(gd,"Choose Classifier");
+			if(returnVal == JFileChooser.APPROVE_OPTION)
+	        {
+				this.clsdirtxt.setText(chooser.getSelectedFile().getAbsolutePath());
+	        }
+        }
+		if(e.getSource() == this.srcfilebtn ){
+			JFileChooser chooser = new JFileChooser(LJ_srcDirectory);
+			FileFilter tiffilter = new FileNameExtensionFilter("tif images (*.tif, *.tiff)", "tif", "tiff");
+			FileFilter rawfilter = new FileNameExtensionFilter("raw data (*.raw)", "raw");
+			chooser.addChoosableFileFilter(tiffilter);
+			chooser.addChoosableFileFilter(rawfilter);
+			chooser.setFileSelectionMode(0);
+			chooser.setSelectedFile(new File(this.srcdirtxt.getText()));
+			int returnVal = chooser.showDialog(gd,"Choose Image");
+			if(returnVal == JFileChooser.APPROVE_OPTION)
+	        {
+				this.srcdirtxt.setText(chooser.getSelectedFile().getPath());
+	        }
+        }
 	}
 }

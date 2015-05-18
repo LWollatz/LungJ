@@ -42,6 +42,7 @@ import ij.util.Tools;
 import ij.plugin.frame.Recorder;
 
 import java.awt.Color;
+import java.awt.Font;
 /*
 public class Global{
     private String LJ_srcFilename = "250x250x250x16bit.tif";
@@ -62,7 +63,8 @@ public class Global{
 }
 */
 public class LJPrefs{
-	public static String LJ_version = "0.2.0";
+	public static final String PLUGIN_NAME = "LungJ";
+	public static final String VERSION = "0.2.1";
 	/** file.separator system property */
 	public static String separator = System.getProperty("file.separator");
 	public static String LJ_dir =  System.getProperty("user.dir") + separator + "plugins" + separator + "LungJ";//getDirectory("imagej") + "/plugins/LungJ";
@@ -112,6 +114,9 @@ public class LJPrefs{
 	
 	//public static String[] LJ_classifiers = {"None"};
 	public static List<String> LJ_classifiers = new ArrayList<String>();
+	
+	/*ImageJ standards*/
+	//Font gdFont = new Font ("Garamond", style , 11);
 	
 	
 	
@@ -444,6 +449,34 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	 if(Recorder.record)
 	   Recorder.recordString(macrostr);
 	}
+	
+	
+	/**
+	 * 
+	 * @param Options: String returned by Macro.getOptions() (with ij.Macro)
+	 * @param key:     String containing the key of the value needed
+	 * @param Default: Default String
+	 * @return String: - String specified by key in Options or
+	 *                 - String specified by Default if key is not found in Options or does not encode a color
+	 */
+	public static int retrieveOption(String Options, String key, int Default){
+		int a = Options.indexOf(" "+key+"=");
+		if (a < 0){
+			return Default;
+		}
+		a = Options.indexOf("[",a);
+		int b = Options.indexOf("]",a);
+		String s = Options.substring(a+1, b);
+		Double d = null;
+		if (s!=null) {
+			try {d = new Double(s);}
+			catch (NumberFormatException e) {d = null;}
+			if (d!=null)
+				return(d.intValue());
+		}
+		return Default;
+	}
+	
 	
 	/**
 	 * 
