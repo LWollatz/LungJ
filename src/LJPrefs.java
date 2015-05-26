@@ -72,7 +72,7 @@ public class LJPrefs{
 	
 	public static String LJ_srcDirectory = LJ_dir;
 	public static String LJ_srcFilename = "";
-	public static String LJ_clsDirectory = Prefs.get("LJCLASSIFIER_DIR", LJ_dir);
+	public static String LJ_clsDirectory = Prefs.get("LJ.CLASSIFIER_DIR", LJ_dir);
 	public static String LJ_clsFilename = "";
 	public static String LJ_clsName = "";
 	public static String LJ_prbFilename = "";
@@ -83,22 +83,22 @@ public class LJPrefs{
 	public static int LJ_mapID = 1;
 	public static int LJ_segID = 1;
 	
-	public static String LJ_segname1 = Prefs.get("LJSEGNAME1", "Tissue");
-	public static String LJ_segname2 = Prefs.get("LJSEGNAME2", "Fibre");
-	public static String LJ_segname3 = Prefs.get("LJSEGNAME3", "Vessels");
-	public static String LJ_segname4 = Prefs.get("LJSEGNAME4", "Airways");
-	public static String LJ_segname5 = Prefs.get("LJSEGNAME5", "Bloodvessels");
-	public static Color  LJ_bgColor =  getPref("LJBGCOLOR", new Color(0, 0, 0));     		//background
-	public static Color  LJ_Color1 =   getPref("LJCOLOR1", new Color(255, 255, 255));		//Tissue
-	public static Color  LJ_Color2 =   getPref("LJCOLOR2", new Color(0, 153, 153));  		//Fibre
-	public static Color  LJ_Color3 =   getPref("LJCOLOR3", new Color(255, 102, 102));		//Vessels
-	public static Color  LJ_Color4 =   getPref("LJCOLOR4", new Color(0, 0, 204));    		//Airways
-	public static Color  LJ_Color5 =   getPref("LJCOLOR5", new Color(204, 0, 0));    		//Bloodvessels
-	public static double LJ_th1 =      Prefs.get("LJTHRESHOLD1", 0.8);                  	//Tissue
-	public static double LJ_th2 =      Prefs.get("LJTHRESHOLD2",0.5);   					//Fibre
-	public static double LJ_th3 = 	   Prefs.get("LJTHRESHOLD3",0.3); 	 					//Vessels
-	public static double LJ_th4 = 	   Prefs.get("LJTHRESHOLD4",0.3);   				  	//Airways
-	public static double LJ_th5 = 	   Prefs.get("LJTHRESHOLD5",0.3);   				  	//Bloodvessels
+	public static String LJ_segname1 = Prefs.get("LJ.SEGNAME1", "Tissue");
+	public static String LJ_segname2 = Prefs.get("LJ.SEGNAME2", "Fibre");
+	public static String LJ_segname3 = Prefs.get("LJ.SEGNAME3", "Vessels");
+	public static String LJ_segname4 = Prefs.get("LJ.SEGNAME4", "Airways");
+	public static String LJ_segname5 = Prefs.get("LJ.SEGNAME5", "Bloodvessels");
+	public static Color  LJ_bgColor =  getPref("LJ.BGCOLOR", new Color(0, 0, 0));     		//background
+	public static Color  LJ_Color1 =   getPref("LJ.COLOR1", new Color(255, 255, 255));		//Tissue
+	public static Color  LJ_Color2 =   getPref("LJ.COLOR2", new Color(0, 153, 153));  		//Fibre
+	public static Color  LJ_Color3 =   getPref("LJ.COLOR3", new Color(255, 102, 102));		//Vessels
+	public static Color  LJ_Color4 =   getPref("LJ.COLOR4", new Color(0, 0, 204));    		//Airways
+	public static Color  LJ_Color5 =   getPref("LJ.COLOR5", new Color(204, 0, 0));    		//Bloodvessels
+	public static double LJ_th1 =      Prefs.get("LJ.THRESHOLD1", 0.8);                  	//Tissue
+	public static double LJ_th2 =      Prefs.get("LJ.THRESHOLD2",0.5);   					//Fibre
+	public static double LJ_th3 = 	   Prefs.get("LJ.THRESHOLD3",0.3); 	 					//Vessels
+	public static double LJ_th4 = 	   Prefs.get("LJ.THRESHOLD4",0.3);   				  	//Airways
+	public static double LJ_th5 = 	   Prefs.get("LJ.THRESHOLD5",0.3);   				  	//Bloodvessels
 	
 	public static int LJ_win_Top = 20;
 	public static int LJ_win_Left = 20;
@@ -124,23 +124,23 @@ public class LJPrefs{
 /**** LungJ PREFERENCES ****/
 	
 	public static void savePreferences() {
-		Prefs.set("LJCLASSIFIER_DIR", LJ_clsDirectory);
-		Prefs.set("LJSEGNAME1", LJ_segname1);
-		Prefs.set("LJSEGNAME2", LJ_segname2);
-		Prefs.set("LJSEGNAME3", LJ_segname3);
-		Prefs.set("LJSEGNAME4", LJ_segname4);
-		Prefs.set("LJSEGNAME5", LJ_segname5);
-		Prefs.set("LJTHRESHOLD1", LJ_th1);
-		Prefs.set("LJTHRESHOLD2", LJ_th2);
-		Prefs.set("LJTHRESHOLD3", LJ_th3);
-		Prefs.set("LJTHRESHOLD4", LJ_th4);
-		Prefs.set("LJTHRESHOLD5", LJ_th5);
-		Prefs.set("LJBGCOLOR", Tools.c2hex(LJ_bgColor));
-		Prefs.set("LJCOLOR1", Tools.c2hex(LJ_Color1));
-		Prefs.set("LJCOLOR2", Tools.c2hex(LJ_Color2));
-		Prefs.set("LJCOLOR3", Tools.c2hex(LJ_Color3));
-		Prefs.set("LJCOLOR4", Tools.c2hex(LJ_Color4));
-		Prefs.set("LJCOLOR5", Tools.c2hex(LJ_Color5));
+		Prefs.set("LJ.CLASSIFIER_DIR", LJ_clsDirectory);
+		Prefs.set("LJ.SEGNAME1", LJ_segname1);
+		Prefs.set("LJ.SEGNAME2", LJ_segname2);
+		Prefs.set("LJ.SEGNAME3", LJ_segname3);
+		Prefs.set("LJ.SEGNAME4", LJ_segname4);
+		Prefs.set("LJ.SEGNAME5", LJ_segname5);
+		Prefs.set("LJ.THRESHOLD1", LJ_th1);
+		Prefs.set("LJ.THRESHOLD2", LJ_th2);
+		Prefs.set("LJ.THRESHOLD3", LJ_th3);
+		Prefs.set("LJ.THRESHOLD4", LJ_th4);
+		Prefs.set("LJ.THRESHOLD5", LJ_th5);
+		Prefs.set("LJ.BGCOLOR", Tools.c2hex(LJ_bgColor));
+		Prefs.set("LJ.COLOR1", Tools.c2hex(LJ_Color1));
+		Prefs.set("LJ.COLOR2", Tools.c2hex(LJ_Color2));
+		Prefs.set("LJ.COLOR3", Tools.c2hex(LJ_Color3));
+		Prefs.set("LJ.COLOR4", Tools.c2hex(LJ_Color4));
+		Prefs.set("LJ.COLOR5", Tools.c2hex(LJ_Color5));
 		Prefs.savePreferences();
 	}
 	
@@ -462,7 +462,10 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	public static int retrieveOption(String Options, String key, int Default){
 		int a = Options.indexOf(" "+key+"=");
 		if (a < 0){
-			return Default;
+			a = Options.indexOf(key+"=");
+			if (a != 0){
+				return Default;
+			}
 		}
 		a = Options.indexOf("[",a);
 		int b = Options.indexOf("]",a);
@@ -489,7 +492,10 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	public static String retrieveOption(String Options, String key, String Default){
 		int a = Options.indexOf(" "+key+"=");
 		if (a < 0){
-			return Default;
+			a = Options.indexOf(key+"=");
+			if (a != 0){
+				return Default;
+			}
 		}
 		a = Options.indexOf("[",a);
 		int b = Options.indexOf("]",a);
@@ -507,7 +513,10 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	public static Color retrieveOption(String Options, String key, Color Default) {
 		int a = Options.indexOf(" "+key+"=");
 		if (a < 0){
-			return Default;
+			a = Options.indexOf(key+"=");
+			if (a != 0){
+				return Default;
+			}
 		}
 		a = Options.indexOf("[",a);
 		int b = Options.indexOf("]",a);

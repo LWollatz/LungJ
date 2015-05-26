@@ -15,8 +15,10 @@ public class Colorize_ implements PlugIn{
 	static Color[] LJColors = new Color[5];
 	
 	public void run(String command){
-		if (IJ.versionLessThan("1.49s"))        // generates an error message for older versions
+		if (IJ.versionLessThan("1.49s")) {       // generates an error message for older versions
+			IJ.showStatus("Plug-In unable to run.");
 			return;
+		}
 		IJ.showStatus("Colorizing Image...");
 		IJ.register(this.getClass());
 		//TODO: make recordable
@@ -26,6 +28,7 @@ public class Colorize_ implements PlugIn{
 			System.out.println("hello\n");
 			arguments = Macro.getOptions().trim();
 			System.out.println(arguments);
+			IJ.log(arguments);
 		}
 		Thread initThread = Thread.currentThread();
 		
@@ -33,6 +36,11 @@ public class Colorize_ implements PlugIn{
 		String options = "";
 		
 		ImagePlus image;
+		if (WindowManager.getImageCount() <= 0){
+			IJ.error("no image opened to apply filter to");
+			IJ.showStatus("Plug-In unable to run.");
+			return;
+		}
 		if (IJ.isMacro()){
 			//get active image:
 			String title = null;
@@ -70,7 +78,7 @@ public class Colorize_ implements PlugIn{
 			values[f] = ""+Tools.c2hex(userColor[f-1]);
 		}
 		
-		keys[0] = "filename";
+		keys[0] = "image";
 		values[0] = image.getTitle();
 		
 		int tHeight = image.getHeight();

@@ -81,8 +81,10 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 		
 		String arguments = "";
 		if (IJ.isMacro() && Macro.getOptions() != null && !Macro.getOptions().trim().isEmpty()) { 
+			IJ.log("macro running\n");
 			arguments = Macro.getOptions().trim();
-			System.out.println(arguments);
+			IJ.log(arguments);
+			IJ.log("^- arguments\n");
 		//}
 		
 		//if (IJ.isMacro()){
@@ -92,12 +94,21 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			//	LJ_srcDirectory = image.getTitle();
 			//}
 			
-			LJ_srcDirectory = null;
+			LJ_srcDirectory = "test";
+			LJ_clsDirectory = "test";
+			AC_channel = 6;
+			
 			LJ_srcDirectory = LJPrefs.retrieveOption(arguments, "filepath", LJ_srcDirectory);
 			LJ_clsDirectory = LJPrefs.retrieveOption(arguments, "classifier", LJ_clsDirectory);
 			AC_channel = LJPrefs.retrieveOption(arguments, "class", 1);
+			
+			IJ.log("filepath: "+LJ_srcDirectory);
+			IJ.log("classifier: "+LJ_clsDirectory);
+			IJ.log("channel: "+AC_channel);
+			
+			
 		}else{
-		
+			IJ.log("no macro running\n");
 			GenericDialog gd = new GenericDialog(command+" Apply Weka Classifier");
 			//gd.addString("Threshold", LJ_srcDirectory, 3);
 			Font gdFont = gd.getFont();
@@ -140,6 +151,8 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 	        }
 			IJ.showStatus("Initializing...");
 			
+			//TODO: recorder needs to get escape characters correctly! i.e. "\\\\"->\\ not "\\"->\
+			
 			//LJ_srcDirectory = gd.getNextString();
 			LJ_srcDirectory = srcdirtxt.getText();
 			Recorder.recordOption("filepath", LJ_srcDirectory);
@@ -156,12 +169,19 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 		
 		IJ.log(LJ_srcDirectory);
 		IJ.log(LJ_clsDirectory);
+		File file = new File(LJ_srcDirectory);
+		String LJ_srcPath = file.getParent();
+		
+		IJ.log(LJ_srcPath);
+		
+		//IJ.openImage();
 		
 		//--Load WEKA--
 		IJ.showStatus("Opening Trainable Weka Segmentation...");
 		//TODO: import library to make direct calls
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"]");
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=["+LJ_srcDirectory+"]");
+		//IJ.log("open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcPath+"]");
 		IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcDirectory+"]");
 		
 		IJ.showProgress(5, 100);

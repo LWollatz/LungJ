@@ -20,7 +20,7 @@ import ij.WindowManager;
 public class Set_Up  implements PlugIn {
 	public static final String PLUGIN_NAME = "LungJ";
 	/** plugin's current version */
-	public static final String PLUGIN_VERSION = "v" + LJPrefs.LJ_version;
+	public static final String PLUGIN_VERSION = "v" + LJPrefs.VERSION;
 	public void run(String arg) {
 		GUI.main(arg);
 		/*

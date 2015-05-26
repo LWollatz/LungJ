@@ -70,6 +70,7 @@ public class Apply_Mask implements PlugIn{
 		int tWidth = image.getWidth();
 		int tDepth = image.getNSlices();
 		int tFrames = mask.getNFrames();
+		int tChannels = mask.getNChannels();
 		
 		/*
 		boolean isBin = false;
@@ -82,12 +83,13 @@ public class Apply_Mask implements PlugIn{
 		*/
 		
 		//ImagePlus imgout = IJ.createImage("Result", "8-bit", tWidth, tHeight, tDepth*tFrames);
-		ImagePlus imgout = IJ.createHyperStack("Result", tWidth, tHeight, 1, tDepth, tFrames, 8);
+		ImagePlus imgout = IJ.createHyperStack("Result", tWidth, tHeight, tChannels, tDepth, tFrames, 8);
 		
 		for (int z=1; z<=tDepth; z++){
 			ImageProcessor imageIP = image.getStack().getProcessor(z).convertToByte(true);
 			for (int f=1; f<=tFrames; f++){
-				int index = mask.getStackIndex(1, z, f);
+			for (int c=1; c<=tChannels; c++){
+				int index = mask.getStackIndex(c, z, f);
 				ImageProcessor maskIP = mask.getStack().getProcessor(index).convertToByte(true);
 				String label = mask.getStack().getShortSliceLabel(index);
 				ImageProcessor outputIP = imgout.getStack().getProcessor(index);
@@ -100,12 +102,13 @@ public class Apply_Mask implements PlugIn{
 				for (int y=0; y<tHeight; y++){
 		    		for (int x=0, p=x+y*tWidth; x<tWidth; x++,p++){
 		    			if (mPixels[p] == (byte)0){
-							oPixels[p] = (int)0;
+							oPixels[p] = (byte)0;
 		    			}else{
 							oPixels[p] = (byte)iPixels[p];
 		    			}
 		    		}
 				}
+			}
 			}
 		}
 		

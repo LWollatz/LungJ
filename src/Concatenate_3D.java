@@ -27,7 +27,7 @@ public class Concatenate_3D implements PlugIn{
 	public void run(String command){
 		IJ.showStatus("Getting data...");
 		IJ.showProgress(0, 100);
-		GenericDialog gd = new GenericDialog(command+" Subdivide image and save into directory");
+		GenericDialog gd = new GenericDialog(command+" Concatenate imageblocks created by subdivide");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
 		IJ.showStatus("Waiting for user input...");
 		gd.showDialog();

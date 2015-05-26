@@ -16,7 +16,9 @@ public class Run_Macro_3D implements PlugIn{
 	
 	private static String BC_inDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\input";
 	private static String BC_outDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\output";
-	private static String code = "run('Create Threshold Mask', 'threshold=55 minimum='+globMin+' maximum='+globMax+' stack');";
+	//private static String code = "var dirin = " + BC_inDirectory + ";\n open(dirin+'\\'+filename);\n run('Create Threshold Mask', 'threshold=55 minimum='+globMin+' maximum='+globMax+' stack');";
+	private static String code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n open(dirin+'\\\\'+filename);\n";
+	
 	private static int maxX = 1;
 	private static int maxY = 1;
 	private static int maxZ = 1;
@@ -25,12 +27,30 @@ public class Run_Macro_3D implements PlugIn{
 	private static int stepZ = 1;
 	private static float globMaxIn = -Float.MAX_VALUE;
 	private static float globMinIn = Float.MAX_VALUE;
+	private static int errCount = 0;
+	
+	
 	
 	public void run(String command){
+		//sample Apply Classifier
+		code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n";
+		code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=[J:\\\\Biomedical Imaging Unit\\\\Research\\\\Research Temporary\\\\3D IfLS Lung Project\\\\temp\\\\20150324_IfLS_Segmentation\\\\run02\\\\vessels.model] class=[2]');\n";
+		code += "run('Create Threshold Mask', 'threshold=30 minimum=0 maximum=1 stack');\n";
+		code += "rename('mask');\n";
+		code += "open(dirin+'\\\\'+filename);\n";
+		code += "run('Apply Mask', 'image='+filename+' mask=mask');";
+		code += "close(filename);\n";
+		code += "close('mask');\n";
+		
+		//sample Threshold
+		//code += "run('Create Threshold Mask', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack');\n";
+		//sample Colorize
+		//code += "run('Colorize ',' image=['+filename+'] color1=[#000000]');\n";
+		
 		GenericDialog gd = new GenericDialog(command+" Subdivide image and save into directory");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
 		gd.addStringField("Output directory", BC_outDirectory, 100);
-		gd.addMessage("Macrocode (provides variables globMin and globMax)");
+		gd.addMessage("Macrocode (provides variables filename, globMin and globMax)");
 		gd.addTextAreas(code, null, 10, 100);
 		gd.showDialog();
 		if (gd.wasCanceled()){
@@ -61,6 +81,7 @@ public class Run_Macro_3D implements PlugIn{
 		ImagePlus imgout = null;
 		float globMax = -Float.MAX_VALUE;
 		float globMin = Float.MAX_VALUE;
+		errCount = 0;
 		
 		for (int z=0; z<maxZ; z+=stepZ) {
 			IJ.showProgress(z, maxZ);
@@ -68,31 +89,46 @@ public class Run_Macro_3D implements PlugIn{
 				for (int y=0; y<maxY; y+=stepY) {
 					/*** open input **/
 					String filein = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_inDirectory,z,y,x);
-					imgin = IJ.openImage(filein);
-					int bd = imgin.getProcessor().getBitDepth();
+					String filename = String.format("%1$04d_%2$04d_%3$04d.tif",z,y,x);
+					//imgin = IJ.openImage(filein);
+					//int bd = imgin.getProcessor().getBitDepth();
 					//imgout = IJ.createImage("Result", maxX, maxY, maxZ, bd);
 					/*** processing **/
-					code = " var globMin = " + globMinIn + ";\n var globMax = " + globMaxIn + ";\n" + code;
-					imgout = process(imgin, code);
-					float[] minmax = LJPrefs.getMinMax(imgout);
-					float curMin = (float)minmax[0];
-					float curMax = (float)minmax[1];
-					if (curMax>globMax) {
-						globMax = curMax; 
+					
+					IJ.log(filename);
+					String fullcode = " var filename = '" + filename + "';\n var globMin = " + globMinIn + ";\n var globMax = " + globMaxIn + ";\n" + code;
+					
+					imgout = process(fullcode);
+					
+					if (imgout == null){
+						errCount += 1;
+						IJ.log("failed "+filein);
+					}else{
+						float[] minmax = LJPrefs.getMinMax(imgout);
+						float curMin = (float)minmax[0];
+						float curMax = (float)minmax[1];
+						if (curMax>globMax) {
+							globMax = curMax; 
+						}
+						if (curMin<globMin) {
+							globMin = curMin;
+						}
+						/*** saving output **/
+						String fileout = String.format("%1$s\\%2$s",BC_outDirectory,filename);
+						IJ.saveAsTiff(imgout,fileout);
+						IJ.log("processed "+filein);
+						imgout.close();
 					}
-					if (curMin<globMin) {
-						globMin = curMin;
-					}
-					/*** saving output **/
-					String fileout = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_outDirectory,z,y,x);
-					IJ.saveAsTiff(imgout,fileout);
-					IJ.log("processed "+filein);
-					imgout.close();
 					imgin = null;
 					imgout = null;
 				}
 			}
 		}
+		
+		if (errCount > 0){
+			IJ.error(String.format("%1$s files failed",errCount));
+		}
+		
 		
 		IJ.showProgress(99, 100);
 		prefs = new Properties();
@@ -116,20 +152,18 @@ public class Run_Macro_3D implements PlugIn{
 		
 	}
 	
-	private ImagePlus process(ImagePlus imgin, String code){
-		ImageProcessor ipi = imgin.getProcessor();
+	private ImagePlus process(String code){
+		//ImagePlus imgin, String code
+		//ImageProcessor ipi = imgin.getProcessor();
 		
-		//int oWidth = imgout.getWidth();
+		//imgin.show();
 		
-		//int iHeight = imgin.getHeight();
-		//int iWidth = imgin.getWidth();
-		//int iDepth = imgin.getNSlices();
 		
-		imgin.show();
 		
 		IJ.runMacro(code);
 		
 		ImagePlus imgout = WindowManager.getCurrentImage();
+		
 		
 		
 		return imgout;

@@ -121,7 +121,7 @@ public class GUI extends JFrame {
 		gbc_lblLungj.gridy = 0;
 		contentPane.add(lblLungj, gbc_lblLungj);
 		
-		JLabel lblV = new JLabel("v"+LJPrefs.LJ_version );
+		JLabel lblV = new JLabel("v"+LJPrefs.VERSION );
 		lblV.setFont(fntTitle);
 		lblV.setHorizontalAlignment(SwingConstants.LEFT);
 		GridBagConstraints gbc_lblV = new GridBagConstraints();
