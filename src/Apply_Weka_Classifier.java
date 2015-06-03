@@ -7,7 +7,7 @@ import ij.plugin.frame.Recorder;
 import ij.gui.GenericDialog;
 import ij.gui.DialogListener;
 
-//import trainableSegmentation;
+//import trainableSegmentation.*;
 //import weka.core.Utils;
 
 

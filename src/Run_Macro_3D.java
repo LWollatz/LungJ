@@ -159,7 +159,7 @@ public class Run_Macro_3D implements PlugIn{
 		//imgin.show();
 		
 		
-		
+		//TODO: how can I intercept macro errors?
 		IJ.runMacro(code);
 		
 		ImagePlus imgout = WindowManager.getCurrentImage();
