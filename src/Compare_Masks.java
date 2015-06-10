@@ -6,7 +6,6 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.plugin.ImageCalculator;
 import ij.plugin.PlugIn;
 import ij.plugin.filter.Analyzer;
 import ij.process.ImageProcessor;
@@ -28,7 +27,7 @@ public class Compare_Masks implements PlugIn {
 		//get available images:
 		int Nimg = WindowManager.getImageCount();
 		if (Nimg < 2){
-			IJ.error("At least two images are required - the original and the mask.");
+			IJ.error("At least two images are required - the correct mask and the mask to be tested.");
 			return;
 		}
 		String[] lstImages = WindowManager.getImageTitles();
@@ -44,8 +43,8 @@ public class Compare_Masks implements PlugIn {
 				Nmasks--;
 			}
 		}
-		if (Nmasks < 1){
-			IJ.error("Could not find valid mask. (A mask needs to be binary, or only contain values between 0 and 1)");
+		if (Nmasks < 2){
+			IJ.error("Could not find two valid masks. (A mask needs to be binary, or only contain values between 0 and 1)");
 			return;
 		}
 		
@@ -58,19 +57,6 @@ public class Compare_Masks implements PlugIn {
         }
 		int AM_srcID = lstImageIds[gd.getNextChoiceIndex()];
 		int AM_maskID = lstImageIds[gd.getNextChoiceIndex()];
-		
-		/*
-		int AM_srcID = 0;
-		int AM_maskID = 0;
-		for (int i = 0; i < Nimg; i++){
-			String temp = lstImages[i];
-			if(temp == AM_srcTitle){
-				AM_srcID = lstImageIds[i];
-			}
-			if(temp == AM_maskTitle){
-				AM_maskID = lstImageIds[i];
-			}
-		}*/
 		
 		ImagePlus image = WindowManager.getImage(AM_srcID);
 		ImagePlus mask = WindowManager.getImage(AM_maskID);
@@ -88,23 +74,11 @@ public class Compare_Masks implements PlugIn {
 			return;
 		}
 		
-		/*
-		boolean isBin = false;
-		if(mask.getProcessor().isBinary()){
-			IJ.runMacro("selectImage("+AM_maskID+");");
-			//NOT GOOD! NEED TO DO THIS ON COPY!
-			IJ.run("Divide...", "value=255 stack");
-			isBin = true;
-		}
-		*/
-		
-		//ImagePlus imgout = IJ.createImage("Result", "8-bit", tWidth, tHeight, tDepth*tFrames);
 		ImagePlus imgout = IJ.createHyperStack("Result", tWidth, tHeight, 3, tDepth, tFrames, 8);
 		
 		for (int z=1; z<=tDepth; z++){
 			
 			for (int f=1; f<=tFrames; f++){
-			//for (int c=1; c<=tChannels; c++){
 				
 				int index = mask.getStackIndex(1, z, f);
 				int indexi = image.getStackIndex(1, z, f);
@@ -151,7 +125,6 @@ public class Compare_Masks implements PlugIn {
 		    			}
 		    		}
 				}
-			//}
 			}
 		}
 		
@@ -161,11 +134,6 @@ public class Compare_Masks implements PlugIn {
 		        Analyzer.setResultsTable(rt);
 		}
 		rt.incrementCounter();
-		/*rt.addValue("True Positive", TP);
-		rt.addValue("True Negative", TN);
-		rt.addValue("False Positive", FP);
-		rt.addValue("False Negative", FN);
-		*/
 		rt.addLabel("True");
 		rt.addValue("Positive", TP);
 		rt.addValue("Negative", TN);
@@ -206,40 +174,10 @@ public class Compare_Masks implements PlugIn {
 		rt.addValue("Negative", "");
 		
 		rt.showRowNumbers(false);
-		//ImageCalculator ic = new ImageCalculator();
-		//ImagePlus output = ic.run("Multiply create 32-bit stack", image, mask);
 		imgout.show();
 		rt.show("Results");
 		
 		
-		/*
-		LJ_srcID = confirmImg(LJ_srcID,LJ_srcFilename,"original image",true);
-		LJ_mapID = confirmImg(LJ_mapID,LJ_mapFilename,"mask",false);
-		//__start__
-		selectImage(LJ_mapID);
-		LJ_mapFilename = getTitle;
-		getMinAndMax(min, max);
-		IJ.run("Divide...", "value="+max+" stack");
-		imageCalculator("Multiply create stack", LJ_srcFilename,LJ_mapFilename);
-		selectImage(LJ_mapID);
-		IJ.run("Multiply...", "value="+max+" stack");
-		//__end__
-		if (LJ_opt_Autosave){
-			LJ_segFilename = "autosave_"+LJ_srcFilename+"_"+LJ_clsName+"_th"+LJ_Threshold+"_segmentation.tif";
-			selectWindow("Result of "+LJ_srcFilename);
-			saveAs("Tiff", LJ_srcDirectory+"\\"+LJ_segFilename);
-		}
-		rename("Segmented Image");
-		LJ_segID = getImageID();
-		*/
-		
-		/*
-		if(isBin){
-			IJ.runMacro("selectImage("+AM_maskID+");");
-			IJ.run("Multiply...", "value=255 stack");
-		}
-		*/
-		
-		IJ.showStatus("Mask Applied.");
+		IJ.showStatus("Masks Compared.");
 	}
 }
