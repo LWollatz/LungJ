@@ -94,8 +94,8 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			//	LJ_srcDirectory = image.getTitle();
 			//}
 			
-			LJ_srcDirectory = "test";
-			LJ_clsDirectory = "test";
+			//LJ_srcDirectory = "test";
+			//LJ_clsDirectory = "test";
 			AC_channel = 6;
 			
 			LJ_srcDirectory = LJPrefs.retrieveOption(arguments, "filepath", LJ_srcDirectory);
@@ -115,7 +115,7 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			
 			JLabel srcdirlbl = new JLabel ("Image Filepath  ", JLabel.RIGHT);
 			srcdirlbl.setFont(gdFont);
-			srcdirtxt = new JTextField(LJ_srcDirectory + "\\" + LJ_srcFilename,50);
+			srcdirtxt = new JTextField(LJ_srcDirectory,50);
 			srcdirtxt.setFont(gdFont);
 			srcfilebtn = new JButton("...");
 			srcfilebtn.addActionListener(this);
@@ -171,6 +171,7 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 		IJ.log(LJ_clsDirectory);
 		File file = new File(LJ_srcDirectory);
 		String LJ_srcPath = file.getParent();
+		String LJ_srcFile = file.getName();
 		
 		IJ.log(LJ_srcPath);
 		
@@ -181,14 +182,23 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 		//TODO: import library to make direct calls
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"]");
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] inputfile=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"] path=["+LJ_srcDirectory+"]");
-		//IJ.log("open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcPath+"]");
-		IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcDirectory+"]");
+		IJ.log("open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcPath+"]");
+		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcPath+"]");
+		IJ.runMacro("open('"+LJ_srcDirectory.replace("\\", "\\\\")+"');");
+		IJ.run("Trainable Weka Segmentation");
+		IJ.runMacro("close('"+LJ_srcFile+"');");
 		
 		IJ.showProgress(5, 100);
 		//--Load Classifier--
 		IJ.showStatus("Loading classifier...");
 		//IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"\\\\"+LJ_clsFilename.replace("\\","\\\\")+"');");
 		IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"');");
+		if (WindowManager.getNonImageTitles().length <= 0){
+			IJ.log(Integer.toString(WindowManager.getNonImageTitles().length));
+			IJ.log("failed to initialize Trainable Weka Segmentation");
+			IJ.showProgress(100, 100);
+			return;
+		}
 		IJ.showProgress(20, 100);
 		//--Get Probability Map--
 		IJ.showStatus("Getting Probability Map...");

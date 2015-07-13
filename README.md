@@ -7,6 +7,14 @@
 * last stable version: ???
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
+### Requirements ###
+
+* ImageJ 1.49s or later
+* Java 1.8.0 (This has to be the Java used by ImageJ! Check under Help>About ImageJ)
+* Trainable Weka Segmentation v2.2.1 (any other version will not work)
+* Fiji (advised as it provides many extra tools including the Trainable Weka Segmentation)
+* Windows 64-bit (advised as not tested for other platforms)
+
 ### How do I get set up? ###
 
 **Easy**
@@ -14,6 +22,14 @@
 * The main directory includes the latest build
 * copy the .jar file into the Fiji ./*plugins* directory
 * restart Fiji
+
+**Detailed**
+
+* download LungJ_.jar from the main directory
+* place LungJ_.jar file into the Fiji ./*plugins* directory of your Fiji installation
+* if there are problems, try creating a subfolder so that the file is placed in *./plugins/LungJ_/LungJ_.jar*
+* restart Fiji
+* the new functions should be available under Plugins>LungJ>
 
 **For Developers**
 

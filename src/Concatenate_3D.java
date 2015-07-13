@@ -74,8 +74,12 @@ public class Concatenate_3D implements PlugIn{
 						int bd = imgblock.getProcessor().getBitDepth();
 						imgout = IJ.createImage("Result", maxX, maxY, maxZ, bd);
 					}
-					imgout = paste(imgblock, imgout, x, y, z);
-					IJ.log("added "+filein);
+					if (imgout == null){
+						IJ.log("ERROR "+filein);
+					}else{
+						imgout = paste(imgblock, imgout, x, y, z);
+						IJ.log("added "+filein);
+					}
 					IJ.showStatus("Concatenating blocks...");
 					prog += 1;
 					IJ.showProgress(prog, maxProg);

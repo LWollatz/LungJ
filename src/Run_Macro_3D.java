@@ -47,7 +47,7 @@ public class Run_Macro_3D implements PlugIn{
 		//sample Colorize
 		//code += "run('Colorize ',' image=['+filename+'] color1=[#000000]');\n";
 		
-		GenericDialog gd = new GenericDialog(command+" Subdivide image and save into directory");
+		GenericDialog gd = new GenericDialog(command+" Run macro on 3D blocks");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
 		gd.addStringField("Output directory", BC_outDirectory, 100);
 		gd.addMessage("Macrocode (provides variables filename, globMin and globMax)");
