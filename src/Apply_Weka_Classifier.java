@@ -53,7 +53,7 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
 	public static final String VERSION = LJPrefs.VERSION;
 	
-	public static final String TWS_version = "v2.2.1";
+	public static final String TWS_version = "v2.2.1"; //as this is included in the window name...
 	
 	private static String LJ_srcDirectory = LJPrefs.LJ_srcDirectory;
 	private static String LJ_srcFilename = "250x250x250x16bit.tif";
@@ -72,16 +72,10 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			return;
 		IJ.showStatus("Initializing...");
 		IJ.showProgress(0, 100);
-		//selectImage(LJ_srcID);
-		/*
-		if (WindowManager.getImageCount() > 0){
-			ImagePlus image = WindowManager.getCurrentImage();
-			LJ_srcFilename = image.getTitle();
-		}*/
 		
 		String arguments = "";
 		if (IJ.isMacro() && Macro.getOptions() != null && !Macro.getOptions().trim().isEmpty()) { 
-			IJ.log("macro running\n");
+			/**running as macro**/
 			arguments = Macro.getOptions().trim();
 			IJ.log(arguments);
 			IJ.log("^- arguments\n");
@@ -108,11 +102,11 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			
 			
 		}else{
-			IJ.log("no macro running\n");
+			/**running as GUI**/
 			GenericDialog gd = new GenericDialog(command+" Apply Weka Classifier");
-			//gd.addString("Threshold", LJ_srcDirectory, 3);
 			Font gdFont = gd.getFont();
 			
+			/**Image File Textbox**/
 			JLabel srcdirlbl = new JLabel ("Image Filepath  ", JLabel.RIGHT);
 			srcdirlbl.setFont(gdFont);
 			srcdirtxt = new JTextField(LJ_srcDirectory,50);
@@ -125,8 +119,7 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			srcpanel.add(srcdirtxt,-1);
 			srcpanel.add(srcfilebtn,-1);
 			gd.addPanel(srcpanel);
-			//gd.addStringField("Directory", LJ_srcDirectory, 100);
-			//gd.addStringField("Filename", LJ_srcFilename, 100);
+			/**Classifier Model File Textbox**/
 			JLabel clsdirlbl = new JLabel ("Classifier Directory  ", JLabel.RIGHT);
 			clsdirlbl.setFont(gdFont);
 			clsdirtxt = new JTextField(LJ_clsDirectory,50);
@@ -139,8 +132,8 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			clspanel.add(clsdirtxt,-1);
 			clspanel.add(clsfilebtn,-1);
 			gd.addPanel(clspanel);
-			//gd.addStringField("Classifier_Directory", LJ_clsDirectory, 100);
-			//gd.addStringField("Classifier_Filename", LJ_clsFilename, 100);
+			/**Class Number Textbox**/
+			//TODO: remove and reorder block to be ready for 4D visualisation instead.
 			gd.addNumericField("Class No", 1, 0);
 			IJ.showStatus("Waiting for user input...");
 			gd.showDialog();
@@ -153,31 +146,27 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			
 			//TODO: recorder needs to get escape characters correctly! i.e. "\\\\"->\\ not "\\"->\
 			
-			//LJ_srcDirectory = gd.getNextString();
+			/** get values from dialog**/
 			LJ_srcDirectory = srcdirtxt.getText();
 			Recorder.recordOption("filepath", LJ_srcDirectory);
 			LJPrefs.LJ_srcDirectory = LJ_srcDirectory;
-			//LJ_srcFilename = gd.getNextString();
-			//LJ_clsDirectory = gd.getNextString();
 			LJ_clsDirectory = clsdirtxt.getText();
 			Recorder.recordOption("classifier", LJ_clsDirectory);
 			LJPrefs.LJ_clsDirectory = LJ_clsDirectory;
-			//LJ_clsFilename = gd.getNextString();
 			AC_channel = (int)gd.getNextNumber();
-			LJPrefs.savePreferences();
+			LJPrefs.savePreferences(); //save preferences for after Fiji restart.
 		}
 		
-		IJ.log(LJ_srcDirectory);
-		IJ.log(LJ_clsDirectory);
+		//IJ.log(LJ_srcDirectory);
+		//IJ.log(LJ_clsDirectory);
 		File file = new File(LJ_srcDirectory);
 		String LJ_srcPath = file.getParent();
 		String LJ_srcFile = file.getName();
 		
-		IJ.log(LJ_srcPath);
+		//IJ.log(LJ_srcPath);
 		
-		//IJ.openImage();
 		
-		//--Load WEKA--
+		/***Load WEKA***/
 		IJ.showStatus("Opening Trainable Weka Segmentation...");
 		//TODO: import library to make direct calls
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"\\"+LJ_srcFilename+"]");
@@ -185,11 +174,12 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 		IJ.log("open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcPath+"]");
 		//IJ.run("Trainable Weka Segmentation", "open=["+LJ_srcDirectory+"] inputfile=["+LJ_srcDirectory+"] path=["+LJ_srcPath+"]");
 		IJ.runMacro("open('"+LJ_srcDirectory.replace("\\", "\\\\")+"');");
+		//IJ.openImage();
 		IJ.run("Trainable Weka Segmentation");
 		IJ.runMacro("close('"+LJ_srcFile+"');");
 		
 		IJ.showProgress(5, 100);
-		//--Load Classifier--
+		/***Load Classifier***/
 		IJ.showStatus("Loading classifier...");
 		//IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"\\\\"+LJ_clsFilename.replace("\\","\\\\")+"');");
 		IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); call('trainableSegmentation.Weka_Segmentation.loadClassifier', '"+LJ_clsDirectory.replace("\\","\\\\")+"');");
@@ -200,15 +190,16 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 			return;
 		}
 		IJ.showProgress(20, 100);
-		//--Get Probability Map--
+		/***Get Probability Map***/
 		IJ.showStatus("Getting Probability Map...");
 		//call("trainableSegmentation.Weka_Segmentation.applyClassifier", LJ_srcDirectory, LJ_srcFilename, "showResults=true", "storeResults=false", "probabilityMaps=true", "");
 		IJ.runMacro("call('trainableSegmentation.Weka_Segmentation.getProbability');");
 		IJ.showProgress(90, 100);
-		//--post processing--
+		/***post processing***/
 		IJ.showStatus("Finishing...");
 		IJ.runMacro("selectWindow('Trainable Weka Segmentation "+TWS_version+"'); close(); selectWindow('Probability maps');");
-		//--remove background channel-- NEED TO MAKE THIS INDEPENDANT OF IMAGE SIZE!
+		/***remove background channel***/ 
+		//TODO: NEED TO MAKE THIS INDEPENDANT OF IMAGE SIZE!
 		ImagePlus image = WindowManager.getCurrentImage();
 		int[] properties = image.getDimensions(); //width, height, nChannels, nSlices, nFrames
 		int nSlices = properties[3];
@@ -223,6 +214,7 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
+		/** code to display file selection dialogs and store chosen result back into textbox**/
 		if(e.getSource() == this.clsfilebtn ){
 			JFileChooser chooser = new JFileChooser(LJ_clsDirectory);
 			FileFilter filter = new FileNameExtensionFilter("Classifier Model", "model");

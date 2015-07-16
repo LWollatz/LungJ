@@ -60,6 +60,7 @@ public class Fill_Holes_Manual_3D implements PlugInFilter {
 		return flags;
     }
 	
+	/*
 	// Called by ImageJ after setup.
     public int showDialog(ImagePlus imp, String command, PlugInFilterRunner pfr) {
         
@@ -86,7 +87,7 @@ public class Fill_Holes_Manual_3D implements PlugInFilter {
         gd.addNumericField("maximum Value", globMax, 4);
         gd.addPreviewCheckbox(pfr);             // passing pfr makes the filter ready for preview
         /*if (IJ.getVersion().compareTo("1.42p")>=0)
-        	gd.addHelp("http://rsb.info.nih.gov/ij/plugins/erode-demo.html");*/
+        	gd.addHelp("http://rsb.info.nih.gov/ij/plugins/erode-demo.html");*//*
         //gd.addDialogListener(this);             // the DialogItemChanged method will be called on user input
         //previewing = true;
         gd.showDialog();                        // display the dialog; preview runs in the background now
@@ -96,15 +97,15 @@ public class Fill_Holes_Manual_3D implements PlugInFilter {
         }
         IJ.register(this.getClass());           // protect static class variables (filter parameters) from garbage collection
         return IJ.setupDialog(imp, flags);      // ask whether to process all slices of stack (if a stack)
-    }
-    
+    }*/
+    /*
     // Called after modifications to the dialog. Returns true if valid input.
     public boolean dialogItemChanged(GenericDialog gd, AWTEvent e) {
     	LJ_threshold = gd.getNextNumber()/100;
     	globMin = gd.getNextNumber();
     	globMax = gd.getNextNumber();
         return (!gd.invalidNumber() && LJ_threshold>=0 && LJ_threshold<=1);
-    }
+    }*/
     
 	
 	public void run(ImageProcessor ip) {

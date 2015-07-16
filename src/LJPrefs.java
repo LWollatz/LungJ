@@ -64,7 +64,7 @@ public class Global{
 */
 public class LJPrefs{
 	public static final String PLUGIN_NAME = "LungJ";
-	public static final String VERSION = "0.2.1";
+	public static final String VERSION = "0.2.2b";
 	/** file.separator system property */
 	public static String separator = System.getProperty("file.separator");
 	public static String LJ_dir =  System.getProperty("user.dir") + separator + "plugins" + separator + "LungJ";//getDirectory("imagej") + "/plugins/LungJ";
@@ -78,6 +78,8 @@ public class LJPrefs{
 	public static String LJ_prbFilename = "";
 	public static String LJ_mapFilename = "";
 	public static String LJ_segFilename = "";
+	public static String LJ_inpDirectory = Prefs.get("LJ.INPUT_DIR", LJ_dir);
+	public static String LJ_outDirectory = Prefs.get("LJ.OUTPUT_DIR", LJ_dir);
 	public static int LJ_srcID = 1;
 	public static int LJ_prbID = 1;
 	public static int LJ_mapID = 1;
@@ -125,6 +127,8 @@ public class LJPrefs{
 	
 	public static void savePreferences() {
 		Prefs.set("LJ.CLASSIFIER_DIR", LJ_clsDirectory);
+		Prefs.set("LJ.INPUT_DIR", LJ_inpDirectory);
+		Prefs.set("LJ.OUTPUT_DIR", LJ_outDirectory);
 		Prefs.set("LJ.SEGNAME1", LJ_segname1);
 		Prefs.set("LJ.SEGNAME2", LJ_segname2);
 		Prefs.set("LJ.SEGNAME3", LJ_segname3);
@@ -592,11 +596,6 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 				}
 			}
 		}
-		//int x = index%width;
-		//int y = index/width;
-		//int[] pos = new int[3];
-		//pos[0]=x; pos[1]=y; pos[2]=z;
-		//return pos;
 		float[] mm = new float[2];
 		mm[0]=min;
 		mm[1]=max;

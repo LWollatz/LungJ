@@ -13,7 +13,7 @@ import ij.process.ImageProcessor;
 
 public class Concatenate_3D implements PlugIn{
 	
-	private static String BC_inDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\output";
+	private static String BC_inDirectory = LJPrefs.LJ_outDirectory;
 	private static int maxX = 1;
 	private static int maxY = 1;
 	private static int maxZ = 1;
@@ -27,6 +27,8 @@ public class Concatenate_3D implements PlugIn{
 	public void run(String command){
 		IJ.showStatus("Getting data...");
 		IJ.showProgress(0, 100);
+		
+		/** create dialog box **/
 		GenericDialog gd = new GenericDialog(command+" Concatenate imageblocks created by subdivide");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
 		IJ.showStatus("Waiting for user input...");
@@ -36,25 +38,28 @@ public class Concatenate_3D implements PlugIn{
 			IJ.showProgress(100, 100);
         	return;
         }
+		
+		/** getting user input and reading image information from preference file **/
 		IJ.showStatus("Getting data...");
 		BC_inDirectory = gd.getNextString();
-		
 		Properties prefs = new Properties();
 		try {
 			prefs = LJPrefs.readProperties(BC_inDirectory + "\\properties.txt");
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			// TODO Auto-generated catch block if no LJinfo file found
 			e.printStackTrace();
 		}
-		
 		maxX = LJPrefs.getPref(prefs, "maxX", maxX);
 		maxY = LJPrefs.getPref(prefs, "maxY", maxY);
 		maxZ = LJPrefs.getPref(prefs, "maxZ", maxZ);
 		stepX = LJPrefs.getPref(prefs, "stepX", stepX);
 		stepY = LJPrefs.getPref(prefs, "stepY", stepY);
 		stepZ = LJPrefs.getPref(prefs, "stepZ", stepZ);
+		// TODO: do I need those two? ...
 		globMin = (float)LJPrefs.getPref(prefs, "minVal", globMin);
 		globMax = (float)LJPrefs.getPref(prefs, "maxVal", globMax);
+		
+		
 		
 		ImagePlus imgout = null;
 		IJ.showStatus("Concatenating blocks...");
@@ -65,21 +70,26 @@ public class Concatenate_3D implements PlugIn{
 		int diffy = (int)Math.round(maxY/stepY+0.5);
 		int maxProg = (diffy*diffx*diffz)*100/99;
 		
+		/** loop over image blocks **/
 		for (int z=0; z<maxZ; z+=stepZ) {
 			for (int x=0; x<maxX; x+=stepX) {
 				for (int y=0; y<maxY; y+=stepY) {
+					/** read in each block **/
 					String filein = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_inDirectory,z,y,x);
 					ImagePlus imgblock = IJ.openImage(filein);
 					if (imgout == null){
+						/** create image for output **/
 						int bd = imgblock.getProcessor().getBitDepth();
 						imgout = IJ.createImage("Result", maxX, maxY, maxZ, bd);
 					}
 					if (imgout == null){
 						IJ.log("ERROR "+filein);
 					}else{
+						/** paste block into full image **/
 						imgout = paste(imgblock, imgout, x, y, z);
 						IJ.log("added "+filein);
 					}
+					/** show progress **/
 					IJ.showStatus("Concatenating blocks...");
 					prog += 1;
 					IJ.showProgress(prog, maxProg);
@@ -99,6 +109,19 @@ public class Concatenate_3D implements PlugIn{
 		
 	}
 	
+	/** takes an image stack and pastes it into another image stack at the given top left position
+	 * @param img
+	 *        image block to paste into canvas image
+	 * @param destimg
+	 *        destination image or canvas to past image block into.
+	 * @param px
+	 *        x coordinate of destimg where x=0 of img is
+	 * @param py
+	 *        y coordinate of destimg where y=0 of img is
+	 * @param pz
+	 *        z coordinate of destimg where z=0 of img is
+	 * @return
+	 */
 	private ImagePlus paste(ImagePlus img, ImagePlus destimg, int px, int py, int pz){
 		ImageProcessor ipo = destimg.getProcessor();
 		
@@ -108,10 +131,13 @@ public class Concatenate_3D implements PlugIn{
 		int iWidth = img.getWidth();
 		int iDepth = img.getNSlices();
 		
+		/** different handler depending on bitdepth required... **/
 		if (ipo.getBitDepth() == 32) {
 			for (int z=pz; z<pz+iDepth; z++) {
+				/** get pixel handler **/
 				float[] oPixels = (float[])destimg.getStack().getProcessor(z+1).getPixels();
 				float[] iPixels = (float[])img.getStack().getProcessor(z-pz+1).getPixels();
+				/** copy img into destimg pixel by pixel **/
 				for (int y=py; y<py+iHeight; y++){
 					for (int x=px; x<px+iWidth; x++){
 						int po=x+y*oWidth;

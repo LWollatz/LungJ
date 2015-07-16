@@ -14,8 +14,8 @@ import ij.process.ImageProcessor;
 
 public class Run_Macro_3D implements PlugIn{
 	
-	private static String BC_inDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\input";
-	private static String BC_outDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\output";
+	private static String BC_inDirectory = LJPrefs.LJ_inpDirectory;
+	private static String BC_outDirectory = LJPrefs.LJ_outDirectory;
 	//private static String code = "var dirin = " + BC_inDirectory + ";\n open(dirin+'\\'+filename);\n run('Create Threshold Mask', 'threshold=55 minimum='+globMin+' maximum='+globMax+' stack');";
 	private static String code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n open(dirin+'\\\\'+filename);\n";
 	
@@ -35,7 +35,7 @@ public class Run_Macro_3D implements PlugIn{
 		//sample Apply Classifier
 		code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n";
 		code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=[J:\\\\Biomedical Imaging Unit\\\\Research\\\\Research Temporary\\\\3D IfLS Lung Project\\\\temp\\\\20150324_IfLS_Segmentation\\\\run02\\\\vessels.model] class=[2]');\n";
-		code += "run('Create Threshold Mask', 'threshold=30 minimum=0 maximum=1 stack');\n";
+		code += "run('Apply Binary Threshold', 'threshold=30 minimum=0 maximum=1 stack');\n";
 		code += "rename('mask');\n";
 		code += "open(dirin+'\\\\'+filename);\n";
 		code += "run('Apply Mask', 'image='+filename+' mask=mask');";
@@ -43,7 +43,7 @@ public class Run_Macro_3D implements PlugIn{
 		code += "close('mask');\n";
 		
 		//sample Threshold
-		//code += "run('Create Threshold Mask', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack');\n";
+		//code += "run('Apply Binary Threshold', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack');\n";
 		//sample Colorize
 		//code += "run('Colorize ',' image=['+filename+'] color1=[#000000]');\n";
 		
@@ -57,8 +57,12 @@ public class Run_Macro_3D implements PlugIn{
         	return;
         }
 		BC_inDirectory = gd.getNextString();
+		LJPrefs.LJ_inpDirectory = BC_inDirectory;
 		BC_outDirectory = gd.getNextString();
+		LJPrefs.LJ_outDirectory = BC_outDirectory;
 		code = gd.getNextText();
+		
+		LJPrefs.savePreferences(); //save preferences for after Fiji restart.
 		
 		Properties prefs = new Properties();
 		try {
