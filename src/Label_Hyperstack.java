@@ -1,18 +1,27 @@
-
 import ij.IJ;
 import ij.ImagePlus;
-import ij.Macro;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.plugin.ImageCalculator;
 import ij.plugin.PlugIn;
-import ij.process.ImageProcessor;
-import ij.util.Tools;
 
-import java.awt.Color;
+/** 
+ * Consistently labels the slices of a hyperstack.
+ * 
+ * - Provide names for each frame. leave the name blank if slices should not be 
+ *   distinguished by their frame.
+ * - Provide names for each channel. leave the name blank if slices should not be 
+ *   distinguished by their channel.
+ * - Provide a separating string (default is ` - ’)
+ * - Choose if the slice number (z-value) should be included in the slice name.
+ *   
+ * @author Lasse Wollatz
+ *   
+ **/
 
 public class Label_Hyperstack implements PlugIn{
-	
+	//TODO: handle case of too many frames (e.g. for more than 10 just allow to include frame number with prefix like t=1 etc.)
+	//TODO: allow to offset slice number
+	//TODO: future work: detect patterns in current image labeling to pre-fill textboxes, or just store user preferences
 	
 	public void run(String command){
 		IJ.showStatus("Labeling Hyperstack");

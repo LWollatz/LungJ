@@ -3,7 +3,6 @@
  */
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.WindowManager;
 import ij.gui.*;
 import ij.plugin.*;
@@ -12,9 +11,7 @@ import ij.process.*;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.io.BufferedOutputStream;
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.*;
 
@@ -22,16 +19,33 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 
 /**
+ * Divides a 3D image into 3D blocks and saves them into a directory along with header 
+ * information in a txt file.
+ * run("3D Blocks - Create", "directory=[C:\myblocks\original] width=250 height=250 depth=250 z-offset=0 save");
+ * 
+ * - Open a large image in ImageJ. If the image is too large to load, load as many slices
+ *   as possible.
+ * - Choose the size of the output blocks. It is advised to make the blocks cubic if they
+ *   are intended for use with 3D algorithms but to make them mere subsets of the 
+ *   original stack, if used with 2D algorithms. This will reduce the number of artefacts
+ *   from boundary assumptions.
+ * - Adjust the z-offset to deal with images that are too large to load into memory at 
+ *   once.
+ * - Provide an output directory for the blocks.
+ * 
  * @author Lasse Wollatz
- *
- */
+ * 
+ **/
+
 public class Subdivide_3D implements PlugIn, ActionListener{
-	
-	private static String BC_outDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\\3D IfLS Lung Project\\temp\\20150324_IfLS_Segmentation\\input";
+	/** plugin's name */
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version */
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	private static String BC_outDirectory = LJPrefs.LJ_inpDirectory;
 	private static int stepX = 250;
 	private static int stepY = 250;
 	private static int stepZ = 250;
@@ -52,7 +66,7 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		int maxX = properties[0];
 		int maxY = properties[1];
 		int maxZ = properties[3];
-		int bits = image.getBitDepth();
+		//int bits = image.getBitDepth();
 		float[] minmax = new float[2];
     	minmax = LJPrefs.getMinMax(image);
 		globMin = (double)minmax[0];
@@ -100,6 +114,9 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		stepZ = (int)gd.getNextNumber();
 		z_offset = (int)gd.getNextNumber();
 		saveProp = gd.getNextBoolean();
+		
+		LJPrefs.LJ_inpDirectory = BC_outDirectory;
+		LJPrefs.savePreferences();
 		
 		ImageProcessor ip = image.getProcessor();
 		

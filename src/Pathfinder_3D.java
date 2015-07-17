@@ -7,13 +7,14 @@ import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
 import ij.process.ImageProcessor;
-import ij.measure.ResultsTable;
-
-import java.lang.*;
 
 public class Pathfinder_3D implements PlugIn {
+	/** plugin's name */
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version */
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	
 	public void run(String command){
 		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions

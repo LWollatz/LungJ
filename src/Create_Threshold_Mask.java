@@ -5,30 +5,36 @@ import ij.plugin.filter.PlugInFilterRunner;
 import ij.gui.GenericDialog;
 import ij.gui.DialogListener;
 import ij.process.*;
-import ij.process.ImageProcessor;
+
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
 
 
 /**
-* LungJ code for binary map creation
-* run("Create Threshold Mask","threshold=0.5");
-*
-* threshold is defined as a percentage between Min and Max
-* output image is true binary (0 or 1) but remains the same bit-depth as the input image
-* window-size and threshold are automatically adjusted and LUT set to grayscale
-* this means that the output map clearly shows foreground and background and is ideal for mathematical operations!
-*
-* Code by Lasse Wollatz, version 2015-04-30
-*/
+ * Creates a truly binary mask based on a fixed global threshold.
+ * run("Create Threshold Mask","threshold=0.5");
+ *
+ * - Select an image
+ * - Call Create_Threshold_Mask and choose a threshold. The slider sets the threshold as 
+ *   a percentage between the minimum and maximum value of the stack. These values are 
+ *   found automatically, but can be altered if needed using the boxes below. The preview
+ *   option can help to find the right value.
+ * - The function will then set all voxel smaller or equal to the threshold to 0 and all 
+ *   voxel larger than the threshold to 1. The LUT will be adjusted to show 0 as black 
+ *   and 1 as white. This means that the output map clearly shows foreground and 
+ *   background and is ideal for mathematical operations! The image type is not modified.
+ * - On re-opening the image, make sure to adjust the window-size under 
+ *   Image>Adjust>Window/Level... as this is not the default for 8-bit images.
+ *   
+ * @author Lasse Wollatz
+ * 
+ **/
 
 public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListener {
 	/** plugin's name */
-	public static final String PLUGIN_NAME = "LungJ";
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
 	/** plugin's current version */
-	public static final String PLUGIN_VERSION = "v" + "0.2.1";
-	//LungJ_.class.getPackage().getImplementationVersion();
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	
 	private static double LJ_threshold = 0.5;           // where to cut off
 	private boolean previewing = false;
@@ -154,7 +160,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         	floatIP = previewEdm;
         } else {
         	floatIP = new FloatProcessor(width, height, (float[])ip.convertToFloat().getPixels());
-            if (floatIP==null) return;         //interrupted during preview?
+            //if (floatIP==null) return;         //interrupted during preview?
             previewEdm = floatIP;
         }
         float[] fPixels = (float[])floatIP.getPixels();

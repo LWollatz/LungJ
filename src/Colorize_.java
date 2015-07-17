@@ -2,16 +2,31 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.Macro;
 import ij.WindowManager;
-import ij.gui.GenericDialog;
-import ij.plugin.ImageCalculator;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
-
 import java.awt.Color;
 
+/** 
+ * Combines a set of segmented images into a colour image.
+ * 
+ * - The original image should be a hyperstack with each feature segmentation appearing 
+ *   in a separate frame.
+ * - Colorize_ allows to choose a colour for each frame.
+ * - Once colours have been chosen, a new image is produced, overlaying each frame with 
+ *   the specified colour and combining them into a single RGB stack, ignoring black 
+ *   pixels as background.
+ *   
+ * @author Lasse Wollatz
+ *   
+ **/
+
 public class Colorize_ implements PlugIn{
-	
+	/** plugin's name */
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version */
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	static Color[] LJColors = new Color[5];
 	
 	public void run(String command){
@@ -30,9 +45,9 @@ public class Colorize_ implements PlugIn{
 			System.out.println(arguments);
 			IJ.log(arguments);
 		}
-		Thread initThread = Thread.currentThread();
+		//Thread initThread = Thread.currentThread();
 		
-		
+		//TODO: have a look at the macro recording again and see what is used and what isn't
 		String options = "";
 		
 		ImagePlus image;
@@ -52,7 +67,7 @@ public class Colorize_ implements PlugIn{
 		}
 		options += " image="+image.getTitle();
 		
-		int tChannels = image.getNChannels();
+		//int tChannels = image.getNChannels();
 		
 		
 		int tFrames = image.getNFrames();

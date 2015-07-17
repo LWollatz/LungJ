@@ -1,36 +1,35 @@
 import ij.IJ;
 import ij.ImagePlus;
 import ij.plugin.filter.PlugInFilter;
-import ij.plugin.filter.PlugInFilterRunner;
-import ij.gui.GenericDialog;
-import ij.gui.DialogListener;
 import ij.process.*;
 
 import java.awt.*;
-import java.awt.event.*;
-import java.util.*;
 
 
 /**
-* LungJ code for filling holes in a mask
-* run("Create Threshold Mask","threshold=0.5");
-*
-* as a preparation, make sure your mask is binary, where the background is minimum and the foreground maximum.
-* use Flood Fill (3D) to fill the background with a grey value between max and min, leaving the holes black
-* use Fill Holes Manual (3D) to replace black values with white and grey with black.
-* this is ideal for filling a mask with many holes in the foreground but only one or few connected background(s).
-*
-* Code by Lasse Wollatz, version 2015-06-10
-*/
+ * Creates a truly binary mask based on a fixed global threshold.
+ * 
+ * - Select an image
+ * - Call Create_Threshold_Mask and choose a threshold. The slider sets the threshold as 
+ *   a percentage between the minimum and maximum value of the stack. These values are 
+ *   found automatically, but can be altered if needed using the boxes below. The preview
+ *   option can help to find the right value.
+ * - The function will then set all voxel smaller or equal to the threshold to 0 and all 
+ *   voxel larger than the threshold to 1. The LUT will be adjusted to show 0 as black 
+ *   and 1 as white. The image type is not modified.
+ *
+ * @author Lasse Wollatz
+ * 
+ **/
 
 public class Fill_Holes_Manual_3D implements PlugInFilter {
 	/** plugin's name */
-	public static final String PLUGIN_NAME = "LungJ";
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
 	/** plugin's current version */
-	public static final String PLUGIN_VERSION = "v" + "0.2.1";
-	//LungJ_.class.getPackage().getImplementationVersion();
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	
-	private static double LJ_threshold = 0.5;           // where to cut off
+	//private static double LJ_threshold = 0.5;           // where to cut off
 	private boolean previewing = false;
     private FloatProcessor previewEdm;
     private double globMin = 0;
@@ -118,14 +117,14 @@ public class Fill_Holes_Manual_3D implements PlugInFilter {
         	floatIP = previewEdm;
         } else {
         	floatIP = new FloatProcessor(width, height, (float[])ip.convertToFloat().getPixels());
-            if (floatIP==null) return;         //interrupted during preview?
+            //if (floatIP==null) return;         //interrupted during preview?
             previewEdm = floatIP;
         }
         float[] fPixels = (float[])floatIP.getPixels();
         Rectangle roiRect = ip.getRoi();
         
         
-        // Pixels with a value < LJ_threshold will be set to background
+        
         if (ip.getBitDepth() == 8) {
         	byte[] bPixels = (byte[])ip.getPixels();
         

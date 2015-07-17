@@ -2,12 +2,31 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.plugin.ImageCalculator;
+//import ij.plugin.ImageCalculator;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 
 
+/**
+ * Applies a mask to an image, leaving the foreground as it is and replacing the 
+ * background by black.
+ * 
+ * - As a preparation, make sure the mask is binary where the background is minimum and 
+ *   the foreground maximum.
+ * - One image should represent the mask, while the other one should represent the 
+ *   original data.
+ * - Use Apply Mask to replace background values in the original data with black.
+ * 
+ * @author Lasse Wollatz
+ *
+ **/
+
 public class Apply_Mask implements PlugIn{
+	/** plugin's name */
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version */
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	
 	public void run(String command){
 		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions

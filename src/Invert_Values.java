@@ -10,15 +10,17 @@ import java.awt.*;
 
 
 /**
-* LungJ code for inverting the values in an image
-* run("Invert Values","minimum=0 maximum=255");
-*
-* this code changes the actual values and mirrors them around the centre between minimum and maximum. Values
-* which exceed the minimum or maximum specified are being cut of at the boundary.
-* The GUI looks up the minimum and maximum value in an image and suggests them as defaults.
-*
-* Code by Lasse Wollatz, version 2015-07-16
-*/
+ * LungJ code for inverting the values in an image
+ * run("Invert Values","minimum=0 maximum=255");
+ *
+ * this code changes the actual values and mirrors them around the centre between minimum
+ * and maximum. Values which exceed the minimum or maximum specified are being cut of at 
+ * the boundary. The GUI looks up the minimum and maximum value in an image and suggests 
+ * them as defaults.
+ *
+ * @author Lasse Wollatz
+ * 
+ **/
 
 public class Invert_Values implements ExtendedPlugInFilter, DialogListener {
 	/** plugin's name */
@@ -26,7 +28,6 @@ public class Invert_Values implements ExtendedPlugInFilter, DialogListener {
 	/** plugin's current version */
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
-	
 	private boolean previewing = false;
     private FloatProcessor previewEdm;
     private double globMin = 0;
@@ -102,7 +103,7 @@ public class Invert_Values implements ExtendedPlugInFilter, DialogListener {
         	floatIP = previewEdm;
         } else {
         	floatIP = new FloatProcessor(width, height, (float[])ip.convertToFloat().getPixels());
-            if (floatIP==null) return;         //interrupted during preview?
+            //if (floatIP==null) return;         //interrupted during preview?
             previewEdm = floatIP;
         }
         //float[] fPixels = (float[])floatIP.getPixels();

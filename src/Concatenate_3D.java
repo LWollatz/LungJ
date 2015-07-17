@@ -4,15 +4,29 @@ import java.util.Properties;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
-import ij.gui.Roi;
-import ij.plugin.Duplicator;
 import ij.plugin.PlugIn;
-import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+/**
+ * Combines 3D blocks in a directory into a single image.
+ * run("3D Blocks - Concatenate", "input=[C:\\myblocks\\threshold]");
+ * 
+ * - Ensure that all the image-blocks are inside the directory and that the 
+ *   `properties.txt’ file is available.
+ * - Call Concatenate_3D and provide the full path to the directory.
+ * - The function will then load the blocks one after the other, stitch them together 
+ *   into one image and display the output.
+ * 
+ * @author Lasse Wollatz
+ * 
+ **/
 
 public class Concatenate_3D implements PlugIn{
-	
+	/** plugin's name */
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version */
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	private static String BC_inDirectory = LJPrefs.LJ_outDirectory;
 	private static int maxX = 1;
 	private static int maxY = 1;

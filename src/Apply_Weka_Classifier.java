@@ -5,25 +5,11 @@ import ij.WindowManager;
 import ij.plugin.*;
 import ij.plugin.frame.Recorder;
 import ij.gui.GenericDialog;
-import ij.gui.DialogListener;
-
 //import trainableSegmentation.*;
 //import weka.core.Utils;
-
-
-
-
-
-
-
-
-
-
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
-import java.util.*;
-
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -33,32 +19,47 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 
 
 /**
-* LungJ code for probability map creation
-* run("Apply Weka Classifier", "directory=[C:\\mydirectory\\images] filename=imgname.end class=[C:\\mydirectory\\classifiers] class=classifiername.model class=1");
-*
-* directory is a string specifying the directory of the input image
-* filename is a string specifying the filename of the input image
-* class_directory is a string specifying the directory of the classifier
-* class_filename is a string specifying the filename of the classifier
-* output image is true binary (0 or 1) but remains the same bit-depth as the input image
-* window-size and threshold are automatically adjusted and LUT set to grayscale
-* this means that the output map clearly shows foreground and background and is ideal for mathematical operations!
-*
-* Code by Lasse Wollatz, version 2015-05-01
-*/
+ * Applies a Weka classifier based on the filename of an image and the filename of a 
+ * classifier model. This implements the whole application process in a single function
+ * and does not require loading the original image into memory twice. This function is 
+ * likely to suffer from updates to the weka-segmentation plug-in but will hopefully be 
+ * directly implemented by the trainable segmentation in a future version.
+ * 
+ * - Pre-process the image of interest according to your needs. Samples must have the 
+ *   correct resolution (bit-size) and value range for the classifier you want to use. 
+ *   There is no need to apply a noise filter, as the Weka segmentation does this for 
+ *   you.
+ * - Select the location of the image you want to segment. It is not advised to load the 
+ *   image in ImageJ prior to calling this function, as that requires extra memory.
+ * - Select a classifier model from your files. LungJ offers some sample classifiers 
+ *   which currently have to be downloaded separately from the java plug in.
+ * - Choose the class you want to extract. Each classifier has at least 2 classes 
+ *   (foreground and background). Future versions are planned to allow the choice of 
+ *   several classes.
+ * - Press `OK’ and the Weka segmentation will be started, the image and the classifier 
+ *   loaded and eventually the classifier will be applied. This process can take a long 
+ *   time and the progressbar updates by the Trainable Weka Segmentation will sometimes 
+ *   suggest that it has finished, even-though it is still working. Apply_Weka_Classifier 
+ *   will close the Trainable Weka Segmentation window, once the segmentation has 
+ *   completed.
+ *
+ * @author Lasse Wollatz
+ * 
+ **/
 
 
 public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 	/** plugin's name */
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	public static final String VERSION = LJPrefs.VERSION;
-	
+	/** plugin's current version */
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	public static final String TWS_version = "v2.2.1"; //as this is included in the window name...
 	
 	private static String LJ_srcDirectory = LJPrefs.LJ_srcDirectory;
-	private static String LJ_srcFilename = "250x250x250x16bit.tif";
+	//private static String LJ_srcFilename = "250x250x250x16bit.tif";
 	private static String LJ_clsDirectory = LJPrefs.LJ_clsDirectory;
-	private static String LJ_clsFilename = "background.model";
+	//private static String LJ_clsFilename = "background.model";
 	private static int AC_channel = 1;
 	
 	JButton clsfilebtn;

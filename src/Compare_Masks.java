@@ -1,7 +1,3 @@
-
-
-
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -11,6 +7,21 @@ import ij.plugin.filter.Analyzer;
 import ij.process.ImageProcessor;
 import ij.measure.ResultsTable;
 
+/** 
+ * Compares two binary masks by combining them into a single colour-coded image. Agreed 
+ * foreground is white and agreed background black. Foreground detected as background is 
+ * blue and background detected as foreground red.
+ * 
+ * - As a preparation, make sure both masks are binary where the background is minimum 
+ *   and the foreground maximum.
+ * - One image should represent the correct masks, while the other one should represent 
+ *   the test-mask
+ * - Use Compare Masks providing the correct masks first and the test-mask second to 
+ *   combine the two and get a results table with the pixel statistics.
+ *   
+ * @author Lasse Wollatz
+ *   
+ **/
 
 public class Compare_Masks implements PlugIn {
 	

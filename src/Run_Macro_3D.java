@@ -5,15 +5,40 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
-import ij.gui.Roi;
-import ij.plugin.Duplicator;
 import ij.plugin.PlugIn;
-import ij.process.FloatProcessor;
-import ij.process.ImageProcessor;
 
+/**
+ * Runs a macro for each 3D block in a directory and saves the resulting image blocks to 
+ * a new directory.
+ * run("3D Blocks - Run Macro", "input=[C:\\myblocks\\original] output=[C:\\myblocks\\threshold] text1=[var dirin = 'C:\\\\myblocks\\\\original'; open(dirin+'\\\\'+filename); run('Apply Binary Threshold', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack'); run('8-bit'); ]");
+ * 
+ * - A directory with image blocks is required as created by Subdivide_3D or by a 
+ *   previous run of this function.
+ * - Provide an input and an output directory. Global image information will be read from
+ *   the input directory and resulting images will be saved into the output directory.
+ * - Provide a macro that will be run for each block. The macro will have the filename 
+ *   defined as a variable but the image will not be opened automatically, to safe 
+ *   memory. At the end of the macro the output image has to be the active image. It is 
+ *   advised not to have any other images open.
+ * - The function will run the macro for each block, adapting the variable defining the 
+ *   image filename for each run and write the active image to the output directory after
+ *   each run. It will create a new properties file with the global properties in the 
+ *   output directory.
+ * - If the macro fails, the process will be continued, but potential error messages have
+ *   to be confirmed by the user and can cause the function to pause. There is a report 
+ *   in the end, stating the number of files that failed if any and details can be found 
+ *   in the log.
+ * 
+ * @author Lasse Wollatz
+ * 
+ **/
 
 public class Run_Macro_3D implements PlugIn{
-	
+	/** plugin's name */
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version */
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	private static String BC_inDirectory = LJPrefs.LJ_inpDirectory;
 	private static String BC_outDirectory = LJPrefs.LJ_outDirectory;
 	//private static String code = "var dirin = " + BC_inDirectory + ";\n open(dirin+'\\'+filename);\n run('Create Threshold Mask', 'threshold=55 minimum='+globMin+' maximum='+globMax+' stack');";
@@ -32,20 +57,23 @@ public class Run_Macro_3D implements PlugIn{
 	
 	
 	public void run(String command){
-		//sample Apply Classifier
+		//TODO: fix macro recorder to record escape characters correctly over three levels
+		/**sample Apply Classifier**/
+		//code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n";
+		//code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=["+LJPrefs.LJ_clsDirectory.replace("\\", "\\\\")+"\\\\vessels.model] class=[2]');\n";
+		/**sample Threshold**/
+		//code += "run('Apply Binary Threshold', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack');\n";
+		/**sample Colorize**/
+		//code += "run('Colorize ',' image=['+filename+'] color1=[#000000]');\n";
+		/**sample full run**/
 		code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n";
-		code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=[J:\\\\Biomedical Imaging Unit\\\\Research\\\\Research Temporary\\\\3D IfLS Lung Project\\\\temp\\\\20150324_IfLS_Segmentation\\\\run02\\\\vessels.model] class=[2]');\n";
+		code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=["+LJPrefs.LJ_clsDirectory.replace("\\", "\\\\")+"\\\\vessels.model] class=[2]');\n";
 		code += "run('Apply Binary Threshold', 'threshold=30 minimum=0 maximum=1 stack');\n";
 		code += "rename('mask');\n";
 		code += "open(dirin+'\\\\'+filename);\n";
 		code += "run('Apply Mask', 'image='+filename+' mask=mask');";
 		code += "close(filename);\n";
 		code += "close('mask');\n";
-		
-		//sample Threshold
-		//code += "run('Apply Binary Threshold', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack');\n";
-		//sample Colorize
-		//code += "run('Colorize ',' image=['+filename+'] color1=[#000000]');\n";
 		
 		GenericDialog gd = new GenericDialog(command+" Run macro on 3D blocks");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
@@ -81,7 +109,7 @@ public class Run_Macro_3D implements PlugIn{
 		globMinIn = (float)LJPrefs.getPref(prefs, "minVal", globMinIn);
 		globMaxIn = (float)LJPrefs.getPref(prefs, "maxVal", globMaxIn);
 		
-		ImagePlus imgin = null;
+		//ImagePlus imgin = null;
 		ImagePlus imgout = null;
 		float globMax = -Float.MAX_VALUE;
 		float globMin = Float.MAX_VALUE;
@@ -123,7 +151,7 @@ public class Run_Macro_3D implements PlugIn{
 						IJ.log("processed "+filein);
 						imgout.close();
 					}
-					imgin = null;
+					//imgin = null;
 					imgout = null;
 				}
 			}
