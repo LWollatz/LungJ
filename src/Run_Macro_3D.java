@@ -58,6 +58,7 @@ public class Run_Macro_3D implements PlugIn{
 	
 	public void run(String command){
 		//TODO: fix macro recorder to record escape characters correctly over three levels
+		
 		/**sample Apply Classifier**/
 		//code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n";
 		//code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=["+LJPrefs.LJ_clsDirectory.replace("\\", "\\\\")+"\\\\vessels.model] class=[2]');\n";

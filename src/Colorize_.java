@@ -5,10 +5,12 @@ import ij.WindowManager;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
+
 import java.awt.Color;
 
 /** 
  * Combines a set of segmented images into a colour image.
+ * run("Colour by Segment"," image=[sample.tif] color1=[#000000] color2=[#FFFFFF] color3=[#009999] color4=[#FF6666]");
  * 
  * - The original image should be a hyperstack with each feature segmentation appearing 
  *   in a separate frame.
@@ -27,7 +29,7 @@ public class Colorize_ implements PlugIn{
 	/** plugin's current version */
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
-	static Color[] LJColors = new Color[5];
+	static Color[] LJColors = LJPrefs.LJ_Colors;
 	
 	public void run(String command){
 		if (IJ.versionLessThan("1.49s")) {       // generates an error message for older versions
@@ -40,7 +42,6 @@ public class Colorize_ implements PlugIn{
 		
 		String arguments = "";
 		if (IJ.isMacro() && Macro.getOptions() != null && !Macro.getOptions().trim().isEmpty()) { 
-			System.out.println("hello\n");
 			arguments = Macro.getOptions().trim();
 			System.out.println(arguments);
 			IJ.log(arguments);
@@ -48,7 +49,7 @@ public class Colorize_ implements PlugIn{
 		//Thread initThread = Thread.currentThread();
 		
 		//TODO: have a look at the macro recording again and see what is used and what isn't
-		String options = "";
+		//String options = "";
 		
 		ImagePlus image;
 		if (WindowManager.getImageCount() <= 0){
@@ -65,7 +66,7 @@ public class Colorize_ implements PlugIn{
 			//get active image:
 			image = WindowManager.getCurrentImage();
 		}
-		options += " image="+image.getTitle();
+		//options += " image="+image.getTitle();
 		
 		//int tChannels = image.getNChannels();
 		
@@ -88,10 +89,13 @@ public class Colorize_ implements PlugIn{
 			}else if(userColor[f-1] == null){
 				userColor[f-1] = Set_Up.getColor("Choose color for "+label+" ( frame "+f+")",LJColors[4]);
 			}
-			options += " color"+f+"="+userColor[f-1];
+			//options += " color"+f+"="+userColor[f-1];
 			keys[f] = "color"+f;
 			values[f] = ""+Tools.c2hex(userColor[f-1]);
 		}
+		
+		LJPrefs.LJ_Colors = LJColors;
+		LJPrefs.savePreferences();
 		
 		keys[0] = "image";
 		values[0] = image.getTitle();
@@ -132,7 +136,7 @@ public class Colorize_ implements PlugIn{
 		imgout.show();
 		
 		//Macro.setOptions(initThread, options);
-		LJPrefs.recordRun("Colorize ", keys, values);
+		LJPrefs.recordRun("Colour by Segment ", keys, values);
 		
 		IJ.showStatus("Image Colorized.");
 	}

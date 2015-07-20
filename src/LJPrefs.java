@@ -43,28 +43,14 @@ import ij.plugin.frame.Recorder;
 
 import java.awt.Color;
 import java.awt.Font;
-/*
-public class Global{
-    private String LJ_srcFilename = "250x250x250x16bit.tif";
-    private String LJ_srcDirectory = "J:\\Biomedical Imaging Unit\\Research\\Research temporary\3D IfLS Lung Project\\temp\20150324_IfLS_Segmentation\\tests\\";
 
-    public String getSrcFilename(){
-        return this.LJ_srcFilename;
-    }
-    
-    public String getSrcDirectory(){
-        return this.LJ_srcDirectory;
-    }
 
-    //If you do not want to change the var ever then do not include this
-    public void setSrcFilename(String srcFilename){
-        this.LJ_srcFilename = srcFilename;
-    }
-}
-*/
 public class LJPrefs{
+	//TODO: clean this mess up!
+	//TODO: remove unneeded tracking data
+	//TODO: add path to relevant ImageJ files and then remove commented code
 	public static final String PLUGIN_NAME = "LungJ";
-	public static final String VERSION = "0.2.2b";
+	public static final String VERSION = "0.2.3 beta";
 	/** file.separator system property */
 	public static String separator = System.getProperty("file.separator");
 	public static String LJ_dir =  System.getProperty("user.dir") + separator + "plugins" + separator + "LungJ";//getDirectory("imagej") + "/plugins/LungJ";
@@ -80,27 +66,37 @@ public class LJPrefs{
 	public static String LJ_segFilename = "";
 	public static String LJ_inpDirectory = Prefs.get("LJ.INPUT_DIR", LJ_dir);
 	public static String LJ_outDirectory = Prefs.get("LJ.OUTPUT_DIR", LJ_dir);
+	/*
 	public static int LJ_srcID = 1;
 	public static int LJ_prbID = 1;
 	public static int LJ_mapID = 1;
 	public static int LJ_segID = 1;
+	*/
+	
 	
 	public static String LJ_segname1 = Prefs.get("LJ.SEGNAME1", "Tissue");
 	public static String LJ_segname2 = Prefs.get("LJ.SEGNAME2", "Fibre");
 	public static String LJ_segname3 = Prefs.get("LJ.SEGNAME3", "Vessels");
 	public static String LJ_segname4 = Prefs.get("LJ.SEGNAME4", "Airways");
 	public static String LJ_segname5 = Prefs.get("LJ.SEGNAME5", "Bloodvessels");
+	
+	
 	public static Color  LJ_bgColor =  getPref("LJ.BGCOLOR", new Color(0, 0, 0));     		//background
 	public static Color  LJ_Color1 =   getPref("LJ.COLOR1", new Color(255, 255, 255));		//Tissue
 	public static Color  LJ_Color2 =   getPref("LJ.COLOR2", new Color(0, 153, 153));  		//Fibre
 	public static Color  LJ_Color3 =   getPref("LJ.COLOR3", new Color(255, 102, 102));		//Vessels
 	public static Color  LJ_Color4 =   getPref("LJ.COLOR4", new Color(0, 0, 204));    		//Airways
 	public static Color  LJ_Color5 =   getPref("LJ.COLOR5", new Color(204, 0, 0));    		//Bloodvessels
+	public static Color[] LJ_Colors = {LJ_bgColor, LJ_Color1, LJ_Color2, LJ_Color3, LJ_Color4};
+	//public static Color[] LJColors = new Color[5];
+	
+	/*
 	public static double LJ_th1 =      Prefs.get("LJ.THRESHOLD1", 0.8);                  	//Tissue
 	public static double LJ_th2 =      Prefs.get("LJ.THRESHOLD2",0.5);   					//Fibre
 	public static double LJ_th3 = 	   Prefs.get("LJ.THRESHOLD3",0.3); 	 					//Vessels
 	public static double LJ_th4 = 	   Prefs.get("LJ.THRESHOLD4",0.3);   				  	//Airways
 	public static double LJ_th5 = 	   Prefs.get("LJ.THRESHOLD5",0.3);   				  	//Bloodvessels
+	*/
 	
 	public static int LJ_win_Top = 20;
 	public static int LJ_win_Left = 20;
@@ -109,10 +105,12 @@ public class LJPrefs{
 	public static int LJ_win_Spacing = 60;
 	public static double LJ_Threshold = 0.2;
 	
+	/*
 	public static boolean LJ_opt_Autosave = Prefs.get("LJOPTAUTOSAVE",true);
 	public static boolean LJ_opt_MakeSegment = true;
 	public static boolean LJ_opt_MakeVideo = false;
 	public static boolean LJ_opt_UseDefaultBin = false;
+	*/
 	
 	//public static String[] LJ_classifiers = {"None"};
 	public static List<String> LJ_classifiers = new ArrayList<String>();
@@ -129,7 +127,7 @@ public class LJPrefs{
 		Prefs.set("LJ.CLASSIFIER_DIR", LJ_clsDirectory);
 		Prefs.set("LJ.INPUT_DIR", LJ_inpDirectory);
 		Prefs.set("LJ.OUTPUT_DIR", LJ_outDirectory);
-		Prefs.set("LJ.SEGNAME1", LJ_segname1);
+		/*Prefs.set("LJ.SEGNAME1", LJ_segname1);
 		Prefs.set("LJ.SEGNAME2", LJ_segname2);
 		Prefs.set("LJ.SEGNAME3", LJ_segname3);
 		Prefs.set("LJ.SEGNAME4", LJ_segname4);
@@ -138,12 +136,12 @@ public class LJPrefs{
 		Prefs.set("LJ.THRESHOLD2", LJ_th2);
 		Prefs.set("LJ.THRESHOLD3", LJ_th3);
 		Prefs.set("LJ.THRESHOLD4", LJ_th4);
-		Prefs.set("LJ.THRESHOLD5", LJ_th5);
-		Prefs.set("LJ.BGCOLOR", Tools.c2hex(LJ_bgColor));
-		Prefs.set("LJ.COLOR1", Tools.c2hex(LJ_Color1));
-		Prefs.set("LJ.COLOR2", Tools.c2hex(LJ_Color2));
-		Prefs.set("LJ.COLOR3", Tools.c2hex(LJ_Color3));
-		Prefs.set("LJ.COLOR4", Tools.c2hex(LJ_Color4));
+		Prefs.set("LJ.THRESHOLD5", LJ_th5);*/
+		Prefs.set("LJ.BGCOLOR", Tools.c2hex(LJ_Colors[0]));
+		Prefs.set("LJ.COLOR1", Tools.c2hex(LJ_Colors[1]));
+		Prefs.set("LJ.COLOR2", Tools.c2hex(LJ_Colors[2]));
+		Prefs.set("LJ.COLOR3", Tools.c2hex(LJ_Colors[3]));
+		Prefs.set("LJ.COLOR4", Tools.c2hex(LJ_Colors[4]));
 		Prefs.set("LJ.COLOR5", Tools.c2hex(LJ_Color5));
 		Prefs.savePreferences();
 	}
@@ -576,7 +574,6 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 		 * - float[2] with float[0] = minimum pixel value
 		 *                 float[1] = maximum pixel value
 		 */
-		int index=0, z=0;
 		float max = -Float.MAX_VALUE;
 		float min = Float.MAX_VALUE;
 		ImageStack stack = imp.getStack();
