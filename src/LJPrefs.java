@@ -105,13 +105,7 @@ public class LJPrefs{
 	public static int LJ_win_Spacing = 60;
 	public static double LJ_Threshold = 0.2;
 	
-	/*
-	public static boolean LJ_opt_Autosave = Prefs.get("LJOPTAUTOSAVE",true);
-	public static boolean LJ_opt_MakeSegment = true;
-	public static boolean LJ_opt_MakeVideo = false;
-	public static boolean LJ_opt_UseDefaultBin = false;
-	*/
-	
+		
 	//public static String[] LJ_classifiers = {"None"};
 	public static List<String> LJ_classifiers = new ArrayList<String>();
 	
@@ -581,15 +575,47 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 		int height = imp.getHeight();
 		int n = width*height;
 		int images = imp.getStackSize();
-		for (int img=1; img<=images; img++) {
-			ImageProcessor ip = stack.getProcessor(img);
-			for (int i=0; i<n; i++) {
-				float v = ip.getf(i);
-				if (v>max) {
-					max = v; 
+		if(imp.getBitDepth() == 24){
+			/*RGB case*/
+			for (int img=1; img<=images; img++) {
+				ImageProcessor ip = stack.getProcessor(img);
+				for (int y=0; y<height; y++){
+		    		for (int x=0, p=x+y*width; x<width; x++,p++){
+		    			int[] pixel = new int[3];
+		    			ip.getPixel(x, y,pixel);
+		    			//float v = ip.getf(i);
+		    			if (pixel[0]>max) {
+		    				max = pixel[0]; 
+		    			}
+		    			if (pixel[1]>max) {
+		    				max = pixel[1]; 
+		    			}
+		    			if (pixel[2]>max) {
+		    				max = pixel[2]; 
+		    			}
+		    			if (pixel[0]<min) {
+		    				min = pixel[0];
+		    			}
+		    			if (pixel[1]<min) {
+		    				min = pixel[1];
+		    			}
+		    			if (pixel[2]<min) {
+		    				min = pixel[2];
+		    			}
+		    		}
 				}
-				if (v<min) {
-					min = v;
+			}
+		}else{
+			for (int img=1; img<=images; img++) {
+				ImageProcessor ip = stack.getProcessor(img);
+				for (int i=0; i<n; i++) {
+					float v = ip.getf(i);
+					if (v>max) {
+						max = v; 
+					}
+					if (v<min) {
+						min = v;
+					}
 				}
 			}
 		}

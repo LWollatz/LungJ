@@ -59,7 +59,7 @@ public class Compare_Masks implements PlugIn {
 			return;
 		}
 		
-		GenericDialog gd = new GenericDialog(command+" Apply Mask");
+		GenericDialog gd = new GenericDialog(command+" Compare Mask");
 		gd.addChoice("Actual Mask", lstMasks, lstMasks[0]);
 		gd.addChoice("Detected Mask", lstMasks, lstMasks[0]);
 		gd.showDialog();

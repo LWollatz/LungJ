@@ -19,9 +19,9 @@ import ij.plugin.PlugIn;
  **/
 
 public class Label_Hyperstack implements PlugIn{
-	//TODO: handle case of too many frames (e.g. for more than 10 just allow to include frame number with prefix like t=1 etc.)
 	//TODO: allow to offset slice number
 	//TODO: future work: detect patterns in current image labeling to pre-fill textboxes, or just store user preferences
+	//TODO:              handle case of too many frames more elegant 
 	
 	public void run(String command){
 		IJ.showStatus("Labeling Hyperstack");
@@ -36,11 +36,17 @@ public class Label_Hyperstack implements PlugIn{
 		String[] FrameNames = new String[tFrames];
 		String seperator = " - ";
 		boolean doSliceN = true;
+		boolean doFrameN = true;
 		
 		GenericDialog gd = new GenericDialog(command+" Relabel Image Slices");
 		gd.addMessage("Frame Labels:");
-		for (int f=1; f<=tFrames; f++){
-			gd.addStringField("Frame-"+f, "", 40);
+		if (tFrames <= 10){
+			for (int f=1; f<=tFrames; f++){
+				gd.addStringField("Frame-"+f, "", 40);
+			}
+		}else{
+			gd.addCheckbox("frame number included", doFrameN);
+			gd.addStringField("Framelabel", "t = ", 40);
 		}
 		gd.addMessage("Channel Labels:");
 		for (int c=1; c<=tChannels; c++){
@@ -48,7 +54,7 @@ public class Label_Hyperstack implements PlugIn{
 		}
 		gd.addMessage("Settings:");
 		gd.addStringField("Seperator", seperator, 5);
-		gd.addCheckbox("include Slice Number", doSliceN);
+		gd.addCheckbox("slice number included", doSliceN);
 		IJ.showStatus("Waiting for User Input...");
 		gd.showDialog();
 		if (gd.wasCanceled()){
@@ -57,8 +63,13 @@ public class Label_Hyperstack implements PlugIn{
         }
 		IJ.showStatus("Labeling Hyperstack");
 		
-		for (int f=0; f<tFrames; f++){
-			FrameNames[f] = gd.getNextString();
+		if (tFrames <= 10){
+			for (int f=0; f<tFrames; f++){
+				FrameNames[f] = gd.getNextString();
+			}
+		}else{
+			doFrameN = gd.getNextBoolean();
+			FrameNames[0] = gd.getNextString();
 		}
 		for (int c=0; c<tChannels; c++){
 			ChannelNames[c] = gd.getNextString();
@@ -71,11 +82,20 @@ public class Label_Hyperstack implements PlugIn{
 				for (int s=1; s<=tSlices; s++){
 					int index = image.getStackIndex(c, s, f);
 					String label = "";
+					if (tFrames <= 10){
 					if (!FrameNames[f-1].equals("")){
 						if (!label.equals("")){
 							label += seperator;
 						}
 						label += FrameNames[f-1];
+					}
+					}else{
+						if (doFrameN){
+							if (!label.equals("")){
+								label += seperator;
+							}
+							label += FrameNames[0] + f;
+						}
 					}
 					if (!ChannelNames[c-1].equals("")){
 						if (!label.equals("")){
