@@ -43,7 +43,7 @@ public class Help implements PlugIn {
 						+ "</h1>"
 						+ "<p>LungJ is an ImageJ plugin designed for (but not limited to) micro-CT lung tissue image analysis.</p>"
 						+ "<p>If you have problems running LungJ, make sure your ImageJ uses Java 1.8.</p>"
-						+ "<p>User and developer documentation can be found at <a href=https://bitbucket.org/lwollatz/lungj/wiki/Home</a></p>"
+						+ "<p>User and developer documentation can be found at our <a href=https://bitbucket.org/lwollatz/lungj/wiki/Home>Wiki</a></p>"
 						+ "<h2>Installation Requirements</h2>"
 						+ "<ul>"
 						+ "<li>Windows 7 - 64bit recommended (not yet tested for other platforms)</li>"
