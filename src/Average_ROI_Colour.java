@@ -38,12 +38,14 @@ import ij.process.ImageProcessor;
  **/
 
 
-public class Average_Color implements PlugIn{
+public class Average_ROI_Colour implements PlugIn{
 	/** plugin's name */
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
 	/** plugin's current version */
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	
+	public static double plotYmax = 0;
 	
 	
 	public void run(String arg) {
@@ -245,11 +247,12 @@ public class Average_Color implements PlugIn{
 		    
 			
 			/**output to Histogram**/
+			plotYmax = 0;
 			ImagePlus img = WindowManager.getCurrentImage();
 			float[] minmax = LJPrefs.getMinMax(img);
 			float max = minmax[1];
 			float min = minmax[0];
-			IJ.log(String.valueOf(min) + "<" + String.valueOf(max));
+			//IJ.log(String.valueOf(min) + "<" + String.valueOf(max));
 			
 			Plot hist = plotHistogram(img, min, max);
 			PlotWindow window = hist.show();
@@ -259,7 +262,26 @@ public class Average_Color implements PlugIn{
 			double[] tmean = {mean[1],mean[2],mean[3]};
 			Plot gauss = plotGauss(hist, tmean, std, Nvox, min, max);
 			
-			window.drawPlot(gauss);
+			/*add square with average colour*/
+			ImagePlus ansimg = gauss.getImagePlus();
+			ImageProcessor ansplot = ansimg.getProcessor();
+			double width = ansplot.getWidth();
+			double height = ansplot.getHeight();
+			int avColor = (int)mean[1];
+			avColor = (int)(avColor*255/max);
+			avColor = ((avColor & 0xff)<<16)+((avColor & 0xff)<<8) + (avColor & 0xff);
+			if(mean[2] != 0){
+				avColor = (((int)mean[1] & 0xff)<<16)+(((int)mean[2] & 0xff)<<8) + ((int)mean[3] & 0xff);
+			}
+			for (int i=(int)(width*0.9); i < width; i++){
+				for (int j=0; j < (int)(width*0.1); j++){
+					ansplot.set(i, j, avColor);
+				}
+			}
+			
+			ansimg.show();
+			
+			//window.drawPlot(gauss);
 
 			
 			
@@ -285,7 +307,7 @@ public class Average_Color implements PlugIn{
 			Xs[i] = i*(max-min)/255+min;
 		}
 		
-		Plot plot = new Plot("Histogram", "pixel value", "labels on the y-axis");
+		Plot plot = new Plot("Histogram", "pixel value", "pixel count");
 		plot.setLimits(min, max, 0, n);
 		if(imp.getBitDepth() == 24){
 			for (int img=1; img<=images; img++) {
@@ -302,7 +324,15 @@ public class Average_Color implements PlugIn{
 		    			Ys[box[0]] += 1;
 		    			YsG[box[1]] += 1;
 		    			YsB[box[2]] += 1;
-		    			
+		    			if (Ys[box[0]] > plotYmax){
+							plotYmax = Ys[box[0]];
+						}
+		    			if (YsG[box[1]] > plotYmax){
+							plotYmax = YsG[box[1]];
+						}
+		    			if (YsB[box[2]] > plotYmax){
+							plotYmax = YsB[box[2]];
+						}
 		    		}
 				}
 			}
@@ -322,6 +352,9 @@ public class Average_Color implements PlugIn{
 					float v = ip.getf(i);
 					int box = Math.round((v-min)*255/(max-min));
 					Ys[box] += 1;
+					if (Ys[box] > plotYmax){
+						plotYmax = Ys[box];
+					}
 					//Xs[box] = box*(max-min)/255+min; //preassign automatically at start?
 				}
 			}
@@ -354,15 +387,15 @@ public class Average_Color implements PlugIn{
 		float D2 = (float)(2*Math.pow(std[1],2));
 		float F3 = (float)(1/(std[2]*Math.sqrt(2*Math.PI)));
 		float D3 = (float)(2*Math.pow(std[2],2));
-		IJ.log(String.valueOf(n));
+		//IJ.log(String.valueOf(n));
 		float x = min;
 		
 		if(mean[2] != 0){
 			for (int i = 0; i < 256; i++){
 				Xs[i] = x;
-				Ys[i] = (float)(0.7*step*n*F1*Math.exp(-1*Math.pow(x-mean[0],2)/D1));
-				YsG[i] = (float)(0.7*step*n*F2*Math.exp(-1*Math.pow(x-mean[1],2)/D2));
-				YsB[i] = (float)(0.7*step*n*F3*Math.exp(-1*Math.pow(x-mean[2],2)/D3));
+				Ys[i] = (float)(0.66*step*n*F1*Math.exp(-1*Math.pow(x-mean[0],2)/D1));
+				YsG[i] = (float)(0.66*step*n*F2*Math.exp(-1*Math.pow(x-mean[1],2)/D2));
+				YsB[i] = (float)(0.66*step*n*F3*Math.exp(-1*Math.pow(x-mean[2],2)/D3));
 				if (Ys[i] > yMax){
 					yMax = Ys[i];
 				}
@@ -392,25 +425,29 @@ public class Average_Color implements PlugIn{
 		}else{
 			for (int i = 0; i < 256; i++){
 				Xs[i] = x;
-				Ys[i] = (float)(0.7*step*n*F1*Math.exp(-1*Math.pow(x-mean[0],2)/D1));
+				Ys[i] = (float)(0.66*step*n*F1*Math.exp(-1*Math.pow(x-mean[0],2)/D1));
 				if (Ys[i] > yMax){
 					yMax = Ys[i];
 				}
 				x += step;
 			}
-			plot.setColor(Color.DARK_GRAY);
+			plot.setColor(Color.BLACK);
 			//if (plot == null){
 			//	plot = new Plot("Gaussian", "pixel value", "occurence", Xs, Ys);
 			//}else{
 				plot.addPoints(Xs, Ys, Plot.DOT);
 			//}
+		    float[] mR = {(float)mean[0]};
+			float[] yR = {(float)yMax};
+			plot.addPoints(mR, yR, Plot.TRIANGLE);
 		}
 		
-		yMax = Math.max(yMax,  yMaxG);
-		yMax = Math.max(yMax,  yMaxB);
-		yMax = Math.max(yMax,  (float)(n/3));
+		plotYmax = Math.max(plotYmax,  yMax);
+		plotYmax = Math.max(plotYmax,  yMaxG);
+		plotYmax = Math.max(plotYmax,  yMaxB);
+		//yMax = Math.max(yMax,  (float)(n/3));
 		
-		plot.setLimits(min, max, 0, yMax);
+		plot.setLimits(min, max, 0, plotYmax);
 		plot.draw();
 		return plot;
 	}
