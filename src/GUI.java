@@ -313,7 +313,7 @@ public class GUI extends JFrame {
 		pnlcol1.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				LJPrefs.LJ_Color1 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color1);
+				LJPrefs.LJ_Color1 = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Color1);
 				pnlcol1.setBackground(LJPrefs.LJ_Color1);
 			}
 		});
@@ -422,7 +422,7 @@ public class GUI extends JFrame {
 		pnlcol2.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
-				LJPrefs.LJ_Color2 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color2);
+				LJPrefs.LJ_Color2 = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Color2);
 				pnlcol2.setBackground(LJPrefs.LJ_Color2);
 			}
 		});
@@ -529,7 +529,7 @@ public class GUI extends JFrame {
 		pnlcol3.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				LJPrefs.LJ_Color3 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color3);
+				LJPrefs.LJ_Color3 = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Color3);
 				pnlcol3.setBackground(LJPrefs.LJ_Color3);
 			}
 		});
@@ -637,7 +637,7 @@ public class GUI extends JFrame {
 		pnlcol4.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				LJPrefs.LJ_Color4 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color4);
+				LJPrefs.LJ_Color4 = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Color4);
 				pnlcol4.setBackground(LJPrefs.LJ_Color4);
 			}
 		});
@@ -745,7 +745,7 @@ public class GUI extends JFrame {
 		pnlcol5.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseReleased(MouseEvent e) {
-				LJPrefs.LJ_Color5 = Set_Up.getColor("Choose Color", LJPrefs.LJ_Color5);
+				LJPrefs.LJ_Color5 = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Color5);
 				pnlcol5.setBackground(LJPrefs.LJ_Color5);
 			}
 		});
@@ -842,7 +842,7 @@ public class GUI extends JFrame {
 			@Override
 			public void mouseReleased(MouseEvent arg0) {
 				//open file dialog...
-				LJPrefs.LJ_clsDirectory = Set_Up.getClassifier();
+				LJPrefs.LJ_clsDirectory = LJPrefs.getClassifier();
 				lblClsDirectory.setText(LJPrefs.LJ_clsDirectory);
 				String[] classifiers = new String[LJPrefs.LJ_classifiers.size()];
 				classifiers = LJPrefs.LJ_classifiers.toArray(classifiers);

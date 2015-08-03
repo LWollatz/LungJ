@@ -67,14 +67,30 @@ public class Run_Macro_3D implements PlugIn{
 		/**sample Colorize**/
 		//code += "run('Colorize ',' image=['+filename+'] color1=[#000000]');\n";
 		/**sample full run**/
-		code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n";
-		code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=["+LJPrefs.LJ_clsDirectory.replace("\\", "\\\\")+"\\\\vessels.model] class=[2]');\n";
-		code += "run('Apply Binary Threshold', 'threshold=30 minimum=0 maximum=1 stack');\n";
-		code += "rename('mask');\n";
-		code += "open(dirin+'\\\\'+filename);\n";
-		code += "run('Apply Mask', 'image='+filename+' mask=mask');";
-		code += "close(filename);\n";
-		code += "close('mask');\n";
+		//code = "var dirin = '" + BC_inDirectory.replace("\\", "\\\\") + "';\n";
+		//code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=["+LJPrefs.LJ_clsDirectory.replace("\\", "\\\\")+"\\\\vessels.model] class=[2]');\n";
+		//code += "run('Apply Binary Threshold', 'threshold=30 minimum=0 maximum=1 stack');\n";
+		//code += "rename('mask');\n";
+		//code += "open(dirin+'\\\\'+filename);\n";
+		//code += "run('Apply Mask', 'image='+filename+' mask=mask');";
+		//code += "close(filename);\n";
+		//code += "close('mask');\n";
+		/**sample generation from settings**/
+		code = "var dirin = '"+BC_inDirectory.replace("\\","\\\\")+"';\n";
+    	if (LJPrefs.LJ_makeMap){
+    		code += "var dircls = '"+LJPrefs.LJ_clsDirectory.replace("\\","\\\\")+"';\n";
+    		code += "run('Apply Weka Classifier',' filepath=['+dirin+'\\\\'+filename+'] classifier=['+dircls+'] class=[2]');\n";
+    	}
+    	if (LJPrefs.LJ_makeMask){
+    		if(!LJPrefs.LJ_makeMap){
+    			code += "open(dirin+'\\\\'+filename);\n";
+    			code += "run('Apply Binary Threshold', 'threshold="+(LJPrefs.LJ_threshold*100)+"  minimum='+globMin+' maximum='+globMax+' stack');\n";
+    		}else{
+    			code += "run('Apply Binary Threshold', 'threshold="+(LJPrefs.LJ_threshold*100)+"  minimum=0 maximum=1 stack');\n";
+    		}
+    		code += "run('8-bit');\n";
+    		code += "run('Multiply...', 'value=255 stack');\n";
+    	}
 		
 		GenericDialog gd = new GenericDialog(command+" Run macro on 3D blocks");
 		gd.addStringField("Input directory", BC_inDirectory, 100);

@@ -36,7 +36,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	
-	private static double LJ_threshold = 0.5;           // where to cut off
+	private static double LJ_threshold = LJPrefs.LJ_threshold;           // where to cut off
 	private boolean previewing = false;
     private FloatProcessor previewEdm;
     private double globMin = 0;
@@ -124,7 +124,7 @@ public class Create_Threshold_Mask implements ExtendedPlugInFilter, DialogListen
         // The dialog
         GenericDialog gd = new GenericDialog(command+"...");
         //gd.addNumericField("Threshold", LJ_threshold, 3);
-        gd.addSlider("Threshold (in %)", 0.00, 100.00, LJ_threshold);
+        gd.addSlider("Threshold (in %)", 0.00, 100.00, LJ_threshold*100);
         gd.addNumericField("minimum Value", globMin, 4);
         gd.addNumericField("maximum Value", globMax, 4);
         gd.addPreviewCheckbox(pfr);             // passing pfr makes the filter ready for preview

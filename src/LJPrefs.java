@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 
+import javax.swing.JColorChooser;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -73,6 +74,10 @@ public class LJPrefs{
 	public static int LJ_segID = 1;
 	*/
 	
+	public static boolean LJ_makeMap = Prefs.get("LJ.MAKEMAP", true);
+	public static boolean LJ_makeMask = Prefs.get("LJ.MAKEMASK", true);
+	public static double LJ_threshold = Prefs.get("LJ.THRESHOLD", 0.67);
+	
 	
 	public static String LJ_segname1 = Prefs.get("LJ.SEGNAME1", "Tissue");
 	public static String LJ_segname2 = Prefs.get("LJ.SEGNAME2", "Fibre");
@@ -103,7 +108,7 @@ public class LJPrefs{
 	public static int LJ_win_Height = 20;
 	public static int LJ_win_Width = 20;
 	public static int LJ_win_Spacing = 60;
-	public static double LJ_Threshold = 0.2;
+	//public static double LJ_Threshold = 0.2;
 	
 		
 	//public static String[] LJ_classifiers = {"None"};
@@ -117,26 +122,25 @@ public class LJPrefs{
 
 /**** LungJ PREFERENCES ****/
 	
+	/**
+	 * saves all of LungJs preferences with ImageJs global preference saver
+	 */
 	public static void savePreferences() {
 		Prefs.set("LJ.CLASSIFIER_DIR", LJ_clsDirectory);
 		Prefs.set("LJ.INPUT_DIR", LJ_inpDirectory);
 		Prefs.set("LJ.OUTPUT_DIR", LJ_outDirectory);
-		/*Prefs.set("LJ.SEGNAME1", LJ_segname1);
-		Prefs.set("LJ.SEGNAME2", LJ_segname2);
-		Prefs.set("LJ.SEGNAME3", LJ_segname3);
-		Prefs.set("LJ.SEGNAME4", LJ_segname4);
-		Prefs.set("LJ.SEGNAME5", LJ_segname5);
-		Prefs.set("LJ.THRESHOLD1", LJ_th1);
-		Prefs.set("LJ.THRESHOLD2", LJ_th2);
-		Prefs.set("LJ.THRESHOLD3", LJ_th3);
-		Prefs.set("LJ.THRESHOLD4", LJ_th4);
-		Prefs.set("LJ.THRESHOLD5", LJ_th5);*/
+
 		Prefs.set("LJ.BGCOLOR", Tools.c2hex(LJ_Colors[0]));
 		Prefs.set("LJ.COLOR1", Tools.c2hex(LJ_Colors[1]));
 		Prefs.set("LJ.COLOR2", Tools.c2hex(LJ_Colors[2]));
 		Prefs.set("LJ.COLOR3", Tools.c2hex(LJ_Colors[3]));
 		Prefs.set("LJ.COLOR4", Tools.c2hex(LJ_Colors[4]));
 		Prefs.set("LJ.COLOR5", Tools.c2hex(LJ_Color5));
+		
+		Prefs.set("LJ.MAKEMAP", LJ_makeMap);
+		Prefs.set("LJ.MAKEMASK", LJ_makeMask);
+		Prefs.set("LJ.THRESHOLD", LJ_threshold);
+		
 		Prefs.savePreferences();
 	}
 	
@@ -435,7 +439,13 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	
 /**** MACRO RECORDING ****/
 	
-	
+	/**
+	 * tells ImageJs macro recorder to record a macro as
+	 * run('command', 'key0=value0 key1=value1, ...');
+	 * @param command  String representing the ImageJ command to run the plugin
+	 * @param keys     String array containing the keys
+	 * @param values   String array containing the values
+	 */
 	public static void recordRun(String command, String[] keys, String[] values){
 	 String macrostr = "run(\"" + command + "\",\"";
 	 for (int i=0; i<keys.length; i++){
@@ -449,9 +459,9 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	
 	/**
 	 * 
-	 * @param Options: String returned by Macro.getOptions() (with ij.Macro)
-	 * @param key:     String containing the key of the value needed
-	 * @param Default: Default String
+	 * @param Options String returned by Macro.getOptions() (with ij.Macro)
+	 * @param key     String containing the key of the value needed
+	 * @param Default Default String
 	 * @return String: - String specified by key in Options or
 	 *                 - String specified by Default if key is not found in Options or does not encode a color
 	 */
@@ -479,11 +489,11 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	
 	/**
 	 * 
-	 * @param Options: String returned by Macro.getOptions() (with ij.Macro)
-	 * @param key:     String containing the key of the value needed
-	 * @param Default: Default String
-	 * @return String: - String specified by key in Options or
-	 *                 - String specified by Default if key is not found in Options or does not encode a color
+	 * @param Options String returned by Macro.getOptions() (with ij.Macro)
+	 * @param key     String containing the key of the value needed
+	 * @param Default Default String
+	 * @return String - String specified by key in Options or
+	 *                - String specified by Default if key is not found in Options or does not encode a color
 	 */
 	public static String retrieveOption(String Options, String key, String Default){
 		int a = Options.indexOf(" "+key+"=");
@@ -500,11 +510,11 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	
 	/**
 	 * 
-	 * @param Options: String returned by Macro.getOptions() (with ij.Macro)
-	 * @param key:     String containing the key of the value needed
-	 * @param Default: Default Color
-	 * @return Color:  - colour specified by key in Options or
-	 *                 - colour specified by Default if key is not found in Options or does not encode a color
+	 * @param Options String returned by Macro.getOptions() (with ij.Macro)
+	 * @param key     String containing the key of the value needed
+	 * @param Default Default Color
+	 * @return Color  - colour specified by key in Options or
+	 *                - colour specified by Default if key is not found in Options or does not encode a color
 	 */
 	public static Color retrieveOption(String Options, String key, Color Default) {
 		int a = Options.indexOf(" "+key+"=");
@@ -535,8 +545,10 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 	 * read in all classifier files from the LJ_clsDirectory directory and stores them in LJ_classifiers.
 	 */
 	public static void loadClassifier(){
-		LJ_classifiers.add("--NONE--");
-		File folder = new File(LJ_clsDirectory);
+		LJ_classifiers.clear();
+		LJ_classifiers.add("...NONE...");
+		File file = new File(LJ_clsDirectory);
+		File folder = file.getParentFile();
 		File[] listOfFiles = folder.listFiles();
 		System.out.println("Directory: " + LJ_clsDirectory);
 		for (int i = 0; i < listOfFiles.length; i++) {
@@ -554,8 +566,37 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 /*** UTILITIES ***/
 	
 	/**
+	 * display color choose dialog with default color and returns selected color.
+	 * @param label Dialog Caption
+	 * @param defaultCol default colour to return
+	 * @return Color selected colour
+	 */
+	public static Color getColor(String label, Color defaultCol){
+		Color selColor = JColorChooser.showDialog(null, label, defaultCol);
+		System.out.println(selColor);
+		return selColor;
+	}
+	
+	
+	//TODO: is this function ever used apart from the GUI???
+	/**
+	 * display file chooser dialog to choose WEKA classifier...
+	 */
+	public static String getClassifier(){
+		FileFilter filter = new FileNameExtensionFilter("Weka Classifier", "model");
+		JFileChooser chooser = new JFileChooser(LJPrefs.LJ_clsDirectory);
+		chooser.addChoosableFileFilter(filter);
+		chooser.showDialog(null, "Select");
+		//String cls = chooser.getSelectedFile().getAbsolutePath();
+		String cls = chooser.getSelectedFile().getParent();
+		LJPrefs.LJ_clsDirectory = cls;
+		LJPrefs.loadClassifier();
+		return cls;
+	}
+	
+	/**
 	 * get minimum and maximum pixel value from a 3D image stack
-	 * @param imp: ImagePlus 3D Image
+	 * @param imp ImagePlus 3D Image
 	 * @return float[2]: [0] minimum pixel value
 	 *                   [1] maximum pixel value
 	 */

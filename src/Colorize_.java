@@ -84,10 +84,10 @@ public class Colorize_ implements PlugIn{
 				userColor[f-1] = LJPrefs.retrieveOption(arguments, "color"+f, userColor[f-1]);
 			}
             if (f< 5 && userColor[f-1] == null){
-				userColor[f-1] = Set_Up.getColor("Choose color for "+label+" ( frame "+f+")",LJColors[f-1]);
+				userColor[f-1] = LJPrefs.getColor("Choose color for "+label+" ( frame "+f+")",LJColors[f-1]);
 				LJColors[f-1] = userColor[f-1];
 			}else if(userColor[f-1] == null){
-				userColor[f-1] = Set_Up.getColor("Choose color for "+label+" ( frame "+f+")",LJColors[4]);
+				userColor[f-1] = LJPrefs.getColor("Choose color for "+label+" ( frame "+f+")",LJColors[4]);
 			}
 			//options += " color"+f+"="+userColor[f-1];
 			keys[f] = "color"+f;

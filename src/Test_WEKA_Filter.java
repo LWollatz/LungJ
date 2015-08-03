@@ -10,7 +10,8 @@ public class Test_WEKA_Filter implements PlugIn{
 	int membranesize = 20;
 	
 	public void run(String arg) {
-		// TODO Auto-generated method stub
+		//TODO: add GUI to request options
+		
 		String macro = "";
 		
 		macro += "var outdir = '\\\\\\\\soton.ac.uk\\\\ude\\\\PersonalFiles\\\\Users\\\\lw6g10\\\\mydocuments\\\\PhD\\\\LungJ\\\\wiki\\\\weka_lung_'; //name of directory and file-prefix to save results to\n";

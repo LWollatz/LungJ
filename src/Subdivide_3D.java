@@ -71,6 +71,7 @@ public class Subdivide_3D implements PlugIn, ActionListener{
     	minmax = LJPrefs.getMinMax(image);
 		globMin = (double)minmax[0];
     	globMax = (double)minmax[1];
+    	
 		
 		gd = new GenericDialog(command+" Subdivide image and save into directory");
 		Font gdFont = gd.getFont();
