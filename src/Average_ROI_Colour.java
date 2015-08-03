@@ -255,7 +255,7 @@ public class Average_ROI_Colour implements PlugIn{
 			//IJ.log(String.valueOf(min) + "<" + String.valueOf(max));
 			
 			Plot hist = plotHistogram(img, min, max);
-			PlotWindow window = hist.show();
+			//PlotWindow window = hist.show();
 			
 
 			int Nvox = img.getWidth()*img.getHeight()*img.getStackSize();
@@ -266,7 +266,7 @@ public class Average_ROI_Colour implements PlugIn{
 			ImagePlus ansimg = gauss.getImagePlus();
 			ImageProcessor ansplot = ansimg.getProcessor();
 			double width = ansplot.getWidth();
-			double height = ansplot.getHeight();
+			//double height = ansplot.getHeight();
 			int avColor = (int)mean[1];
 			avColor = (int)(avColor*255/max);
 			avColor = ((avColor & 0xff)<<16)+((avColor & 0xff)<<8) + (avColor & 0xff);
