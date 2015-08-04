@@ -3,8 +3,8 @@
 ### What is this repository for? ###
 
 * providing a Plug-In for Fiji / ImageJ for segmenting micro-CT scans of Lung Tissues
-* current version: 0.2.0
-* last stable version: ???
+* current version: 0.3.0
+* last stable version: 0.3
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### Requirements ###
@@ -20,13 +20,13 @@
 **Easy**
 
 * The main directory includes the latest build
-* copy the .jar file into the Fiji ./*plugins* directory
+* copy the .jar file into the Fiji ./*plugins*/*LungJ* directory
 * restart Fiji
 
 **Detailed**
 
 * download LungJ_.jar from the main directory
-* place LungJ_.jar file into the Fiji ./*plugins* directory of your Fiji installation
+* place LungJ_.jar file into the Fiji ./*plugins*/*LungJ* directory of your Fiji installation
 * if there are problems, try creating a subfolder so that the file is placed in *./plugins/LungJ_/LungJ_.jar*
 * restart Fiji
 * the new functions should be available under Plugins>LungJ>
