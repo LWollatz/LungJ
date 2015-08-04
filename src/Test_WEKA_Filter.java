@@ -1,4 +1,5 @@
 import ij.IJ;
+import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
 
@@ -12,158 +13,312 @@ public class Test_WEKA_Filter implements PlugIn{
 	public void run(String arg) {
 		//TODO: add GUI to request options
 		
+		GenericDialog gd = new GenericDialog("WEKA Test Settings...");
+		gd.addStringField("Output Directory", LJPrefs.LJ_srcDirectory, 100);
+		gd.addCheckbox("save images", true);
+		gd.addCheckbox("enhance contrast", true);
+		gd.addCheckbox("apply 6 shades", false);
+		String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians","Membrane projections","Variance","Mean","Minimum","Maximum","Median","Anisotropic diffusion","Bilateral","Lipschitz","Kuwahara","Gabor","Derivatives","Laplacian","Structure","Entropy","Neighbors"};
+		boolean[] defaultValues = {true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true};
+		//String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians"};
+		//boolean[] defaultValues = {true,true,true,true};
+		gd.addCheckboxGroup(10, 2, labels, defaultValues);
+		gd.showDialog();
+        if (gd.wasCanceled()){
+        	return;
+        }
+		
+        String outputdirectory = gd.getNextString().replace("\\", "\\\\");
+        doSave = gd.getNextBoolean();
+        doEnhance = gd.getNextBoolean();
+        doShades = gd.getNextBoolean();
+		
+        
+		
 		String macro = "";
 		
 		macro += "var outdir = '\\\\\\\\soton.ac.uk\\\\ude\\\\PersonalFiles\\\\Users\\\\lw6g10\\\\mydocuments\\\\PhD\\\\LungJ\\\\wiki\\\\weka_lung_'; //name of directory and file-prefix to save results to\n";
 		macro += "rename('original');\n\n";
 		
 		/**Gaussian**/
-		macro += "\n/****GAUSSIAN BLUR****/\n";
-		macro += GaussMacro(1);
-		macro += GaussMacro(2);
-	    macro += GaussMacro(4);
-		macro += GaussMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****GAUSSIAN BLUR****/\n";
+			macro += GaussMacro(1);
+			macro += GaussMacro(2);
+			macro += GaussMacro(4);
+			macro += GaussMacro(8);
+		}
+
 		/**Sobel**/
-		macro += "\n/****SOBEL****/\n";
-		macro += SobelMacro(1);
-		macro += SobelMacro(2);
-		macro += SobelMacro(4);
-		macro += SobelMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****SOBEL****/\n";
+			macro += SobelMacro(1);
+			macro += SobelMacro(2);
+			macro += SobelMacro(4);
+			macro += SobelMacro(8);
+		}
+
 		/**Hessian**/
-		macro += "\n/****HESSIAN****/\n";
-		macro += HesseMacro(1);
-		macro += HesseMacro(2);
-		macro += HesseMacro(4);
-		macro += HesseMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****HESSIAN****/\n";
+			macro += HesseMacro(1);
+			macro += HesseMacro(2);
+			macro += HesseMacro(4);
+			macro += HesseMacro(8);
+		}
+
 		/**Gaussian Difference**/
-		macro += "\n/****DIFFERENCE OF GAUSSIAN****/\n";
-		macro += GaussDifMacro(2, 1);
-		
-		macro += GaussDifMacro(4, 2);
-		macro += GaussDifMacro(4, 1);
-		
-		macro += GaussDifMacro(8, 1);
-		macro += GaussDifMacro(8, 2);
-		macro += GaussDifMacro(8, 4);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****DIFFERENCE OF GAUSSIAN****/\n";
+			macro += GaussDifMacro(2, 1);
+
+			macro += GaussDifMacro(4, 2);
+			macro += GaussDifMacro(4, 1);
+
+			macro += GaussDifMacro(8, 1);
+			macro += GaussDifMacro(8, 2);
+			macro += GaussDifMacro(8, 4);
+		}
+
 		//TODO: Membrane projections
-		
+		if(gd.getNextBoolean()){
+
+		}
+
 		/**Variance**/
-		macro += "\n/****VARIANCE****/\n";
-		macro += VarianceMacro(1);
-		macro += VarianceMacro(2);
-		macro += VarianceMacro(4);
-		macro += VarianceMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****VARIANCE****/\n";
+			macro += VarianceMacro(1);
+			macro += VarianceMacro(2);
+			macro += VarianceMacro(4);
+			macro += VarianceMacro(8);
+		}
+
 		/**Mean**/
-		macro += "\n/****MEAN****/\n";
-		macro += MeanMacro(1);
-		macro += MeanMacro(2);
-		macro += MeanMacro(4);
-		macro += MeanMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****MEAN****/\n";
+			macro += MeanMacro(1);
+			macro += MeanMacro(2);
+			macro += MeanMacro(4);
+			macro += MeanMacro(8);
+		}
+
 		/**Minimum**/
-		macro += "\n/****MINIMUM****/\n";
-		macro += MinimumMacro(1);
-		macro += MinimumMacro(2);
-		macro += MinimumMacro(4);
-		macro += MinimumMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****MINIMUM****/\n";
+			macro += MinimumMacro(1);
+			macro += MinimumMacro(2);
+			macro += MinimumMacro(4);
+			macro += MinimumMacro(8);
+		}
+
 		/**Maximum**/
-		macro += "\n/****MAXIMUM****/\n";
-		macro += MaximumMacro(1);
-		macro += MaximumMacro(2);
-		macro += MaximumMacro(4);
-		macro += MaximumMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****MAXIMUM****/\n";
+			macro += MaximumMacro(1);
+			macro += MaximumMacro(2);
+			macro += MaximumMacro(4);
+			macro += MaximumMacro(8);
+		}
+
 		/**Median**/
-		macro += "\n/****MEDIAN****/\n";
-		macro += MedianMacro(1);
-		macro += MedianMacro(2);
-		macro += MedianMacro(4);
-		macro += MedianMacro(8);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****MEDIAN****/\n";
+			macro += MedianMacro(1);
+			macro += MedianMacro(2);
+			macro += MedianMacro(4);
+			macro += MedianMacro(8);
+		}
+
 		/**Anisotropic Diffusion**/
-		macro += "\n/****ANISOTROPIC DIFFUSION****/\n";
-		macro += AnisotropicDiffusionMacro(20, 1, 0.1, 0.9, 20, membranesize);
-		macro += AnisotropicDiffusionMacro(20, 1, 0.35, 0.9, 20, membranesize);
-		
-		macro += AnisotropicDiffusionMacro(20, 2, 0.1, 0.9, 20, membranesize);
-		macro += AnisotropicDiffusionMacro(20, 2, 0.35, 0.9, 20, membranesize);
-		
-		macro += AnisotropicDiffusionMacro(20, 4, 0.1, 0.9, 20, membranesize);
-		macro += AnisotropicDiffusionMacro(20, 4, 0.35, 0.9, 20, membranesize);
-		
-		macro += AnisotropicDiffusionMacro(20, 8, 0.1, 0.9, 20, membranesize);
-		macro += AnisotropicDiffusionMacro(20, 8, 0.35, 0.9, 20, membranesize);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****ANISOTROPIC DIFFUSION****/\n";
+			macro += AnisotropicDiffusionMacro(20, 1, 0.1, 0.9, 20, membranesize);
+			macro += AnisotropicDiffusionMacro(20, 1, 0.35, 0.9, 20, membranesize);
+
+			macro += AnisotropicDiffusionMacro(20, 2, 0.1, 0.9, 20, membranesize);
+			macro += AnisotropicDiffusionMacro(20, 2, 0.35, 0.9, 20, membranesize);
+
+			macro += AnisotropicDiffusionMacro(20, 4, 0.1, 0.9, 20, membranesize);
+			macro += AnisotropicDiffusionMacro(20, 4, 0.35, 0.9, 20, membranesize);
+
+			macro += AnisotropicDiffusionMacro(20, 8, 0.1, 0.9, 20, membranesize);
+			macro += AnisotropicDiffusionMacro(20, 8, 0.35, 0.9, 20, membranesize);
+		}
+
 		/**Bilateral**/
-		macro += "\n/****BILATERAL****/\n";
-		macro += Bilateral(5, 50);
-		macro += Bilateral(5, 100);
-		
-		macro += Bilateral(10, 50);
-		macro += Bilateral(10, 100);
-		
-		macro += Bilateral(20, 50);
-		macro += Bilateral(20, 100);
-		
-		//TODO: Lipschitz
-		
-		//TODO: Kuwahara
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****BILATERAL****/\n";
+			macro += Bilateral(5, 50);
+			macro += Bilateral(5, 100);
+
+			macro += Bilateral(10, 50);
+			macro += Bilateral(10, 100);
+
+			macro += Bilateral(20, 50);
+			macro += Bilateral(20, 100);
+		}
+
+		/**Lipschitz**/
+		if(gd.getNextBoolean()){
+			macro += "\n/****LIPSCHITZ****/\n";
+			macro += LipschitzMacro(5, true, false);
+			macro += LipschitzMacro(10, true, false);
+			macro += LipschitzMacro(15, true, false);
+			macro += LipschitzMacro(20, true, false);
+			macro += LipschitzMacro(25, true, false);
+
+			macro += LipschitzMacro(5, false, true);
+			macro += LipschitzMacro(10, false, true);
+			macro += LipschitzMacro(15, false, true);
+			macro += LipschitzMacro(20, false, true);
+			macro += LipschitzMacro(25, false, true);
+
+			macro += LipschitzMacro(5, true, true);
+			macro += LipschitzMacro(10, true, true);
+			macro += LipschitzMacro(15, true, true);
+			macro += LipschitzMacro(20, true, true);
+			macro += LipschitzMacro(25, true, true);
+		}
+
+		/**Kuwahara**/
+		if(gd.getNextBoolean()){
+			macro += "\n/****KUWAHARA****/\n";
+			macro += KuwaharaMacro("Variance");
+			macro += KuwaharaMacro("Variance / Mean");
+			macro += KuwaharaMacro("Variance / Mean^2");
+		}
+
 		//TODO: Gabor
-		
+		if(gd.getNextBoolean()){
+
+		}
+
 		/**Derivatives**/
-		macro += "\n/****DERIVATIVES****/\n";
-		macro += Derivatives(2, 0, 0, 1);
-		macro += Derivatives(1, 1, 0, 1);
-		macro += Derivatives(0, 2, 0, 1);
-		
-		macro += Derivatives(3, 0, 0, 1);
-		macro += Derivatives(2, 1, 0, 1);
-		macro += Derivatives(1, 2, 0, 1);
-		macro += Derivatives(0, 3, 0, 1);
-		
-		macro += Derivatives(4, 0, 0, 1);
-		macro += Derivatives(3, 1, 0, 1);
-		macro += Derivatives(2, 2, 0, 1);
-		macro += Derivatives(1, 3, 0, 1);
-		macro += Derivatives(0, 4, 0, 1);
-		
-		macro += Derivatives(5, 0, 0, 1);
-		macro += Derivatives(4, 1, 0, 1);
-		macro += Derivatives(3, 2, 0, 1);
-		macro += Derivatives(2, 3, 0, 1);
-		macro += Derivatives(1, 4, 0, 1);
-		macro += Derivatives(0, 5, 0, 1);
-		
-		//TODO: Laplacian
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****DERIVATIVES****/\n";
+			macro += Derivatives(2, 0, 0, 1);
+			macro += Derivatives(1, 1, 0, 1);
+			macro += Derivatives(0, 2, 0, 1);
+
+			macro += Derivatives(3, 0, 0, 1);
+			macro += Derivatives(2, 1, 0, 1);
+			macro += Derivatives(1, 2, 0, 1);
+			macro += Derivatives(0, 3, 0, 1);
+
+			macro += Derivatives(4, 0, 0, 1);
+			macro += Derivatives(3, 1, 0, 1);
+			macro += Derivatives(2, 2, 0, 1);
+			macro += Derivatives(1, 3, 0, 1);
+			macro += Derivatives(0, 4, 0, 1);
+
+			macro += Derivatives(5, 0, 0, 1);
+			macro += Derivatives(4, 1, 0, 1);
+			macro += Derivatives(3, 2, 0, 1);
+			macro += Derivatives(2, 3, 0, 1);
+			macro += Derivatives(1, 4, 0, 1);
+			macro += Derivatives(0, 5, 0, 1);
+		}
+
+		/**Laplacian**/
+		if(gd.getNextBoolean()){
+			macro += "\n/****LAPLACIAN****/\n";
+			macro += LaplaceMacro(1);
+			macro += LaplaceMacro(2);
+			macro += LaplaceMacro(4);
+			macro += LaplaceMacro(8);
+		}
+
 		/**Structure**/
-		macro += "\n/****STRUCTURE****/\n";
-		macro += Structure(1, 1);
-		macro += Structure(2, 1);
-		macro += Structure(4, 1);
-		macro += Structure(8, 1);
-		
-		macro += Structure(1, 3);
-		macro += Structure(2, 3);
-		macro += Structure(4, 3);
-		macro += Structure(8, 3);
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****STRUCTURE****/\n";
+			macro += Structure(1, 1);
+			macro += Structure(2, 1);
+			macro += Structure(4, 1);
+			macro += Structure(8, 1);
+
+			macro += Structure(1, 3);
+			macro += Structure(2, 3);
+			macro += Structure(4, 3);
+			macro += Structure(8, 3);
+		}
+
 		//TODO: Entropy
-		
+		if(gd.getNextBoolean()){
+			macro += "\n/****ENTROPY****/\n";
+			macro += EntropyMacro(4,256);
+		}
+
 		//TODO: Neighbors
+		if(gd.getNextBoolean()){
+
+		}
 		
 		IJ.log(macro);
 		IJ.runMacro(macro);
 	}
 	
+	private String LipschitzMacro(int slope, boolean topdown, boolean tophat){
+		String options = "";
+		if(topdown){
+			options += " topdown";
+		}
+		if(topdown){
+			options += " tophat";
+		}
+		String macro = "/***LIPSCHITZ "+slope+options+"***/\n";
+		macro += "selectWindow('original');\n";
+		macro += "run('Lipschitz', 'slope="+slope+options+" stack');\n";
+		String fname = "lipschitz_";
+		if(topdown){
+			fname += "down";
+		}
+		if(topdown){
+			fname += "tophat";
+		}
+		macro += FinalMacro(fname+"_"+slope);
+		macro += "rename('Lipschitz "+slope+", "+options+"');\n";
+		
+		return macro;
+	}
 	
+	private String EntropyMacro(int radius, int number){
+		String macro = "/***ENTROPY "+radius+", "+number+"***/\n";
+		macro += "selectWindow('original');\n";
+		macro += "run('Duplicate...', 'title=Entropy duplicate');\n";
+		macro += "run('32-bit');";
+		macro += "run('Entropy', 'radius="+radius+" number="+number+" stack');\n";
+		
+		macro += FinalMacro("entropy");
+		macro += "rename('Entropy "+radius+", "+number+"');\n";
+		
+		return macro;
+	}
+	
+	private String KuwaharaMacro(String criterion){
+		String macro = "/***KUWAHARA "+criterion+"***/\n";
+		macro += "selectWindow('original');\n";
+		macro += "run('Duplicate...', 'title=Kuwahara duplicate');\n";
+		macro += "selectWindow('Kuwahara');\n";
+		macro += "run('Linear Kuwahara', 'number_of_angles=30 line_length=11 criterion=["+criterion+"] stack');\n";
+		
+		macro += FinalMacro("kuwahara_"+criterion.replace(" / ", "by"));
+		macro += "rename('Kuwahara "+criterion+"');\n";
+		
+		return macro;
+	}
+	
+	private String LaplaceMacro(int smoothing){
+		String macro = "/***LAPLACIAN "+smoothing+"***/\n";
+		macro += "selectWindow('original');\n";
+		macro += "run('FeatureJ Laplacian', 'compute smoothing="+smoothing+"');\n";
+		macro += "selectWindow('original Laplacian');\n";
+		
+		macro += FinalMacro("laplace"+smoothing);
+		macro += "rename('Laplacian "+smoothing+"');\n";
+		
+		return macro;
+	}
 	
 	private String SobelMacro(int sigma){
 		String macro = "/***SOBEL "+sigma+"***/\n";

@@ -333,7 +333,7 @@ public class Lipschitz_ implements PlugInFilter
 
 			Lipschitz2D(iptmp);
 
-			IJ.log("tmpwidth = " + String.valueOf(iptmp.getWidth()));
+			//IJ.log("tmpwidth = " + String.valueOf(iptmp.getWidth()));
 			m_stack_out.addSlice(m_imp.getShortTitle()+" "+(i+1)+"/"+m_scount, iptmp);
 
 			if (breaked = IJ.escapePressed()) IJ.beep();
