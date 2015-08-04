@@ -1,0 +1,4 @@
+syntax: glob
+Thumbs.db
+.settings/org.eclipse.ltk.core.refactoring.prefs
+LungJ_.zip
