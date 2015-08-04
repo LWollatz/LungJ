@@ -25,6 +25,7 @@ Uninstallable=no
 
 [Messages]
 WelcomeLabel2=This will install [name/ver] on your computer.%n%nYou need to have Fiji with ImageJ version 1.49n or later and Java 8 (jre1.8) installed.
+SelectDirLabel3=Setup will install [name] for the ImageJ distribution in the following folder.
 
 [Components]
 Name: PlugIn; Description: "LungJ PlugIn for Fiji"; Types: full compact custom; Flags: fixed
@@ -62,7 +63,7 @@ begin
   end;
 end;
 
-function getImageJ(): String;
+function getImageJ(Param: String): String;
 begin
   Result := FileExistsWildcard(ExpandConstant('{app}') + '\ImageJ*.exe');
 end;

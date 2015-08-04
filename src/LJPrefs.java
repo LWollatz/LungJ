@@ -17,33 +17,14 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import ij.IJ;
-import ij.ImageJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.Macro;
-import ij.Menus;
 import ij.Prefs;
-import ij.gui.ImageCanvas;
-import ij.gui.NewImage;
-import ij.gui.PlotWindow;
-import ij.gui.Roi;
-import ij.gui.Toolbar;
-import ij.io.FileSaver;
-import ij.io.ImportDialog;
-import ij.io.OpenDialog;
-import ij.plugin.Animator;
-import ij.plugin.filter.Analyzer;
-import ij.plugin.filter.Filters;
-import ij.plugin.filter.ParticleAnalyzer;
-import ij.process.FloatBlitter;
 import ij.process.ImageProcessor;
-import ij.text.TextWindow;
 import ij.util.Tools;
 import ij.plugin.frame.Recorder;
 
 import java.awt.Color;
-import java.awt.Font;
 
 
 public class LJPrefs{
@@ -51,7 +32,7 @@ public class LJPrefs{
 	//TODO: remove unneeded tracking data
 	//TODO: add path to relevant ImageJ files and then remove commented code
 	public static final String PLUGIN_NAME = "LungJ";
-	public static final String VERSION = "0.2.3 beta";
+	public static final String VERSION = "0.3.0";
 	/** file.separator system property */
 	public static String separator = System.getProperty("file.separator");
 	public static String LJ_dir =  System.getProperty("user.dir") + separator + "plugins" + separator + "LungJ";//getDirectory("imagej") + "/plugins/LungJ";

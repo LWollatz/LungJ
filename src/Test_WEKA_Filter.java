@@ -11,7 +11,6 @@ public class Test_WEKA_Filter implements PlugIn{
 	int membranesize = 20;
 	
 	public void run(String arg) {
-		//TODO: add GUI to request options
 		
 		GenericDialog gd = new GenericDialog("WEKA Test Settings...");
 		gd.addStringField("Output Directory", LJPrefs.LJ_srcDirectory, 100);
@@ -19,9 +18,7 @@ public class Test_WEKA_Filter implements PlugIn{
 		gd.addCheckbox("enhance contrast", true);
 		gd.addCheckbox("apply 6 shades", false);
 		String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians","Membrane projections","Variance","Mean","Minimum","Maximum","Median","Anisotropic diffusion","Bilateral","Lipschitz","Kuwahara","Gabor","Derivatives","Laplacian","Structure","Entropy","Neighbors"};
-		boolean[] defaultValues = {true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true,true};
-		//String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians"};
-		//boolean[] defaultValues = {true,true,true,true};
+		boolean[] defaultValues = {true,true,true,true,false,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false};
 		gd.addCheckboxGroup(10, 2, labels, defaultValues);
 		gd.showDialog();
         if (gd.wasCanceled()){
@@ -36,8 +33,7 @@ public class Test_WEKA_Filter implements PlugIn{
         
 		
 		String macro = "";
-		
-		macro += "var outdir = '\\\\\\\\soton.ac.uk\\\\ude\\\\PersonalFiles\\\\Users\\\\lw6g10\\\\mydocuments\\\\PhD\\\\LungJ\\\\wiki\\\\weka_lung_'; //name of directory and file-prefix to save results to\n";
+		macro += "var outdir = '"+outputdirectory.replace("\\", "\\\\")+"'; //name of directory and file-prefix to save results to\n";
 		macro += "rename('original');\n\n";
 		
 		/**Gaussian**/

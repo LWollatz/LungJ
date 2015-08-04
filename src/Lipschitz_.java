@@ -317,7 +317,7 @@ public class Lipschitz_ implements PlugInFilter
 		ImageHeight = ip.getHeight();
 		ImageWidth = ip.getWidth();
 		
-		IJ.log("tmpwidth = " + String.valueOf(ip.getWidth()));
+		//IJ.log("tmpwidth = " + String.valueOf(ip.getWidth()));
 
 		for(int i = 0; ((i < m_scount) && (!breaked)); i++)
 		{

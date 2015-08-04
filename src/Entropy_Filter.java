@@ -136,23 +136,23 @@ public class Entropy_Filter implements PlugInFilter
 		{
 			if (ip instanceof ByteProcessor)	
 			{
-				IJ.log("Float2Byte");
+				//IJ.log("Float2Byte");
 				ip2 = fp.convertToByte(true);
 			}
 			else
 			{
-				IJ.log("Float2Short");
+				//IJ.log("Float2Short");
 				ip2 = fp.convertToShort(true);
 			}
 			ip.setPixels(ip2.getPixels());
 		}
 		else
 		{
-			IJ.log("keeping output");
+			//IJ.log("keeping output");
 			ip.setPixels( fp.getPixels() );
 		}
 		
-		IJ.log("resetminmax");
+		//IJ.log("resetminmax");
 		ip.resetMinAndMax();
 		
 	}
