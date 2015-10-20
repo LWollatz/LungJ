@@ -48,6 +48,7 @@ public class Test_WEKA_Filter implements PlugIn{
 		/**Sobel**/
 		if(gd.getNextBoolean()){
 			macro += "\n/****SOBEL****/\n";
+			macro += SobelMacro(0);
 			macro += SobelMacro(1);
 			macro += SobelMacro(2);
 			macro += SobelMacro(4);
@@ -57,6 +58,7 @@ public class Test_WEKA_Filter implements PlugIn{
 		/**Hessian**/
 		if(gd.getNextBoolean()){
 			macro += "\n/****HESSIAN****/\n";
+			//macro += HesseMacro(0);
 			macro += HesseMacro(1);
 			macro += HesseMacro(2);
 			macro += HesseMacro(4);
@@ -76,9 +78,28 @@ public class Test_WEKA_Filter implements PlugIn{
 			macro += GaussDifMacro(8, 4);
 		}
 
-		//TODO: Membrane projections
+		/**Membrane projections**/
 		if(gd.getNextBoolean()){
-
+			macro += "\n/****MEMBRANE PROJECTIONS****/\n";
+			macro += MembraneMacro(1,15);
+			macro += MembraneMacro(5,15);
+			macro += MembraneMacro(9,15);
+			macro += MembraneMacro(13,15);
+			
+			macro += MembraneMacro(1,19);
+			macro += MembraneMacro(5,19);
+			macro += MembraneMacro(9,19);
+			macro += MembraneMacro(13,19);
+			
+			macro += MembraneMacro(1,27);
+			macro += MembraneMacro(5,27);
+			macro += MembraneMacro(9,27);
+			macro += MembraneMacro(13,27);
+			
+			macro += MembraneMacro(1,43);
+			macro += MembraneMacro(5,43);
+			macro += MembraneMacro(9,43);
+			macro += MembraneMacro(13,43);
 		}
 
 		/**Variance**/
@@ -151,8 +172,8 @@ public class Test_WEKA_Filter implements PlugIn{
 			macro += Bilateral(10, 50);
 			macro += Bilateral(10, 100);
 
-			macro += Bilateral(20, 50);
-			macro += Bilateral(20, 100);
+			/*macro += Bilateral(20, 50);
+			macro += Bilateral(20, 100);*/
 		}
 
 		/**Lipschitz**/
@@ -193,7 +214,26 @@ public class Test_WEKA_Filter implements PlugIn{
 		/**Derivatives**/
 		if(gd.getNextBoolean()){
 			macro += "\n/****DERIVATIVES****/\n";
-			macro += Derivatives(2, 0, 0, 1);
+			macro += Derivatives(2, 2, 0, 1);
+			macro += Derivatives(3, 3, 0, 1);
+			macro += Derivatives(4, 4, 0, 1);
+			macro += Derivatives(5, 5, 0, 1);
+			
+			macro += Derivatives(2, 2, 0, 2);
+			macro += Derivatives(3, 3, 0, 2);
+			macro += Derivatives(4, 4, 0, 2);
+			macro += Derivatives(5, 5, 0, 2);
+			
+			macro += Derivatives(2, 2, 0, 4);
+			macro += Derivatives(3, 3, 0, 4);
+			macro += Derivatives(4, 4, 0, 4);
+			macro += Derivatives(5, 5, 0, 4);
+			
+			macro += Derivatives(2, 2, 0, 8);
+			macro += Derivatives(3, 3, 0, 8);
+			macro += Derivatives(4, 4, 0, 8);
+			macro += Derivatives(5, 5, 0, 8);
+			/*macro += Derivatives(2, 0, 0, 1);
 			macro += Derivatives(1, 1, 0, 1);
 			macro += Derivatives(0, 2, 0, 1);
 
@@ -213,7 +253,7 @@ public class Test_WEKA_Filter implements PlugIn{
 			macro += Derivatives(3, 2, 0, 1);
 			macro += Derivatives(2, 3, 0, 1);
 			macro += Derivatives(1, 4, 0, 1);
-			macro += Derivatives(0, 5, 0, 1);
+			macro += Derivatives(0, 5, 0, 1);*/
 		}
 
 		/**Laplacian**/
@@ -239,15 +279,33 @@ public class Test_WEKA_Filter implements PlugIn{
 			macro += Structure(8, 3);
 		}
 
-		//TODO: Entropy
+		/**Entropy**/
 		if(gd.getNextBoolean()){
 			macro += "\n/****ENTROPY****/\n";
+			macro += EntropyMacro(1,32);
+			macro += EntropyMacro(2,32);
+			macro += EntropyMacro(4,32);
+			macro += EntropyMacro(8,32);
+			
+			macro += EntropyMacro(1,64);
+			macro += EntropyMacro(2,64);
+			macro += EntropyMacro(4,64);
+			macro += EntropyMacro(8,64);
+			
+			macro += EntropyMacro(1,128);
+			macro += EntropyMacro(2,128);
+			macro += EntropyMacro(4,128);
+			macro += EntropyMacro(8,128);
+			
+			macro += EntropyMacro(1,256);
+			macro += EntropyMacro(2,256);
 			macro += EntropyMacro(4,256);
+			macro += EntropyMacro(8,256);
 		}
 
 		//TODO: Neighbors
 		if(gd.getNextBoolean()){
-
+			macro += NeighborMacro(1, 8);
 		}
 		
 		IJ.log(macro);
@@ -285,7 +343,7 @@ public class Test_WEKA_Filter implements PlugIn{
 		macro += "run('32-bit');";
 		macro += "run('Entropy', 'radius="+radius+" number="+number+" stack');\n";
 		
-		macro += FinalMacro("entropy");
+		macro += FinalMacro("entropy_r"+radius+"_bins"+number);
 		macro += "rename('Entropy "+radius+", "+number+"');\n";
 		
 		return macro;
@@ -420,8 +478,7 @@ public class Test_WEKA_Filter implements PlugIn{
 		macro += "rename('Hessian (a-d)^2');\n";
 		macro += "imageCalculator('Add create', 'Hessian 4b^2','Hessian (a-d)^2');\n";
 		macro += "rename('Hessian 4b^2 + (a-d)^2');\n";
-		macro += "selectWindow('Hessian (a-d)^2');\n";
-		macro += "close();\n";
+		
 		macro += "selectWindow('Hessian 4b^2');\n";
 		macro += "close();\n";
 		macro += "selectWindow('Hessian 4b^2 + (a-d)^2');\n";
@@ -445,7 +502,13 @@ public class Test_WEKA_Filter implements PlugIn{
 		macro += "rename('Hessian Orientation "+sigma+"');\n";
 		
 		macro += "selectWindow('Hessian 4b^2 + (a-d)^2');\n";
-		macro += "rename('Hessian Square of Gamma-normalized eigenvalue difference??? "+sigma+"');\n";
+		macro += "rename('Hessian Square of Gamma-normalized square eigenvalue difference??? "+sigma+"');\n";
+		macro += "imageCalculator('Multiply create', 'Hessian Square of Gamma-normalized square eigenvalue difference??? "+sigma+"','Hessian (a-d)^2');\n";
+		macro += "rename('Hessian Gamma-normalized square eigenvalue difference??? "+sigma+"');\n";
+		macro += FinalMacro("hess"+sigma+"_gnsqeigdif");
+		macro += "selectWindow('Hessian Square of Gamma-normalized square eigenvalue difference??? "+sigma+"');\n";
+		macro += FinalMacro("hess"+sigma+"_gnsqeigdif_sq");
+		
 		
 		macro += "selectWindow('Hessian a^2');\n";
 		macro += "close();\n";
@@ -456,6 +519,8 @@ public class Test_WEKA_Filter implements PlugIn{
 		macro += "selectWindow('Hessian ad');\n";
 		macro += "close();\n";
 		macro += "selectWindow('Hessian (a-d)');\n";
+		macro += "close();\n";
+		macro += "selectWindow('Hessian (a-d)^2');\n";
 		macro += "close();\n";
 		macro += "selectWindow('Hessian (a+d)/2');\n";
 		macro += "close();\n";
@@ -511,17 +576,17 @@ public class Test_WEKA_Filter implements PlugIn{
 		macro += "selectWindow('original');\n";
 		macro += "run('FeatureJ Derivatives', 'x-order="+dx+" y-order="+dy+" z-order="+dz+" smoothing="+sigma+"');\n";
 		if (dx==0){
-			macro += FinalMacro("diff_y"+dy);
+			macro += FinalMacro("diff"+sigma+"_y"+dy);
 		}else if (dy==0){
-			macro += FinalMacro("diff_x"+dx);
+			macro += FinalMacro("diff"+sigma+"_x"+dx);
 		}else if (dx==1 && dy ==1){
-			macro += FinalMacro("diff_xy");
+			macro += FinalMacro("diff"+sigma+"_xy");
 		}else if (dx==1){
-			macro += FinalMacro("diff_xy"+dy);
+			macro += FinalMacro("diff"+sigma+"_xy"+dy);
 		}else if (dy==1){
-			macro += FinalMacro("diff_x"+dx+"y");
+			macro += FinalMacro("diff"+sigma+"_x"+dx+"y");
 		}else{
-			macro += FinalMacro("diff_x"+dx+"y"+dy);
+			macro += FinalMacro("diff"+sigma+"_x"+dx+"y"+dy);
 		}
 		
 		macro += "rename('Derivative dx"+dx+", dy"+dy+"');\n";
@@ -540,6 +605,80 @@ public class Test_WEKA_Filter implements PlugIn{
 		macro += "selectWindow('original largest structure eigenvalues');\n";
 		macro += FinalMacro("struct_eig_largest_i"+integration+"_s"+smoothing);
 		macro += "rename('Structure eigenvalues "+smoothing+", "+integration+" (largest)');\n";
+		
+		return macro;
+	}
+	
+	private String MembraneMacro(int membrane, int patchsize){
+		String macro = "/***MEMBRANE PROJECTION "+membrane+","+patchsize+"***/\n";
+		macro += "selectWindow('original');\n";
+		macro += "run('Membrane Projections', 'membrane="+membrane+" patch="+patchsize+"');\n";
+		
+		macro += "selectWindow('membrane stack');\n";
+		macro += "run('Duplicate...', 'title=mem0');\n";
+		macro += "selectWindow('mem0');\n";
+		macro += FinalMacro("membrane_"+membrane+"_"+patchsize+"_av");
+		macro += "rename('Membrane Projection average thickness="+membrane+" kernelsize="+patchsize+"');\n";
+		
+		macro += "selectWindow('membrane stack');\n";
+		macro += "run('Next Slice [>]');\n";
+		macro += "run('Duplicate...', 'title=mem1');\n";
+		macro += "selectWindow('mem1');\n";
+		macro += FinalMacro("membrane_"+membrane+"_"+patchsize+"_max");
+		macro += "rename('Membrane Projection maximum thickness="+membrane+" kernelsize="+patchsize+"');\n";
+		
+		macro += "selectWindow('membrane stack');\n";
+		macro += "run('Next Slice [>]');\n";
+		macro += "run('Duplicate...', 'title=mem2');\n";
+		macro += "selectWindow('mem2');\n";
+		macro += FinalMacro("membrane_"+membrane+"_"+patchsize+"_min");
+		macro += "rename('Membrane Projection minimum thickness="+membrane+" kernelsize="+patchsize+"');\n";
+		
+		macro += "selectWindow('membrane stack');\n";
+		macro += "run('Next Slice [>]');\n";
+		macro += "run('Duplicate...', 'title=mem3');\n";
+		macro += "selectWindow('mem3');\n";
+		macro += FinalMacro("membrane_"+membrane+"_"+patchsize+"_sum");
+		macro += "rename('Membrane Projection sum thickness="+membrane+" kernelsize="+patchsize+"');\n";
+		
+		macro += "selectWindow('membrane stack');\n";
+		macro += "run('Next Slice [>]');\n";
+		macro += "run('Duplicate...', 'title=mem4');\n";
+		macro += "selectWindow('mem4');\n";
+		macro += FinalMacro("membrane_"+membrane+"_"+patchsize+"_sd");
+		macro += "rename('Membrane Projection standard deviation thickness="+membrane+" kernelsize="+patchsize+"');\n";
+		
+		macro += "selectWindow('membrane stack');\n";
+		macro += "run('Next Slice [>]');\n";
+		macro += "run('Duplicate...', 'title=mem5');\n";
+		macro += "selectWindow('mem5');\n";
+		macro += FinalMacro("membrane_"+membrane+"_"+patchsize+"_med");
+		macro += "rename('Membrane Projection median thickness="+membrane+" kernelsize="+patchsize+"');\n";
+		
+		macro += "selectWindow('membrane stack');\n";
+		macro += "close();\n";
+		
+		return macro;
+	}
+	
+	private String NeighborMacro(int minsig, int maxsig){
+		String macro = "/***NEIGHBORS "+minsig+" to "+maxsig+"***/\n";
+		macro += "selectWindow('original');\n";
+		macro += "run('Neighbors', 'minsigma="+minsig+" maxsigma="+maxsig+"');\n";
+		
+		for (int s=minsig, i=1; s<=maxsig; s*=2){
+			for (int k=0; k<8; k++, i++){
+				macro += "selectWindow('Neighbors');\n";
+				macro += "setSlice("+i+");\n";
+				macro += "run('Duplicate...', 'title=n"+s+"_"+k+"');\n";
+				macro += "selectWindow('n"+s+"_"+k+"');\n";
+				macro += FinalMacro("neighbors_"+s+"_"+k);
+				macro += "rename('Neighbors sigma="+s+" shift="+k+"');\n";
+			}
+		}
+		
+		macro += "selectWindow('Neighbors');\n";
+		macro += "close();\n";
 		
 		return macro;
 	}

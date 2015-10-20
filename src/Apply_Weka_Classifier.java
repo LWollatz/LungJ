@@ -4,12 +4,15 @@ import ij.Macro;
 import ij.WindowManager;
 import ij.plugin.*;
 import ij.plugin.frame.Recorder;
+import ij.process.ImageProcessor;
 import ij.gui.GenericDialog;
+
 //import trainableSegmentation.*;
 //import weka.core.Utils;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
+
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
@@ -54,9 +57,9 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 	/** plugin's current version */
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
-	public static final String TWS_version = "v2.2.1"; //as this is included in the window name...
+	public static String TWS_version = "v2.2.1"; //as this is included in the window name...
 	
-	private static String LJ_srcDirectory = LJPrefs.LJ_srcDirectory;
+	private static String LJ_srcDirectory = LJPrefs.LJ_inpDirectory;
 	//private static String LJ_srcFilename = "250x250x250x16bit.tif";
 	private static String LJ_clsDirectory = LJPrefs.LJ_clsDirectory;
 	//private static String LJ_clsFilename = "background.model";
@@ -178,6 +181,22 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 		//IJ.openImage();
 		IJ.run("Trainable Weka Segmentation");
 		IJ.runMacro("close('"+LJ_srcFile+"');");
+		
+		int Nimg = WindowManager.getImageCount();
+		String[] lstImages = WindowManager.getImageTitles();
+		int[] lstImageIds = WindowManager.getIDList();
+		String tempStr = "";
+		for (int i = 0; i < Nimg; i++){
+			if (lstImages[i].startsWith("Trainable Weka Segmentation")){
+				tempStr = lstImages[i].replace("Trainable Weka Segmentation ", "");
+				if(!(TWS_version.equals(tempStr))){
+					IJ.log("Newer version of the Trainable WEKA Segmentation found (found "+tempStr+", expected "+TWS_version+"). There might be compatibility issues...");
+					TWS_version = tempStr;
+				}
+				
+			}
+		}
+		
 		
 		IJ.showProgress(5, 100);
 		/***Load Classifier***/

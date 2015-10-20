@@ -112,7 +112,7 @@ public class Invert_Values implements ExtendedPlugInFilter, DialogListener {
         
         if (ip.getBitDepth() == 8) {
         	byte[] bPixels = (byte[])ip.getPixels();
-        	IJ.log("("+String.valueOf(tmin)+"|"+String.valueOf(tmax)+")");
+        	//IJ.log("("+String.valueOf(tmin)+"|"+String.valueOf(tmax)+")");
         	for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++){
         		for (int x=roiRect.x, p=x+y*width; x<roiRect.x+roiRect.width; x++,p++){
         			tsum = tmax + tmin - (double)bPixels[p];

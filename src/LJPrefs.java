@@ -32,7 +32,7 @@ public class LJPrefs{
 	//TODO: remove unneeded tracking data
 	//TODO: add path to relevant ImageJ files and then remove commented code
 	public static final String PLUGIN_NAME = "LungJ";
-	public static final String VERSION = "0.3.0";
+	public static final String VERSION = "0.3.1b";
 	/** file.separator system property */
 	public static String separator = System.getProperty("file.separator");
 	public static String LJ_dir =  System.getProperty("user.dir") + separator + "plugins" + separator + "LungJ";//getDirectory("imagej") + "/plugins/LungJ";

@@ -52,6 +52,7 @@ public class Compare_Masks implements PlugIn {
 			}else{
 				lstMasks[i] = "--not a mask--";
 				Nmasks--;
+				IJ.log(String.valueOf(temp.getMin()) + " - " + String.valueOf(temp.getMax()));
 			}
 		}
 		if (Nmasks < 2){
@@ -144,6 +145,12 @@ public class Compare_Masks implements PlugIn {
 		        rt = new ResultsTable();
 		        Analyzer.setResultsTable(rt);
 		}
+		
+		double po = (TP+TN)/(TN+TP+FP+FN);
+		double pc = ((TP+FP)*(TP+FN)+(TN+FP)*(TN+FN))/((TN+TP+FP+FN)*(TN+TP+FP+FN));
+		double kappa = (po-pc)/(1-pc);
+		double S = (2*TP)/(2*TP+FP+FN);
+		
 		rt.incrementCounter();
 		rt.addLabel("True");
 		rt.addValue("Positive", TP);
@@ -181,6 +188,16 @@ public class Compare_Masks implements PlugIn {
 		rt.incrementCounter();
 		rt.addLabel("accuracy");
 		rt.addValue("Percentage", 100*(TP+TN)/(TN+TP+FP+FN));
+		rt.addValue("Positive", "");
+		rt.addValue("Negative", "");
+		rt.incrementCounter();
+		rt.addLabel("kappa");
+		rt.addValue("Percentage", 100*kappa);
+		rt.addValue("Positive", "");
+		rt.addValue("Negative", "");
+		rt.incrementCounter();
+		rt.addLabel("similarity index");
+		rt.addValue("Percentage", 100*S);
 		rt.addValue("Positive", "");
 		rt.addValue("Negative", "");
 		
