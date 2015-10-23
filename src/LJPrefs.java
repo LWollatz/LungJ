@@ -20,6 +20,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
+import ij.gui.Plot;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
 import ij.plugin.frame.Recorder;
@@ -645,6 +646,62 @@ public static boolean getPref(Properties ljPrefs, String key, boolean defaultVal
 		mm[0]=min;
 		mm[1]=max;
 		return mm;
+	}
+	
+	public static Plot plotHistogram(float[] Xs, float[] YsR, float[] YsG, float[] YsB, float Xmin, float Xmax, float Ymin, float Ymax){
+		//colour plot
+		
+		Plot plot = new Plot("Histogram", "pixel value", "pixel count");
+		plot.setLimits(Xmin, Xmax, Ymin, Ymax);
+		
+		plot.setColor(Color.RED);
+		plot.addPoints(Xs, YsR, Plot.LINE);
+		plot.draw();
+		plot.setColor(Color.GREEN);
+		plot.addPoints(Xs, YsG, Plot.LINE);
+		plot.draw();
+		plot.setColor(Color.BLUE);
+		plot.addPoints(Xs, YsB, Plot.LINE);
+		plot.draw();
+
+		return plot;
+	}
+	
+	public static Plot plotHistogram(double[] Xs, double[] Ys, double Xmin, double Xmax, long Ymin, long Ymax){
+		//grayscale plot
+		Plot plot = new Plot("Histogram", "pixel value\n\n\n.", "pixel count");
+		plot.setLimits(Xmin, Xmax, Ymin, Ymax);
+		
+		plot.setColor(Color.BLACK);
+		plot.addPoints(Xs, Ys, Plot.LINE);
+		plot.draw();
+		
+
+		return plot;
+	}
+	
+	public static Plot plotHistogram(float[] Xs, float[] YsR, float[] YsG, float[] YsB, float Ymax){
+		//colour quick plot
+		int n = Xs.length;
+		float Ymin = 0;
+		float Xmin = Xs[0];
+		float Xmax = Xs[n-1];
+		
+		Plot plot = plotHistogram(Xs, YsR, YsG, YsB, Xmin, Xmax, Ymin, Ymax);
+		
+		return plot;
+	}
+	
+	public static Plot plotHistogram(double[] Xs, double[] Ys, long Ymax){
+		//grayscale quick plot
+		int n = Xs.length;
+		long Ymin = 0;
+		double Xmin = Xs[0];
+		double Xmax = Xs[n-1];
+		
+		Plot plot = plotHistogram(Xs, Ys, Xmin, Xmax, Ymin, Ymax);
+		
+		return plot;
 	}
 	
 }

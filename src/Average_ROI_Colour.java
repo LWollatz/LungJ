@@ -54,13 +54,19 @@ public class Average_ROI_Colour implements PlugIn{
 		/**use ROI Manager**/
 		
 		RoiManager manager = RoiManager.getInstance();
+		
 		if (manager != null) {
-		    Hashtable<String, Roi> table = (Hashtable<String, Roi>)manager.getROIs();
+		    //Hashtable<String, Roi> table = (Hashtable<String, Roi>)manager.getROIs();
+			int[] table = manager.getIndexes();
 		    /** mean calculation run **/
 		    double[] mean = {0,0,0,0};
-		    for (String label : table.keySet()) {
+		    IJ.log("manager not null");
+		    if (table != null) {
+		    	IJ.log("table not null");
+		    for (int label : table) { //for (String label : table.keySet()) {
+		    	IJ.log("in loop");
 		        //int slice = manager.getSliceNumber(label);
-		        Roi roi = table.get(label);
+		        Roi roi = manager.getRoi(label); //Roi roi = table.get(label);
 		        ImagePlus img = roi.getImage();
 		        if (img == null){
 		        	img = WindowManager.getCurrentImage();
@@ -86,9 +92,9 @@ public class Average_ROI_Colour implements PlugIn{
 		    //IJ.log("mean = " + String.valueOf(mean[1]) + ";" + String.valueOf(mean[2])+ ";" + String.valueOf(mean[3]));
 		    /** std dev calculation run **/
 		    double[] std = {0,0,0};
-		    for (String label : table.keySet()) {
+		    for (int label : table) { //for (String label : table.keySet()) {
 		        //int slice = manager.getSliceNumber(label);
-		        Roi roi = table.get(label);
+		        Roi roi = manager.getRoi(label);
 		        ImagePlus img = roi.getImage();
 		        if (img == null){
 		        	img = WindowManager.getCurrentImage();
@@ -285,7 +291,7 @@ public class Average_ROI_Colour implements PlugIn{
 
 			
 			
-		    
+		    } 
 		}
 		
 	}

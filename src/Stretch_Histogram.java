@@ -108,6 +108,22 @@ public class Stretch_Histogram implements ExtendedPlugInFilter, DialogListener {
         int height = ip.getHeight(); 
     	double tsum;
         
+    	/*
+selectWindow("0250_0750_1000.tif");
+run("Window/Level...");
+resetMinAndMax();
+setMinAndMax(-1, 2);
+run("Close");
+run("16-bit");
+run("Stretch Histogram", "a_orig=13055 a_new=24726 b_orig=34815 b_new=32255 stack");
+run("Window/Level...");
+resetMinAndMax();
+run("Close");
+    	 */
+    	
+    	
+    	
+    	
     	//TODO: do I still use previewEdm?
         if (previewing && previewEdm!=null) {
         	floatIP = previewEdm;
@@ -131,13 +147,14 @@ public class Stretch_Histogram implements ExtendedPlugInFilter, DialogListener {
         	}
         }else if (ip.getBitDepth() == 16) {
         	short[] bPixels = (short[])ip.getPixels();
-        	
+        	short sSum = 0;
         	for (int y=roiRect.y; y<roiRect.y+roiRect.height; y++){
         		for (int x=roiRect.x, p=x+y*width; x<roiRect.x+roiRect.width; x++,p++){
-        			tsum = b + m*(double)bPixels[p];
-        			if ((bPixels[p] & 0xFFFF) < 0) {tsum = 0;}
+        			sSum = (short)(b + m*(double)bPixels[p]);
+        			tsum = (b + m*(double)(bPixels[p] & 0xFFFF));
+        			if ((bPixels[p] & 0xFFFF) < 0) {sSum = 0;}
         			//if ((bPixels[p] & 0xFFFF) > tmax) {tsum = tmin;}
-        			bPixels[p] = (short) (tsum);	
+        			bPixels[p] = (short)(tsum - 65536);	//-32768 //49152
         		}
         	}
         }else if (ip.getBitDepth() == 32) {
