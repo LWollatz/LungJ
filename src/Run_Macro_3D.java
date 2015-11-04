@@ -1,6 +1,8 @@
 import java.io.IOException;
 import java.util.Properties;
 
+import lj.LJPrefs;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -50,6 +52,9 @@ public class Run_Macro_3D implements PlugIn{
 	private static int stepX = 1;
 	private static int stepY = 1;
 	private static int stepZ = 1;
+	private static int haloX = 0;
+	private static int haloY = 0;
+	private static int haloZ = 0;
 	private static float globMaxIn = -Float.MAX_VALUE;
 	private static float globMinIn = Float.MAX_VALUE;
 	private static int errCount = 0;
@@ -123,6 +128,9 @@ public class Run_Macro_3D implements PlugIn{
 		stepX = LJPrefs.getPref(prefs, "stepX", stepX);
 		stepY = LJPrefs.getPref(prefs, "stepY", stepY);
 		stepZ = LJPrefs.getPref(prefs, "stepZ", stepZ);
+		haloX = LJPrefs.getPref(prefs, "haloX", haloX);
+		haloY = LJPrefs.getPref(prefs, "haloY", haloY);
+		haloZ = LJPrefs.getPref(prefs, "haloZ", haloZ);
 		globMinIn = (float)LJPrefs.getPref(prefs, "minVal", globMinIn);
 		globMaxIn = (float)LJPrefs.getPref(prefs, "maxVal", globMaxIn);
 		
@@ -187,6 +195,9 @@ public class Run_Macro_3D implements PlugIn{
 		prefs.put("stepX", Double.toString(stepX));
 		prefs.put("stepY", Double.toString(stepY));
 		prefs.put("stepZ", Double.toString(stepZ));
+		prefs.put("haloX", Double.toString(haloX));
+		prefs.put("haloY", Double.toString(haloY));
+		prefs.put("haloZ", Double.toString(haloZ));
 		prefs.put("minVal", Double.toString(globMin));
 		prefs.put("maxVal", Double.toString(globMax));
 		try {

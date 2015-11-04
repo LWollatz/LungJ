@@ -6,6 +6,8 @@ import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
 
+import lj.LJPrefs;
+
 import java.awt.Color;
 
 /** 

@@ -20,6 +20,7 @@ import javax.swing.border.MatteBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import lj.LJPrefs;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 

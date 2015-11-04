@@ -1,4 +1,4 @@
-
+package lj;
 
 
 import java.io.BufferedInputStream;

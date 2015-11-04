@@ -7,6 +7,7 @@ import ij.plugin.frame.Recorder;
 import ij.process.ImageProcessor;
 import ij.gui.GenericDialog;
 
+
 //import trainableSegmentation.*;
 //import weka.core.Utils;
 import java.awt.*;
@@ -19,6 +20,8 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
+
+import lj.LJPrefs;
 
 
 /**

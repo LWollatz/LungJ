@@ -8,6 +8,8 @@ import ij.process.*;
 
 import java.awt.*;
 
+import lj.LJPrefs;
+
 
 /**
  * LungJ code for inverting the values in an image

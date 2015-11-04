@@ -2,6 +2,7 @@ import java.awt.Color;
 import java.awt.Rectangle;
 import java.util.Hashtable;
 
+import lj.LJPrefs;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;

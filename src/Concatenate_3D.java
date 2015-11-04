@@ -1,6 +1,7 @@
 import java.io.IOException;
 import java.util.Properties;
 
+import lj.LJPrefs;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
@@ -34,6 +35,9 @@ public class Concatenate_3D implements PlugIn{
 	private static int stepX = 1;
 	private static int stepY = 1;
 	private static int stepZ = 1;
+	private static int haloX = 0;
+	private static int haloY = 0;
+	private static int haloZ = 0;
 	private static double globMax = 1;
 	private static double globMin = 0;
 	
@@ -69,7 +73,9 @@ public class Concatenate_3D implements PlugIn{
 		stepX = LJPrefs.getPref(prefs, "stepX", stepX);
 		stepY = LJPrefs.getPref(prefs, "stepY", stepY);
 		stepZ = LJPrefs.getPref(prefs, "stepZ", stepZ);
-		// TODO: do I need those two? ...
+		haloX = LJPrefs.getPref(prefs, "haloX", haloX);
+		haloY = LJPrefs.getPref(prefs, "haloY", haloY);
+		haloZ = LJPrefs.getPref(prefs, "haloZ", haloZ);
 		globMin = (float)LJPrefs.getPref(prefs, "minVal", globMin);
 		globMax = (float)LJPrefs.getPref(prefs, "maxVal", globMax);
 		
@@ -91,6 +97,32 @@ public class Concatenate_3D implements PlugIn{
 					/** read in each block **/
 					String filein = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_inDirectory,z,y,x);
 					ImagePlus imgblock = IJ.openImage(filein);
+					
+					int bWidth = imgblock.getWidth();
+					int bHeight = imgblock.getHeight();
+					int bDepth = imgblock.getNSlices();
+					
+					
+					int xs = stepX+2*haloX;
+					int ys = stepY+2*haloY;
+					int zs = stepZ+2*haloZ;
+					
+					int x1 = haloX;
+					if (x-haloX < 0){x1 = 0; xs = xs - haloX;}
+					int y1 = haloY;
+					if (y-haloY < 0){y1 = 0; ys = ys - haloY;}
+					int z1 = haloZ;
+					if (z-haloZ < 0){z1 = 0; zs = zs - haloZ;}
+					
+					int x2 = bWidth - haloX;
+					if (x + xs > maxX){x2 = bWidth;}
+					int y2 = bHeight - haloY;
+					if (y + ys > maxY){y2 = bHeight;}
+					int z2 = bDepth - haloZ;
+					if (z + zs > maxZ){z2 = bDepth;}
+
+					
+					
 					if (imgout == null){
 						/** create image for output **/
 						int bd = imgblock.getProcessor().getBitDepth();
@@ -100,7 +132,7 @@ public class Concatenate_3D implements PlugIn{
 						IJ.log("ERROR "+filein);
 					}else{
 						/** paste block into full image **/
-						imgout = paste(imgblock, imgout, x, y, z);
+						imgout = paste(imgblock, imgout, x, y, z, x1, x2, y1, y2, z1, z2);
 						IJ.log("added "+filein);
 					}
 					/** show progress **/
@@ -145,6 +177,7 @@ public class Concatenate_3D implements PlugIn{
 		int iWidth = img.getWidth();
 		int iDepth = img.getNSlices();
 		
+		
 		/** different handler depending on bitdepth required... **/
 		if (ipo.getBitDepth() == 32) {
 			for (int z=pz; z<pz+iDepth; z++) {
@@ -188,5 +221,58 @@ public class Concatenate_3D implements PlugIn{
 		return destimg;
 		
 	}
-	
+	private ImagePlus paste(ImagePlus img, ImagePlus destimg, int px, int py, int pz, int sx1, int sx2, int sy1, int sy2, int sz1, int sz2){
+		ImageProcessor ipo = destimg.getProcessor();
+		
+		int oWidth = destimg.getWidth();
+		
+		int iHeight = sy2-sy1;
+		int iWidth = sx2-sx1;
+		int iDepth = sz2-sz1;
+		int bWidth = img.getWidth();
+		
+		/** different handler depending on bitdepth required... **/
+		if (ipo.getBitDepth() == 32) {
+			for (int z=pz; z<pz+iDepth; z++) {
+				/** get pixel handler **/
+				float[] oPixels = (float[])destimg.getStack().getProcessor(z+1).getPixels();
+				float[] iPixels = (float[])img.getStack().getProcessor(z-pz+sz1+1).getPixels();
+				/** copy img into destimg pixel by pixel **/
+				for (int y=py; y<py+iHeight; y++){
+					for (int x=px; x<px+iWidth; x++){
+						int po=x+y*oWidth;
+						int pi=(x+sx1-px)+(y+sy1-py)*bWidth; 
+	    				oPixels[po] = iPixels[pi];
+					}
+	    		}
+			}
+		}else if (ipo.getBitDepth() == 16) {
+			for (int z=pz; z<pz+iDepth; z++) {
+				short[] oPixels = (short[])destimg.getStack().getProcessor(z+1).getPixels();
+				short[] iPixels = (short[])img.getStack().getProcessor(z-pz+sz1+1).getPixels();
+				for (int y=py; y<py+iHeight; y++){
+					for (int x=px; x<px+iWidth; x++){
+						int po=x+y*oWidth;
+						int pi=(x+sx1-px)+(y+sy1-py)*bWidth; 
+	    				oPixels[po] = iPixels[pi];
+					}
+	    		}
+			}
+		}else  if (ipo.getBitDepth() == 8) {
+			for (int z=pz; z<pz+iDepth; z++) {
+				byte[] oPixels = (byte[])destimg.getStack().getProcessor(z+1).getPixels();
+				byte[] iPixels = (byte[])img.getStack().getProcessor(z-pz+sz1+1).getPixels();
+				for (int y=py; y<py+iHeight; y++){
+					for (int x=px; x<px+iWidth; x++){
+						int po=x+y*oWidth;
+						int pi=(x+sx1-px)+(y+sy1-py)*bWidth;  
+	    				oPixels[po] = iPixels[pi];
+					}
+	    		}
+			}
+		}
+		return destimg;
+		
+	}
+
 }

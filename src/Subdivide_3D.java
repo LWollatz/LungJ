@@ -20,6 +20,8 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 
+import lj.LJPrefs;
+
 /**
  * Divides a 3D image into 3D blocks and saves them into a directory along with header 
  * information in a txt file.
@@ -49,6 +51,9 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 	private static int stepX = 250;
 	private static int stepY = 250;
 	private static int stepZ = 250;
+	private static int haloX = 0;
+	private static int haloY = 0;
+	private static int haloZ = 0;
 	private static int z_offset = 0;
 	private double globMin = 0;
     private double globMax = 1;
@@ -93,6 +98,10 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		gd.addNumericField("width", stepX, 0);
 		gd.addNumericField("height", stepY, 0);
 		gd.addNumericField("depth", stepZ, 0);
+		gd.addMessage("Halo Size:");
+		gd.addNumericField("halo_width", haloX, 0);
+		gd.addNumericField("halo_height", haloY, 0);
+		gd.addNumericField("halo_depth", haloZ, 0);
 		gd.addMessage("Other Settings:");
 		gd.addNumericField("z-offset", z_offset, 0, 4,  "(affects filename only)");
 		gd.addCheckbox("save LungJ header", saveProp);
@@ -113,6 +122,9 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		stepX = (int)gd.getNextNumber();
 		stepY = (int)gd.getNextNumber();
 		stepZ = (int)gd.getNextNumber();
+		haloX = (int)gd.getNextNumber();
+		haloY = (int)gd.getNextNumber();
+		haloZ = (int)gd.getNextNumber();
 		z_offset = (int)gd.getNextNumber();
 		saveProp = gd.getNextBoolean();
 		
@@ -121,17 +133,51 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		
 		ImageProcessor ip = image.getProcessor();
 		
+		int x1 = 0;
+		int y1 = 0;
+		int z1 = 0;
+		
+		int xs = stepX+2*haloX;
+		int ys = stepY+2*haloY;
+		int zs = stepZ+2*haloZ;
+		
+		int x2 = x1+xs;
+		int y2 = y1+ys;
+		int z2 = z1+zs;
+		
+		
 		for (int z=0; z<maxZ; z+=stepZ) {
 			ip.setSliceNumber(z);
 			IJ.showProgress(z, maxZ);
 			//run("Image Sequence...", "open=["+stackdirectory+"] number=250 file=DigiSens_ sort");
 			for (int x=0; x<maxX; x+=stepX) {
 				for (int y=0; y<maxY; y+=stepY) {
-					Roi tempRoi = new Roi(x, y, stepX, stepY);
+					
+					xs = stepX+2*haloX;
+					ys = stepY+2*haloY;
+					zs = stepZ+2*haloZ;
+					
+					x1 = x-haloX;
+					if (x1 < 0){x1 = 0; xs = xs - haloX;}
+					y1 = y-haloY;
+					if (y1 < 0){y1 = 0; ys = ys - haloY;}
+					z1 = z-haloZ;
+					if (z1 < 0){z1 = 0; zs = zs - haloZ;}
+					
+					x2 = x1+xs;
+					if (x2 > maxX){xs = maxX - x1;}
+					y2 = y1+ys;
+					if (y2 > maxY){ys = maxY - y1;}
+					z2 = z1+zs;
+					if (z2 > maxZ){zs = maxZ - z1;}
+					
+					//Roi tempRoi = new Roi(x, y, stepX, stepY);
+					Roi tempRoi = new Roi(x1, y1, xs, ys);
 					image.setRoi(tempRoi);
 					ip.setRoi(tempRoi);
 					int lastSlice = (z+stepZ < maxZ) ? z+stepZ : maxZ;
-					ImagePlus imgblock = new Duplicator().run(image,z+1,lastSlice);
+					//ImagePlus imgblock = new Duplicator().run(image,z+1,lastSlice);
+					ImagePlus imgblock = new Duplicator().run(image,z1+1,z1+zs);
 					String fileout = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_outDirectory,(z+z_offset),y,x);
 					IJ.saveAsTiff(imgblock,fileout);
 					IJ.showStatus("Creating blocks...");
@@ -150,6 +196,9 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 			prefs.put("stepX", Double.toString(stepX));
 			prefs.put("stepY", Double.toString(stepY));
 			prefs.put("stepZ", Double.toString(stepZ));
+			prefs.put("haloX", Double.toString(haloX));
+			prefs.put("haloY", Double.toString(haloY));
+			prefs.put("haloZ", Double.toString(haloZ));
 			prefs.put("minVal", Double.toString(globMin));
 			prefs.put("maxVal", Double.toString(globMax));
 			try {

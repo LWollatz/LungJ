@@ -5,6 +5,8 @@ import ij.process.*;
 
 import java.awt.*;
 
+import lj.LJPrefs;
+
 
 /**
  * Creates a truly binary mask based on a fixed global threshold.
