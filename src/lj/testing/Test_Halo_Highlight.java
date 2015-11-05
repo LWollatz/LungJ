@@ -113,7 +113,7 @@ public class Test_Halo_Highlight implements PlugIn{
 							for (int yb=0; yb<bHeight; yb++){
 					    		for (int xb=0, p=xb+yb*bWidth; xb<bWidth; xb++,p++){
 					    			if (yb<y1 ||  yb>=y2 || xb<x1 ||  xb>=x2 || zb<=z1 ||  zb>z2){
-										oPixels[p] = (short)(40000);
+										oPixels[p] = (short)(60000);
 					    			}
 					    		}
 							}
