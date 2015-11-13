@@ -29,7 +29,6 @@
 			private static int haloZ = 0;
 			private static float globMaxIn = -Float.MAX_VALUE;
 			private static float globMinIn = Float.MAX_VALUE;
-			private static int errCount = 0;
 			
 			
 			private static int moveX = 1; //current movement x-direction (+1 or -1)
@@ -79,6 +78,8 @@
 			private static String fileout222 = "";
 			private static ImagePlus img222 = null;
 			
+			private static Boolean[] requireClean = {false,false,false};
+			
 			
 			
 			public void run(String command){
@@ -117,7 +118,6 @@
 				haloZ = LJPrefs.getPref(prefs, "haloZ", haloZ);
 				globMinIn = (float)LJPrefs.getPref(prefs, "minVal", globMinIn);
 				globMaxIn = (float)LJPrefs.getPref(prefs, "maxVal", globMaxIn);
-				errCount = 0;
 				
 				/**initialise coordinates for first load**/
 				xs1 = 0;
@@ -165,18 +165,36 @@
 				
 				while(moveZ == 1){
 					if (xs1+moveX*stepX<maxX && xs2+moveX*stepX<maxX && xs1+moveX*stepX>=0 && xs2+moveX*stepX>=0){
+						docleanexchange();
 						move(2);
 						doexchange();
+						if (xs1+moveX*stepX>=maxX || xs2+moveX*stepX>=maxX){
+							requireClean[2] = true;
+						}else{
+							requireClean[2] = false;
+						}
 					}else{
-						docleanexchange();
 						if (ys1+moveY*stepY<maxY && ys2+moveY*stepY<maxY && ys1+moveY*stepY>=0 && ys2+moveY*stepY>=0){
+							docleanexchange();
 							move(1);
 							doexchange();
+							if (ys1+moveY*stepY>=maxY || ys2+moveY*stepY>=maxY){
+								requireClean[1] = true;
+							}else{
+								requireClean[1] = false;
+							}
 						}else{
 							if (zs1+stepZ<maxZ && zs2+stepZ<maxZ){
+								docleanexchange();
 								move(0);
 								doexchange();
+								if (zs1+stepZ>=maxZ || zs2+stepZ>=maxZ){
+									requireClean[0] = true;
+								}else{
+									requireClean[0] = false;
+								}
 							}else{
+								docleanexchange();
 								moveZ *= -1;
 							}
 							moveY *= -1;
@@ -2062,6 +2080,9 @@
 			
 			private void docleanexchange(){
 				IJ.log("clean"+String.valueOf(configuration[0])+String.valueOf(configuration[1])+String.valueOf(configuration[2]));
+				if (!requireClean[0] && !requireClean[1] && !requireClean[2]){
+					return;
+				}
 				if (configuration[0] == 0){
 					if (configuration[1] == 0){
 						if (configuration[2] == 0){
@@ -2091,6 +2112,7 @@
 						}
 					}
 				}
+				return;
 			}
 			
 			private void docleanexchangetype000(){
@@ -2103,88 +2125,223 @@
 				 * i221 i222
 				 */
 				
-				//exchanging img121 and img122 (x-direction change)
-				tempX1 = img121.getWidth()-2*haloX;
-				tempX2 = img121.getWidth()-haloX;
-				tempY1 = img121.getHeight()-haloY-stepY;
-				tempY2 = img121.getHeight()-haloY;
-				tempZ1 = img121.getStackSize()-haloZ-stepZ;
-				tempZ2 = img121.getStackSize()-haloZ;
-				for (int z=tempZ1+1; z<=tempZ2; z++) {
-					ImageProcessor proc21 = img121.getStack().getProcessor(z);
-					ImageProcessor proc22 = img122.getStack().getProcessor(z);
-					for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
-						for (int y=tempY1; y<tempY2; y++) {
-							proc22.set(xao, y, proc21.get(x, y));
-							proc21.set(xb, y, proc22.get(xbo, y));
+				if (requireClean[1]){
+					//exchanging img121 and img122 (x-direction change)
+					tempX1 = img121.getWidth()-2*haloX;
+					tempX2 = img121.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img121.getHeight();
+					tempZ1 = img121.getStackSize()-haloZ-stepZ;
+					tempZ2 = img121.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img121.getStack().getProcessor(z);
+						ImageProcessor proc22 = img122.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
 						}
 					}
 				}
-				//exchanging img211 and img212 (x-direction change)
-				tempX1 = img211.getWidth()-2*haloX;
-				tempX2 = img211.getWidth()-haloX;
-				tempY1 = img211.getHeight()-haloY-stepY;
-				tempY2 = img211.getHeight()-haloY;
-				tempZ1 = img211.getStackSize()-haloZ-stepZ;
-				tempZ2 = img211.getStackSize()-haloZ;
-				for (int z=tempZ1+1; z<=tempZ2; z++) {
-					ImageProcessor proc21 = img211.getStack().getProcessor(z);
-					ImageProcessor proc22 = img212.getStack().getProcessor(z);
-					for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
-						for (int y=tempY1; y<tempY2; y++) {
-							proc22.set(xao, y, proc21.get(x, y));
-							proc21.set(xb, y, proc22.get(xbo, y));
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img211 and img212 (x-direction change)
+					tempX1 = img211.getWidth()-2*haloX;
+					tempX2 = img211.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img211.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img211.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img211.getStack().getProcessor(z);
+						ImageProcessor proc22 = img212.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img221 and img222 (x-direction change)
+					tempX1 = img221.getWidth()-2*haloX;
+					tempX2 = img221.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img221.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img221.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img221.getStack().getProcessor(z);
+						ImageProcessor proc22 = img222.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
 						}
 					}
 				}
 
 				
-				//exchanging img112 and img122 (y-direction change)
-				/*
-				tempX1 = img112.getWidth()-haloX-stepX;
-				tempX2 = img112.getWidth()-haloX;
-				tempY1 = img112.getHeight()-2*haloY;
-				tempY2 = img112.getHeight()-haloY;
-				tempZ1 = img112.getStackSize()-haloZ-stepZ;
-				tempZ2 = img112.getStackSize()-haloZ;
-				for (int z=tempZ1+1; z<=tempZ2; z++) {
-					ImageProcessor proc1 = img112.getStack().getProcessor(z);
-					ImageProcessor proc2 = img122.getStack().getProcessor(z);
-					for (int x=tempX1; x<tempX2; x++) {
-						for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
-							proc2.set(x, yao, proc1.get(x, y));
-							proc1.set(x, yb, proc2.get(x, ybo));
+				if (requireClean[2]){
+					//exchanging img112 and img122 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img112.getWidth();
+					tempY1 = img112.getHeight()-2*haloY;
+					tempY2 = img112.getHeight()-haloY;
+					tempZ1 = img112.getStackSize()-haloZ-stepZ;
+					tempZ2 = img112.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(z);
+						ImageProcessor proc2 = img122.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
 						}
 					}
-				}*/
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img211 and img221 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img211.getWidth();
+					tempY1 = img211.getHeight()-2*haloY;
+					tempY2 = img211.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img211.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(z);
+						ImageProcessor proc2 = img221.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img212 and img222 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img212.getWidth();
+					tempY1 = img212.getHeight()-2*haloY;
+					tempY2 = img212.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img212.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(z);
+						ImageProcessor proc2 = img222.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
 				
-				//exchanging img112 and img212 (z-direction change)
 				/*
-				tempX1 = img112.getWidth()-haloX-stepX;
-				tempX2 = img112.getWidth()-haloX;
-				tempY1 = img112.getHeight()-haloY-stepY;
-				tempY2 = img112.getHeight()-haloY;
-				tempZ1 = img112.getStackSize()-2*haloZ;
-				tempZ2 = img112.getStackSize()-haloZ;
-				for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
-					ImageProcessor proc1 = img112.getStack().getProcessor(z);
-					ImageProcessor proc2 = img212.getStack().getProcessor(zao);
-					for (int x=tempX1; x<tempX2; x++) {
-						for (int y=tempY1; y<tempY2; y++) {
-							proc2.set(x, y, proc1.get(x, y));
+				 * current arrangement:
+				 * i111 i112
+				 * i121 i122
+				 * 
+				 * i211 i212
+				 * i221 i222
+				 */
+				
+				if (requireClean[2]){
+					//exchanging img112 and img212 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img112.getWidth();
+					tempY1 = img112.getHeight()-haloY-stepY;
+					tempY2 = img112.getHeight()-haloY;
+					tempZ1 = img112.getStackSize()-2*haloZ;
+					tempZ2 = img112.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(z);
+						ImageProcessor proc2 = img212.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img212.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
 						}
 					}
 				}
-				for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
-					ImageProcessor proc1 = img112.getStack().getProcessor(zb);
-					ImageProcessor proc2 = img212.getStack().getProcessor(zbo);
-					for (int x=tempX1; x<tempX2; x++) {
-						for (int y=tempY1; y<tempY2; y++) {
-							proc1.set(x, y, proc2.get(x, y));
+				
+				if (requireClean[1]){
+					//exchanging img121 and img221 (z-direction change)
+					tempX1 = img121.getWidth()-haloX-stepX;
+					tempX2 = img121.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img121.getHeight();
+					tempZ1 = img121.getStackSize()-2*haloZ;
+					tempZ2 = img121.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(z);
+						ImageProcessor proc2 = img221.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img221.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
 						}
 					}
 				}
-				*/
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img122 and img222 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img122.getWidth();
+					tempY1 = haloY;
+					tempY2 = img122.getHeight();
+					tempZ1 = img122.getStackSize()-2*haloZ;
+					tempZ2 = img122.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(z);
+						ImageProcessor proc2 = img222.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img222.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
 				
 				//exchanging img121 and img221 (z-direction change)
 				/*
@@ -2332,19 +2489,1571 @@
 				
 			}
 			
-			private void docleanexchangetype001(){}
+			private void docleanexchangetype001(){
+				/*
+				 * current arrangement:
+				 * img112 img111
+				 * img122 img121
+				 * 
+				 * img212 img211
+				 * img222 img221
+				 */
+				
+				if (requireClean[1]){
+					//exchanging img122 and img121 (x-direction change)
+					tempX1 = img122.getWidth()-2*haloX;
+					tempX2 = img122.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img122.getHeight();
+					tempZ1 = img122.getStackSize()-haloZ-stepZ;
+					tempZ2 = img122.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img122.getStack().getProcessor(z);
+						ImageProcessor proc22 = img121.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img212 and img211 (x-direction change)
+					tempX1 = img212.getWidth()-2*haloX;
+					tempX2 = img212.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img212.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img212.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img212.getStack().getProcessor(z);
+						ImageProcessor proc22 = img211.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img222 and img221 (x-direction change)
+					tempX1 = img222.getWidth()-2*haloX;
+					tempX2 = img222.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img222.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img222.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img222.getStack().getProcessor(z);
+						ImageProcessor proc22 = img221.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+
+				
+				if (requireClean[2]){
+					//exchanging img111 and img121 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img111.getWidth();
+					tempY1 = img111.getHeight()-2*haloY;
+					tempY2 = img111.getHeight()-haloY;
+					tempZ1 = img111.getStackSize()-haloZ-stepZ;
+					tempZ2 = img111.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(z);
+						ImageProcessor proc2 = img121.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img212 and img222 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img212.getWidth();
+					tempY1 = img212.getHeight()-2*haloY;
+					tempY2 = img212.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img212.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(z);
+						ImageProcessor proc2 = img222.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img211 and img221 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img211.getWidth();
+					tempY1 = img211.getHeight()-2*haloY;
+					tempY2 = img211.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img211.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(z);
+						ImageProcessor proc2 = img221.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				
+				/*
+				 * current arrangement:
+				 * i111 i112
+				 * i121 i122
+				 * 
+				 * i211 i212
+				 * i221 i222
+				 */
+				
+				if (requireClean[2]){
+					//exchanging img111 and img211 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img111.getWidth();
+					tempY1 = img111.getHeight()-haloY-stepY;
+					tempY2 = img111.getHeight()-haloY;
+					tempZ1 = img111.getStackSize()-2*haloZ;
+					tempZ2 = img111.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(z);
+						ImageProcessor proc2 = img211.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img211.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1]){
+					//exchanging img122 and img222 (z-direction change)
+					tempX1 = img122.getWidth()-haloX-stepX;
+					tempX2 = img122.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img122.getHeight();
+					tempZ1 = img122.getStackSize()-2*haloZ;
+					tempZ2 = img122.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(z);
+						ImageProcessor proc2 = img222.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img222.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img121 and img221 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img121.getWidth();
+					tempY1 = haloY;
+					tempY2 = img121.getHeight();
+					tempZ1 = img121.getStackSize()-2*haloZ;
+					tempZ2 = img121.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(z);
+						ImageProcessor proc2 = img221.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img221.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+			}
 			
-			private void docleanexchangetype010(){}
+			private void docleanexchangetype010(){
+				/*
+				 * current arrangement:
+				 * img121 img122
+				 * img111 img112
+				 * 
+				 * img221 img222
+				 * img211 img212
+				 */
+				
+				if (requireClean[1]){
+					//exchanging img111 and img112 (x-direction change)
+					tempX1 = img111.getWidth()-2*haloX;
+					tempX2 = img111.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img111.getHeight();
+					tempZ1 = img111.getStackSize()-haloZ-stepZ;
+					tempZ2 = img111.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img111.getStack().getProcessor(z);
+						ImageProcessor proc22 = img112.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img221 and img222 (x-direction change)
+					tempX1 = img221.getWidth()-2*haloX;
+					tempX2 = img221.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img221.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img221.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img221.getStack().getProcessor(z);
+						ImageProcessor proc22 = img222.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img211 and img212 (x-direction change)
+					tempX1 = img211.getWidth()-2*haloX;
+					tempX2 = img211.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img211.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img211.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img211.getStack().getProcessor(z);
+						ImageProcessor proc22 = img212.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+
+				
+				if (requireClean[2]){
+					//exchanging img122 and img112 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img122.getWidth();
+					tempY1 = img122.getHeight()-2*haloY;
+					tempY2 = img122.getHeight()-haloY;
+					tempZ1 = img122.getStackSize()-haloZ-stepZ;
+					tempZ2 = img122.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(z);
+						ImageProcessor proc2 = img112.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img221 and img211 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img221.getWidth();
+					tempY1 = img221.getHeight()-2*haloY;
+					tempY2 = img221.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img221.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(z);
+						ImageProcessor proc2 = img211.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img222 and img212 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img222.getWidth();
+					tempY1 = img222.getHeight()-2*haloY;
+					tempY2 = img222.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img222.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(z);
+						ImageProcessor proc2 = img212.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				
+				/*
+				 * current arrangement:
+				 * i111 i112
+				 * i121 i122
+				 * 
+				 * i211 i212
+				 * i221 i222
+				 */
+				
+				if (requireClean[2]){
+					//exchanging img122 and img222 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img122.getWidth();
+					tempY1 = img122.getHeight()-haloY-stepY;
+					tempY2 = img122.getHeight()-haloY;
+					tempZ1 = img122.getStackSize()-2*haloZ;
+					tempZ2 = img122.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(z);
+						ImageProcessor proc2 = img222.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img222.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1]){
+					//exchanging img111 and img211 (z-direction change)
+					tempX1 = img111.getWidth()-haloX-stepX;
+					tempX2 = img111.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img111.getHeight();
+					tempZ1 = img111.getStackSize()-2*haloZ;
+					tempZ2 = img111.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(z);
+						ImageProcessor proc2 = img211.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img211.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img112 and img212 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img112.getWidth();
+					tempY1 = haloY;
+					tempY2 = img112.getHeight();
+					tempZ1 = img112.getStackSize()-2*haloZ;
+					tempZ2 = img112.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(z);
+						ImageProcessor proc2 = img212.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img212.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+			}
 			
-			private void docleanexchangetype011(){}
+			private void docleanexchangetype011(){
+				/*
+				 * current arrangement:
+				 * img122 img121
+				 * img112 img111
+				 * 
+				 * img222 img221
+				 * img212 img211
+				 */
+				
+				if (requireClean[1]){
+					//exchanging img112 and img111 (x-direction change)
+					tempX1 = img112.getWidth()-2*haloX;
+					tempX2 = img112.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img112.getHeight();
+					tempZ1 = img112.getStackSize()-haloZ-stepZ;
+					tempZ2 = img112.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img112.getStack().getProcessor(z);
+						ImageProcessor proc22 = img111.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img222 and img221 (x-direction change)
+					tempX1 = img222.getWidth()-2*haloX;
+					tempX2 = img222.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img222.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img222.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img222.getStack().getProcessor(z);
+						ImageProcessor proc22 = img221.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img212 and img211 (x-direction change)
+					tempX1 = img212.getWidth()-2*haloX;
+					tempX2 = img212.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img212.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img212.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img212.getStack().getProcessor(z);
+						ImageProcessor proc22 = img211.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+
+				
+				if (requireClean[2]){
+					//exchanging img121 and img111 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img121.getWidth();
+					tempY1 = img121.getHeight()-2*haloY;
+					tempY2 = img121.getHeight()-haloY;
+					tempZ1 = img121.getStackSize()-haloZ-stepZ;
+					tempZ2 = img121.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(z);
+						ImageProcessor proc2 = img111.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img222 and img212 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img222.getWidth();
+					tempY1 = img222.getHeight()-2*haloY;
+					tempY2 = img222.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img222.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(z);
+						ImageProcessor proc2 = img212.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img221 and img211 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img221.getWidth();
+					tempY1 = img221.getHeight()-2*haloY;
+					tempY2 = img221.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img221.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(z);
+						ImageProcessor proc2 = img211.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				
+				/*
+				 * current arrangement:
+				 * i111 i112
+				 * i121 i122
+				 * 
+				 * i211 i212
+				 * i221 i222
+				 */
+				
+				if (requireClean[2]){
+					//exchanging img121 and img221 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img121.getWidth();
+					tempY1 = img121.getHeight()-haloY-stepY;
+					tempY2 = img121.getHeight()-haloY;
+					tempZ1 = img121.getStackSize()-2*haloZ;
+					tempZ2 = img121.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(z);
+						ImageProcessor proc2 = img221.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img221.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1]){
+					//exchanging img112 and img212 (z-direction change)
+					tempX1 = img112.getWidth()-haloX-stepX;
+					tempX2 = img112.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img112.getHeight();
+					tempZ1 = img112.getStackSize()-2*haloZ;
+					tempZ2 = img112.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(z);
+						ImageProcessor proc2 = img212.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img212.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img111 and img211 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img111.getWidth();
+					tempY1 = haloY;
+					tempY2 = img111.getHeight();
+					tempZ1 = img111.getStackSize()-2*haloZ;
+					tempZ2 = img111.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(z);
+						ImageProcessor proc2 = img211.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img211.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+			}
 			
-			private void docleanexchangetype100(){}
+			private void docleanexchangetype100(){
+				/*
+				 * current arrangement:
+				 * img211 img212
+				 * img221 img222
+				 * 
+				 * img111 img112
+				 * img121 img122
+				 */
+				
+				if (requireClean[1]){
+					//exchanging img221 and img222 (x-direction change)
+					tempX1 = img221.getWidth()-2*haloX;
+					tempX2 = img221.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img221.getHeight();
+					tempZ1 = img221.getStackSize()-haloZ-stepZ;
+					tempZ2 = img221.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img221.getStack().getProcessor(z);
+						ImageProcessor proc22 = img222.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img111 and img112 (x-direction change)
+					tempX1 = img111.getWidth()-2*haloX;
+					tempX2 = img111.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img111.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img111.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img111.getStack().getProcessor(z);
+						ImageProcessor proc22 = img112.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img121 and img122 (x-direction change)
+					tempX1 = img121.getWidth()-2*haloX;
+					tempX2 = img121.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img121.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img121.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img121.getStack().getProcessor(z);
+						ImageProcessor proc22 = img122.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+
+				
+				if (requireClean[2]){
+					//exchanging img212 and img222 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img212.getWidth();
+					tempY1 = img212.getHeight()-2*haloY;
+					tempY2 = img212.getHeight()-haloY;
+					tempZ1 = img212.getStackSize()-haloZ-stepZ;
+					tempZ2 = img212.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(z);
+						ImageProcessor proc2 = img222.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img111 and img121 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img111.getWidth();
+					tempY1 = img111.getHeight()-2*haloY;
+					tempY2 = img111.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img111.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(z);
+						ImageProcessor proc2 = img121.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img112 and img122 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img112.getWidth();
+					tempY1 = img112.getHeight()-2*haloY;
+					tempY2 = img112.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img112.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(z);
+						ImageProcessor proc2 = img122.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				
+				/*
+				 * current arrangement:
+				 * i111 i112
+				 * i121 i122
+				 * 
+				 * i211 i212
+				 * i221 i222
+				 */
+				
+				if (requireClean[2]){
+					//exchanging img212 and img112 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img212.getWidth();
+					tempY1 = img212.getHeight()-haloY-stepY;
+					tempY2 = img212.getHeight()-haloY;
+					tempZ1 = img212.getStackSize()-2*haloZ;
+					tempZ2 = img212.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(z);
+						ImageProcessor proc2 = img112.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img112.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1]){
+					//exchanging img221 and img121 (z-direction change)
+					tempX1 = img221.getWidth()-haloX-stepX;
+					tempX2 = img221.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img221.getHeight();
+					tempZ1 = img221.getStackSize()-2*haloZ;
+					tempZ2 = img221.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(z);
+						ImageProcessor proc2 = img121.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img121.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img222 and img122 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img222.getWidth();
+					tempY1 = haloY;
+					tempY2 = img222.getHeight();
+					tempZ1 = img222.getStackSize()-2*haloZ;
+					tempZ2 = img222.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(z);
+						ImageProcessor proc2 = img122.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img122.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+			}
 			
-			private void docleanexchangetype101(){}
+			private void docleanexchangetype101(){
+				/*
+				 * current arrangement:
+				 * img212 img211
+				 * img222 img221
+				 * 
+				 * img112 img111
+				 * img122 img121
+				 */
+				
+				if (requireClean[1]){
+					//exchanging img222 and img221 (x-direction change)
+					tempX1 = img222.getWidth()-2*haloX;
+					tempX2 = img222.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img222.getHeight();
+					tempZ1 = img222.getStackSize()-haloZ-stepZ;
+					tempZ2 = img222.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img222.getStack().getProcessor(z);
+						ImageProcessor proc22 = img221.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img112 and img111 (x-direction change)
+					tempX1 = img112.getWidth()-2*haloX;
+					tempX2 = img112.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img112.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img112.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img112.getStack().getProcessor(z);
+						ImageProcessor proc22 = img111.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img122 and img121 (x-direction change)
+					tempX1 = img122.getWidth()-2*haloX;
+					tempX2 = img122.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img122.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img122.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img122.getStack().getProcessor(z);
+						ImageProcessor proc22 = img121.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+
+				
+				if (requireClean[2]){
+					//exchanging img211 and img221 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img211.getWidth();
+					tempY1 = img211.getHeight()-2*haloY;
+					tempY2 = img211.getHeight()-haloY;
+					tempZ1 = img211.getStackSize()-haloZ-stepZ;
+					tempZ2 = img211.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(z);
+						ImageProcessor proc2 = img221.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img112 and img122 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img112.getWidth();
+					tempY1 = img112.getHeight()-2*haloY;
+					tempY2 = img112.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img112.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img112.getStack().getProcessor(z);
+						ImageProcessor proc2 = img122.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img111 and img121 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img111.getWidth();
+					tempY1 = img111.getHeight()-2*haloY;
+					tempY2 = img111.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img111.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img111.getStack().getProcessor(z);
+						ImageProcessor proc2 = img121.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[2]){
+					//exchanging img211 and img111 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img211.getWidth();
+					tempY1 = img211.getHeight()-haloY-stepY;
+					tempY2 = img211.getHeight()-haloY;
+					tempZ1 = img211.getStackSize()-2*haloZ;
+					tempZ2 = img211.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(z);
+						ImageProcessor proc2 = img111.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img111.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1]){
+					//exchanging img222 and img122 (z-direction change)
+					tempX1 = img222.getWidth()-haloX-stepX;
+					tempX2 = img222.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img222.getHeight();
+					tempZ1 = img222.getStackSize()-2*haloZ;
+					tempZ2 = img222.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(z);
+						ImageProcessor proc2 = img122.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img122.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img221 and img121 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img221.getWidth();
+					tempY1 = haloY;
+					tempY2 = img221.getHeight();
+					tempZ1 = img221.getStackSize()-2*haloZ;
+					tempZ2 = img221.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(z);
+						ImageProcessor proc2 = img121.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img121.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+			}
 			
-			private void docleanexchangetype110(){}
+			private void docleanexchangetype110(){
+				/*
+				 * current arrangement:
+				 * img221 img222
+				 * img211 img212
+				 * 
+				 * img121 img122
+				 * img111 img112
+				 */
+				
+				if (requireClean[1]){
+					//exchanging img211 and img212 (x-direction change)
+					tempX1 = img211.getWidth()-2*haloX;
+					tempX2 = img211.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img211.getHeight();
+					tempZ1 = img211.getStackSize()-haloZ-stepZ;
+					tempZ2 = img211.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img211.getStack().getProcessor(z);
+						ImageProcessor proc22 = img212.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img121 and img122 (x-direction change)
+					tempX1 = img121.getWidth()-2*haloX;
+					tempX2 = img121.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img121.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img121.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img121.getStack().getProcessor(z);
+						ImageProcessor proc22 = img122.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img111 and img112 (x-direction change)
+					tempX1 = img111.getWidth()-2*haloX;
+					tempX2 = img111.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img111.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img111.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img111.getStack().getProcessor(z);
+						ImageProcessor proc22 = img112.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+
+				
+				if (requireClean[2]){
+					//exchanging img222 and img212 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img222.getWidth();
+					tempY1 = img222.getHeight()-2*haloY;
+					tempY2 = img222.getHeight()-haloY;
+					tempZ1 = img222.getStackSize()-haloZ-stepZ;
+					tempZ2 = img222.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(z);
+						ImageProcessor proc2 = img212.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img121 and img111 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img121.getWidth();
+					tempY1 = img121.getHeight()-2*haloY;
+					tempY2 = img121.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img121.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(z);
+						ImageProcessor proc2 = img111.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img122 and img112 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img122.getWidth();
+					tempY1 = img122.getHeight()-2*haloY;
+					tempY2 = img122.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img122.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(z);
+						ImageProcessor proc2 = img112.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[2]){
+					//exchanging img222 and img122 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img222.getWidth();
+					tempY1 = img222.getHeight()-haloY-stepY;
+					tempY2 = img222.getHeight()-haloY;
+					tempZ1 = img222.getStackSize()-2*haloZ;
+					tempZ2 = img222.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(z);
+						ImageProcessor proc2 = img122.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img222.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img122.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1]){
+					//exchanging img211 and img111 (z-direction change)
+					tempX1 = img211.getWidth()-haloX-stepX;
+					tempX2 = img211.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img211.getHeight();
+					tempZ1 = img211.getStackSize()-2*haloZ;
+					tempZ2 = img211.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(z);
+						ImageProcessor proc2 = img111.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img111.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img212 and img112 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img212.getWidth();
+					tempY1 = haloY;
+					tempY2 = img212.getHeight();
+					tempZ1 = img212.getStackSize()-2*haloZ;
+					tempZ2 = img212.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(z);
+						ImageProcessor proc2 = img112.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img112.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+			}
 			
-			private void docleanexchangetype111(){}
+			private void docleanexchangetype111(){
+				/*
+				 * current arrangement:
+				 * img222 img221
+				 * img212 img211
+				 * 
+				 * img122 img121
+				 * img112 img111
+				 */
+				
+				if (requireClean[1]){
+					//exchanging img212 and img211 (x-direction change)
+					tempX1 = img212.getWidth()-2*haloX;
+					tempX2 = img212.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img212.getHeight();
+					tempZ1 = img212.getStackSize()-haloZ-stepZ;
+					tempZ2 = img212.getStackSize()-haloZ;
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img212.getStack().getProcessor(z);
+						ImageProcessor proc22 = img211.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0]){
+					//exchanging img122 and img121 (x-direction change)
+					tempX1 = img122.getWidth()-2*haloX;
+					tempX2 = img122.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img122.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img122.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img122.getStack().getProcessor(z);
+						ImageProcessor proc22 = img121.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[0] && requireClean[2]){
+					//exchanging img112 and img111 (x-direction change)
+					tempX1 = img112.getWidth()-2*haloX;
+					tempX2 = img112.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img112.getHeight();
+					tempZ1 = haloZ;
+					tempZ2 = img112.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc21 = img112.getStack().getProcessor(z);
+						ImageProcessor proc22 = img111.getStack().getProcessor(z);
+						for (int x=tempX1, xao = 0, xbo = haloX, xb=tempX2; x<tempX2; x++, xb++, xao++, xbo++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc22.set(xao, y, proc21.get(x, y));
+								proc21.set(xb, y, proc22.get(xbo, y));
+							}
+						}
+					}
+				}
+				if (requireClean[2]){
+					//exchanging img221 and img211 (y-direction change)
+					
+					tempX1 = haloX;
+					tempX2 = img221.getWidth();
+					tempY1 = img221.getHeight()-2*haloY;
+					tempY2 = img221.getHeight()-haloY;
+					tempZ1 = img221.getStackSize()-haloZ-stepZ;
+					tempZ2 = img221.getStackSize()-haloZ;
+					IJ.log("X: " + String.valueOf(tempX1) + "<" + String.valueOf(tempX2));
+					IJ.log("Y: " + String.valueOf(tempY1) + "<" + String.valueOf(tempY2));
+					IJ.log("Yo: " + String.valueOf(0) + "<" + String.valueOf(tempY2-tempY1));
+					IJ.log("Z: " + String.valueOf(tempZ1) + "<" + String.valueOf(tempZ2));
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(z);
+						ImageProcessor proc2 = img211.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0]){
+					//exchanging img122 and img112 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img122.getWidth();
+					tempY1 = img122.getHeight()-2*haloY;
+					tempY2 = img122.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img122.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img122.getStack().getProcessor(z);
+						ImageProcessor proc2 = img112.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2] && requireClean[0] && requireClean[1]){
+					//exchanging img121 and img111 (y-direction change)
+					tempX1 = haloX;
+					tempX2 = img121.getWidth();
+					tempY1 = img121.getHeight()-2*haloY;
+					tempY2 = img121.getHeight()-haloY;
+					tempZ1 = haloZ;
+					tempZ2 = img121.getStackSize();
+					for (int z=tempZ1+1; z<=tempZ2; z++) {
+						ImageProcessor proc1 = img121.getStack().getProcessor(z);
+						ImageProcessor proc2 = img111.getStack().getProcessor(z);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1, yao = 0, ybo = haloY, yb=tempY2; y<tempY2; y++, yb++, yao++, ybo++) {
+								proc2.set(x, yao, proc1.get(x, y));
+								proc1.set(x, yb, proc2.get(x, ybo));
+							}
+						}
+					}
+				}
+				if (requireClean[2]){
+					//exchanging img221 and img121 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img221.getWidth();
+					tempY1 = img221.getHeight()-haloY-stepY;
+					tempY2 = img221.getHeight()-haloY;
+					tempZ1 = img221.getStackSize()-2*haloZ;
+					tempZ2 = img221.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(z);
+						ImageProcessor proc2 = img121.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img221.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img121.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1]){
+					//exchanging img212 and img112 (z-direction change)
+					tempX1 = img212.getWidth()-haloX-stepX;
+					tempX2 = img212.getWidth()-haloX;
+					tempY1 = haloY;
+					tempY2 = img212.getHeight();
+					tempZ1 = img212.getStackSize()-2*haloZ;
+					tempZ2 = img212.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(z);
+						ImageProcessor proc2 = img112.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img212.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img112.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+				
+				if (requireClean[1] && requireClean[2]){
+					//exchanging img211 and img111 (z-direction change)
+					tempX1 = haloX;
+					tempX2 = img211.getWidth();
+					tempY1 = haloY;
+					tempY2 = img211.getHeight();
+					tempZ1 = img211.getStackSize()-2*haloZ;
+					tempZ2 = img211.getStackSize()-haloZ;
+					for (int z=tempZ1+1, zao = 1; z<=tempZ2; z++, zao++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(z);
+						ImageProcessor proc2 = img111.getStack().getProcessor(zao);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc2.set(x, y, proc1.get(x, y));
+							}
+						}
+					}
+					for (int zb=tempZ2+1, zbo = haloZ+1; zb<=tempZ2+haloZ; zb++, zbo++) {
+						ImageProcessor proc1 = img211.getStack().getProcessor(zb);
+						ImageProcessor proc2 = img111.getStack().getProcessor(zbo);
+						for (int x=tempX1; x<tempX2; x++) {
+							for (int y=tempY1; y<tempY2; y++) {
+								proc1.set(x, y, proc2.get(x, y));
+							}
+						}
+					}
+				}
+			}
 	}
 
 
