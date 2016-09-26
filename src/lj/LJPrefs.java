@@ -17,6 +17,7 @@ import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.Prefs;
@@ -33,7 +34,11 @@ public class LJPrefs{
 	//TODO: remove unneeded tracking data
 	//TODO: add path to relevant ImageJ files and then remove commented code
 	public static final String PLUGIN_NAME = "LungJ";
-	public static final String VERSION = "0.3.1b";
+	public static final String VERSION = "0.3.2";
+	public static final String PLUGIN_JAVA_VERSION = "1.6.0_24";
+	public static final String PLUGIN_IJ_VERSION = "1.51d";
+	public static final String PLUGIN_TWS_VERSION = "2.2.1";
+	public static final String IJ_VERSION = IJ.getVersion();
 	/** file.separator system property */
 	public static String separator = System.getProperty("file.separator");
 	public static String LJ_dir =  System.getProperty("user.dir") + separator + "plugins" + separator + "LungJ";//getDirectory("imagej") + "/plugins/LungJ";

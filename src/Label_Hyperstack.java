@@ -1,7 +1,11 @@
+import java.util.Enumeration;
+import java.util.Properties;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
+import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 
 /** 
@@ -12,14 +16,14 @@ import ij.plugin.PlugIn;
  * - Provide names for each channel. leave the name blank if slices should not be 
  *   distinguished by their channel.
  * - Provide a separating string (default is ` - ’)
- * - Choose if the slice number (z-value) should be included in the slice name.
+ * - Choose if the slice number (z-value) should be included in the slice name. If 
+ *   so, provide a starting value and an increment value as well as a unit if useful
  *   
  * @author Lasse Wollatz
  *   
  **/
 
 public class Label_Hyperstack implements PlugIn{
-	//TODO: allow to offset slice number
 	//TODO: future work: detect patterns in current image labeling to pre-fill textboxes, or just store user preferences
 	//TODO:              handle case of too many frames more elegant 
 	
@@ -31,30 +35,110 @@ public class Label_Hyperstack implements PlugIn{
 		int tChannels = image.getNChannels();
 		int tFrames = image.getNFrames();
 		int tSlices = image.getNSlices();
+		int tWidth = image.getWidth();
+		int tHeight = image.getHeight();
+		
+		Calibration cal = image.getCalibration(); 
+		Double xres = cal.pixelWidth; //xres contains the voxel width in units 
+		Double yres = cal.pixelHeight; //yres contains the voxel height in units 
+		Double zres = cal.pixelDepth; //zres contains the voxel depth in units 
+		//String unit = ij.measure.getUnit();
+		
+		int a = 0;
+		int b = 0;
+		//Double xres = 1.0;
+		//Double yres = 1.0;
+		//Double zres = 1.0;
+		String unit = "";
+		String dimstr = "";
+		//Properties imgprops = image.getProperties();
+		Object prop = image.getProperty("Info");
+		String imginfo = (String)prop;
+		a = imginfo.indexOf("\nXResolution ");
+		/*if(a>0){
+			a = imginfo.indexOf("=",a)+1;
+			b = imginfo.indexOf("\n",a);
+			xres = 1/Double.parseDouble(imginfo.substring(a, b));
+			if(xres<0){
+				xres=1.0;
+			}
+		}
+		a = imginfo.indexOf("\nYResolution ");
+		if(a>0){
+			a = imginfo.indexOf("=",a)+1;
+			b = imginfo.indexOf("\n",a);
+			yres = 1/Double.parseDouble(imginfo.substring(a, b));
+			if(yres<0){
+				yres=1.0;
+			}
+		}
+		a = imginfo.indexOf("\nSpacing ");
+		if(a>0){
+			a = imginfo.indexOf("=",a)+1;
+			b = imginfo.indexOf("\n",a);
+			zres = Double.parseDouble(imginfo.substring(a, b));
+			if(zres<0){
+				zres=1.0;
+			}
+		}*/
+		a = imginfo.indexOf("\nUnit ");
+		if(a>0){
+			a = imginfo.indexOf("=",a)+2;
+			b = imginfo.indexOf("\n",a);
+			unit = imginfo.substring(a, b);
+			dimstr = " ("+(tWidth*xres)+"x"+(tHeight*yres)+"x"+(tSlices*zres)+" "+unit+")";
+		}
+		
+		
 		
 		String[] ChannelNames = new String[tChannels];
 		String[] FrameNames = new String[tFrames];
+		Double FramelabelStart = 0.0;
+		Double FramelabelInc = 1.0;
+		String FramelabelEnd = "";
+		Double SlicelabelStart = 0.0;
+		Double SlicelabelInc = zres;
+		String SlicelabelEnd = unit;
 		String seperator = " - ";
 		boolean doSliceN = true;
 		boolean doFrameN = true;
 		
+		Double tempnum = 0.0;
+		
 		GenericDialog gd = new GenericDialog(command+" Relabel Image Slices");
-		gd.addMessage("Frame Labels:");
-		if (tFrames <= 10){
+		gd.addMessage("Dimensions: "+tWidth+"x"+tHeight+"x"+tSlices+" px"+dimstr);
+		if(tFrames > 10){
+			gd.addMessage("Frame Labels:");
+			gd.addCheckbox("frame number included", doFrameN);
+			gd.addStringField("frame_starting_string", "t = ", 40);
+			gd.addNumericField("frame_starting_number", FramelabelStart, 5);
+			gd.addNumericField("frame_increment_number", FramelabelInc, 5);
+			gd.addStringField("frame_ending_string", FramelabelEnd, 5);
+		}else if (tFrames > 1){
+			gd.addMessage("Frame Labels:");
 			for (int f=1; f<=tFrames; f++){
 				gd.addStringField("Frame-"+f, "", 40);
 			}
-		}else{
-			gd.addCheckbox("frame number included", doFrameN);
-			gd.addStringField("Framelabel", "t = ", 40);
+		}else {
+			gd.addMessage("(only single frame found)");
 		}
-		gd.addMessage("Channel Labels:");
-		for (int c=1; c<=tChannels; c++){
-			gd.addStringField("Channel-"+c, "", 40);
+		if (tChannels > 1){
+			gd.addMessage("Channel Labels:");
+			for (int c=1; c<=tChannels; c++){
+				gd.addStringField("Channel-"+c, "", 40);
+			}
+		}else {
+			gd.addMessage("(only single channel found)");
 		}
+		gd.addMessage("Slice Labels:");
+		gd.addCheckbox("slice number included", doSliceN);
+		gd.addNumericField("slice_starting_number", SlicelabelStart, 5);
+		gd.addNumericField("slice_increment_number", SlicelabelInc, 5);
+		gd.addStringField("slice_ending_string", SlicelabelEnd, 5);
+		
+		//gd.addTextAreas(imginfo, "", 20, 20);
 		gd.addMessage("Settings:");
 		gd.addStringField("Seperator", seperator, 5);
-		gd.addCheckbox("slice number included", doSliceN);
 		IJ.showStatus("Waiting for User Input...");
 		gd.showDialog();
 		if (gd.wasCanceled()){
@@ -63,53 +147,69 @@ public class Label_Hyperstack implements PlugIn{
         }
 		IJ.showStatus("Labeling Hyperstack");
 		
-		if (tFrames <= 10){
+		if(tFrames > 10){
+			doFrameN = gd.getNextBoolean();
+			FrameNames[0] = gd.getNextString();
+			FramelabelStart = gd.getNextNumber();
+			FramelabelInc = gd.getNextNumber();
+			FramelabelEnd = gd.getNextString();
+		}else if (tFrames > 1){
 			for (int f=0; f<tFrames; f++){
 				FrameNames[f] = gd.getNextString();
 			}
-		}else{
-			doFrameN = gd.getNextBoolean();
-			FrameNames[0] = gd.getNextString();
 		}
-		for (int c=0; c<tChannels; c++){
-			ChannelNames[c] = gd.getNextString();
+		if (tChannels > 1){
+			for (int c=0; c<tChannels; c++){
+				ChannelNames[c] = gd.getNextString();
+			}
 		}
-		seperator = gd.getNextString();
+		//get slices
 		doSliceN = gd.getNextBoolean();
+		SlicelabelStart = gd.getNextNumber();
+		SlicelabelInc = gd.getNextNumber();
+		SlicelabelEnd = gd.getNextString();
+		//get settings
+		seperator = gd.getNextString();
 		
 		for (int f=1; f<=tFrames; f++){
 			for (int c=1; c<=tChannels; c++){
 				for (int s=1; s<=tSlices; s++){
 					int index = image.getStackIndex(c, s, f);
 					String label = "";
-					if (tFrames <= 10){
-					if (!FrameNames[f-1].equals("")){
-						if (!label.equals("")){
-							label += seperator;
-						}
-						label += FrameNames[f-1];
-					}
-					}else{
+					if(tFrames > 10){
 						if (doFrameN){
 							if (!label.equals("")){
 								label += seperator;
 							}
-							label += FrameNames[0] + f;
+							tempnum = (FramelabelStart+((double)f-1.0)*FramelabelInc);
+							label += FrameNames[0] + tempnum.toString() + FramelabelEnd;
+						}
+					}else if (tFrames > 1){
+						if (!FrameNames[f-1].equals("")){
+							if (!label.equals("")){
+								label += seperator;
+							}
+							label += FrameNames[f-1];
 						}
 					}
-					if (!ChannelNames[c-1].equals("")){
-						if (!label.equals("")){
-							label += seperator;
+					if (tChannels > 1){
+						if (!ChannelNames[c-1].equals("")){
+							if (!label.equals("")){
+								label += seperator;
+							}
+							label += ChannelNames[c-1];
 						}
-						label += ChannelNames[c-1];
 					}
 					if (doSliceN){
 						if (!label.equals("")){
 							label += seperator;
 						}
-						label += "slice " + s;
+						tempnum = SlicelabelStart+((double)s-1.0)*SlicelabelInc;
+						label += tempnum.toString() + ""; 
+						label += SlicelabelEnd;
 					}
-					image.getStack().setSliceLabel(label, index);
+					IJ.log(label);
+					image.getStack().setSliceLabel(label+" ", index); //for some reason the unit vanishes and numbers are rounded to integers
 				}
 			}
 		}

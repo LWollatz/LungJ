@@ -8,6 +8,7 @@ import ij.process.ImageProcessor;
 import ij.gui.GenericDialog;
 
 
+
 //import trainableSegmentation.*;
 //import weka.core.Utils;
 import java.awt.*;
@@ -59,8 +60,9 @@ public class Apply_Weka_Classifier implements PlugIn, ActionListener{
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
 	/** plugin's current version */
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	public static final String PLUGIN_TWS = LJPrefs.PLUGIN_TWS_VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
-	public static String TWS_version = "v2.2.1"; //as this is included in the window name...
+	public static String TWS_version = "v" + PLUGIN_TWS; //as this is included in the window name...
 	
 	private static String LJ_srcDirectory = LJPrefs.LJ_inpDirectory;
 	//private static String LJ_srcFilename = "250x250x250x16bit.tif";

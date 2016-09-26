@@ -3372,6 +3372,7 @@
 					}
 				}
 				
+				
 				if (requireClean[1] && requireClean[2]){
 					//exchanging img222 and img122 (z-direction change)
 					tempX1 = haloX;

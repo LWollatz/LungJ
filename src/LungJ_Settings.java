@@ -119,7 +119,7 @@ public class LungJ_Settings implements PlugIn, ActionListener{
         
         /**COLORIZE_**/
         gd.addMessage("Colours for Colour by Segment");
-        JPanel pnlcol0 = new JPanel();
+        final JPanel pnlcol0 = new JPanel();
 		pnlcol0.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent arg0) {
 				LJPrefs.LJ_Colors[0] = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Colors[0]);
@@ -130,7 +130,7 @@ public class LungJ_Settings implements PlugIn, ActionListener{
 		pnlcol0.setBackground(LJPrefs.LJ_Colors[0]);
 		cCol.gridx = 2;
 		gd.add(pnlcol0, cCol);
-		JPanel pnlcol1 = new JPanel();
+		final JPanel pnlcol1 = new JPanel();
 		pnlcol1.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent arg0) {
 				LJPrefs.LJ_Colors[1] = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Colors[1]);
@@ -141,7 +141,7 @@ public class LungJ_Settings implements PlugIn, ActionListener{
 		pnlcol1.setBackground(LJPrefs.LJ_Colors[1]);
 		cCol.gridx = 3;
 		gd.add(pnlcol1, cCol);
-		JPanel pnlcol2 = new JPanel();
+		final JPanel pnlcol2 = new JPanel();
 		pnlcol2.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent arg0) {
 				LJPrefs.LJ_Colors[2] = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Colors[2]);
@@ -152,7 +152,7 @@ public class LungJ_Settings implements PlugIn, ActionListener{
 		pnlcol2.setBackground(LJPrefs.LJ_Colors[2]);
 		cCol.gridx = 4;
 		gd.add(pnlcol2, cCol);
-		JPanel pnlcol3 = new JPanel();
+		final JPanel pnlcol3 = new JPanel();
 		pnlcol3.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent arg0) {
 				LJPrefs.LJ_Colors[3] = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Colors[3]);
@@ -163,7 +163,7 @@ public class LungJ_Settings implements PlugIn, ActionListener{
 		pnlcol3.setBackground(LJPrefs.LJ_Colors[3]);
 		cCol.gridx = 5;
 		gd.add(pnlcol3, cCol);
-		JPanel pnlcol4 = new JPanel();
+		final JPanel pnlcol4 = new JPanel();
 		pnlcol4.addMouseListener(new MouseAdapter() {
 			public void mouseReleased(MouseEvent arg0) {
 				LJPrefs.LJ_Colors[4] = LJPrefs.getColor("Choose Color", LJPrefs.LJ_Colors[4]);
