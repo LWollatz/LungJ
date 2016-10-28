@@ -2,18 +2,18 @@
 
 ### What is this repository for? ###
 
-* providing a Plug-In for Fiji / ImageJ for segmenting micro-CT scans of Lung Tissues
-* current version: 0.3.0
-* last stable version: 0.3
+* providing a Plug-In for Fiji / ImageJ for segmenting images, too large to process in RAM at once as well as several other tools for image segmentation & processing.
+* current version: 0.5.0
+* last stable version: 0.3.0
 * [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
 
 ### Requirements ###
 
 * ImageJ 1.49s or later
-* Java 1.8.0 (This has to be the Java used by ImageJ! Check under Help>About ImageJ)
-* Trainable Weka Segmentation v2.2.1 (any other version will not work)
+* Trainable Weka Segmentation Plugin
+* Flood Fill (3D) Plugin
+* 3D Viewer Plugin
 * Fiji (advised as it provides many extra tools including the Trainable Weka Segmentation)
-* Windows 64-bit (advised as not tested for other platforms)
 
 ### How do I get set up? ###
 
@@ -40,13 +40,7 @@
 * copy the .jar file into the Fiji *./plugins* directory
 * restart Fiji
 
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
 ### Who do I talk to? ###
 
 * Repo owner: Lasse Wollatz (l.wollatz@soton.ac.uk)
-* Other community or team contact
+* More info: http://imagej.net/LungJ
