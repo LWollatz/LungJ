@@ -1,17 +1,16 @@
 package lj.testing;
 
-import lj.LJPrefs;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
-import ij.WindowManager;
-import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 
-import java.io.IOException;
-import java.util.Properties;
-
+/***
+ * WORK IN PROGRESS
+ * creates a testimage for testing the halo exchange function
+ * @author lw6g10
+ *
+ ***/
 public class Test_Halo_Make implements PlugIn {
 	//TODO: create function to read in blocks and replace halo by a chessboard pattern or similar
 		

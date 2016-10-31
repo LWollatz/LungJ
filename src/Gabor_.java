@@ -14,15 +14,18 @@ import net.imglib2.img.display.imagej.ImageJFunctions;
 import net.imglib2.algorithm.fft2.FFTConvolution;
 import net.imglib2.img.ImagePlusAdapter;
 
-
+/*** Gabor_
+ * implements the TWS Gabor filter
+ * This class has been copied from the TWS and adapted for independent use. (NOT FULLY FUNCTIONAL!)
+ * @author Trainable WEKA Segmentation
+ ***/
 public class Gabor_ implements PlugIn{
 	
 	ImagePlus originalImage = null;
 	int width = 0;
 	int height = 0;
 	
-	public void run(String arg) 
-	{
+	public void run(String arg){
 		if (arg.equals("about"))
 		{
 			//TODO: showAbout(); 
@@ -72,14 +75,7 @@ public class Gabor_ implements PlugIn{
 	 * @param frequency frequency of the sinusoidal component
 	 * @param nAngles number of filter orientations
 	 */
-	public void addGabor(
-			final ImagePlus originalImage,
-			final double sigma,
-			final double gamma,
-			final double psi,
-			final double frequency,
-			final int nAngles)
-	{
+	public void addGabor(final ImagePlus originalImage, final double sigma, final double gamma, final double psi, final double frequency, final int nAngles){
 		if (Thread.currentThread().isInterrupted()) 
 			return;
 
@@ -190,8 +186,7 @@ public class Gabor_ implements PlugIn{
 	 * @param originalImage input image
 	 * @return array of channels
 	 */
-	ImagePlus[] extractChannels(final ImagePlus originalImage) 
-	{
+	ImagePlus[] extractChannels(final ImagePlus originalImage) {
 		final int width = originalImage.getWidth();
 		final int height = originalImage.getHeight();
 		ImagePlus[] channels;
@@ -224,8 +219,7 @@ public class Gabor_ implements PlugIn{
 	 * @param channels results channels
 	 * @return result image 
 	 */
-	ImagePlus mergeResultChannels(final ImagePlus[] channels) 
-	{
+	ImagePlus mergeResultChannels(final ImagePlus[] channels) {
 		if(channels.length > 1)
 		{						
 			ImageStack mergedColorStack = mergeStacks(channels[0].getImageStack(), channels[1].getImageStack(), channels[2].getImageStack());
@@ -249,8 +243,7 @@ public class Gabor_ implements PlugIn{
 	 * @param blueChannel image stack representing the blue channel
 	 * @return RGB merged stack
 	 */
-	ImageStack mergeStacks(ImageStack redChannel, ImageStack greenChannel, ImageStack blueChannel)
-	{
+	ImageStack mergeStacks(ImageStack redChannel, ImageStack greenChannel, ImageStack blueChannel){
 		final ImageStack colorStack = new ImageStack( redChannel.getWidth(), redChannel.getHeight());
 		
 		for(int n=1; n<=redChannel.getSize(); n++)

@@ -1,5 +1,3 @@
-import java.awt.Window;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
@@ -8,25 +6,33 @@ import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.plugin.ZProjector;
 import ij.plugin.filter.Convolver;
-import ij.plugin.filter.PlugInFilter;
 import ij.process.ByteProcessor;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
+/*** Membrane_Projections
+ * implements the TWS Membrane_Projections filter
+ * This class has been copied from the TWS and adapted for independent use.
+ * 
+ * @author Trainable WEKA Segmentation
+ * @author iarganda
+ * @author ctrueden
+ * @author m-ezzat
+ * @author dscho
+ * 
+ * @author Lasse Wollatz
+ ***/
 public class Membrane_Projections implements PlugIn{
 	int nAngles = 30;
 	int width = 0;
 	int height = 0;
 	/** original image */
 	ImagePlus originalImage = null;
-	public static final int MEMBRANE				=  4;
 	
 	
-	public void run(String arg) 
-	{
-		if (arg.equals("about"))
-		{
+	public void run(String arg){
+		if (arg.equals("about")){
 			showAbout(); 
 			return;
 		}
@@ -60,11 +66,14 @@ public class Membrane_Projections implements PlugIn{
 	
 	
 	
-	/** 
-	 * Add membrane features to the stack (single thread version)
-	 * @param patchSize size of the filter to be used
-	 * @param membraneSize expected membrane thickness
-	 */
+	/*** addMembraneFeatures ***
+     * Add membrane features to the stack (single thread version)
+     * 
+     * @param  patchSize           int size of the filter to be used
+     * @param  membraneSize        int expected membrane thickness
+     * 
+     * @see trainableSegmentation.FeatureStack#addMembraneFeatures
+     ***/
 	public void addMembraneFeatures(int patchSize,int membraneSize){
 		//patchSize = 19
 		//membraneSize = 1?
@@ -103,7 +112,7 @@ public class Membrane_Projections implements PlugIn{
 	  }
 	  ImagePlus merged=mergeResultChannels(results);
 	  
-	  //for (int i=1; i <= merged.getImageStackSize(); i++)   wholeStack.addSlice(merged.getImageStack().getSliceLabel(i),merged.getImageStack().getPixels(i));
+	  // for (int i=1; i <= merged.getImageStackSize(); i++)   wholeStack.addSlice(merged.getImageStack().getSliceLabel(i),merged.getImageStack().getPixels(i));
 	  
 	  merged.show();
 	}
@@ -112,23 +121,25 @@ public class Membrane_Projections implements PlugIn{
 	
 	
 	
-	/**
-	 * Display filter information
-	 */
-	void showAbout() 
-	{
+	/*** showAbout ***
+     * Display filter information
+     * 
+     ***/
+	void showAbout(){
 		IJ.showMessage("Membrane Projections filter...",
 				"modified from Trainable WEKA segmentationn\n");
 	}
 	
 	
-	/**
-	 * Extract channels from input image if it is RGB
-	 * @param originalImage input image
-	 * @return array of channels
-	 */
-	ImagePlus[] extractChannels(final ImagePlus originalImage) 
-	{
+	/*** extractChannels ***
+     * Extract channels from input image if it is RGB
+     * 
+     * @param  originalImage       ImagePlus input image
+     * @return                     ImagePlus[] array of channels
+     * 
+     * @see trainableSegmentation.FeatureStack#extractChannels
+     ***/
+	ImagePlus[] extractChannels(final ImagePlus originalImage){
 		final int width = originalImage.getWidth();
 		final int height = originalImage.getHeight();
 		ImagePlus[] channels;
@@ -156,13 +167,15 @@ public class Membrane_Projections implements PlugIn{
 		return channels;
 	}
 	
-	/**
-	 * Merge input channels if they are more than 1
-	 * @param channels results channels
-	 * @return result image 
-	 */
-	ImagePlus mergeResultChannels(final ImagePlus[] channels) 
-	{
+	/*** mergeResultChannels ***
+     * Merge input channels if they are more than 1
+     * 
+     * @param  channels            ImagePlus[] results 
+     * @return                     ImagePlus result image 
+     * 
+     * @see trainableSegmentation.FeatureStack#mergeResultChannels
+     ***/
+	ImagePlus mergeResultChannels(final ImagePlus[] channels){
 		if(channels.length > 1)
 		{						
 			ImageStack mergedColorStack = mergeStacks(channels[0].getImageStack(), channels[1].getImageStack(), channels[2].getImageStack());
@@ -178,16 +191,17 @@ public class Membrane_Projections implements PlugIn{
 			return channels[0];
 	}
 	
-	/**
-	 * Merge three image stack into a color stack (no scaling)
-	 * 
-	 * @param redChannel image stack representing the red channel 
-	 * @param greenChannel image stack representing the green channel
-	 * @param blueChannel image stack representing the blue channel
-	 * @return RGB merged stack
-	 */
-	ImageStack mergeStacks(ImageStack redChannel, ImageStack greenChannel, ImageStack blueChannel)
-	{
+	 /*** mergeStacks ***
+     * Merge three image stack into a colour stack (no scaling)
+     * 
+     * @param  redChannel          ImageStack image stack representing the red channel 
+     * @param  greenChannel        ImageStack image stack representing the green channel
+     * @param  blueChannel         ImageStack image stack representing the blue channel
+     * @return                     ImageStack RGB merged stack
+     * 
+     * @see trainableSegmentation.FeatureStack#mergeStacks
+     ***/
+	ImageStack mergeStacks(ImageStack redChannel, ImageStack greenChannel, ImageStack blueChannel){
 		final ImageStack colorStack = new ImageStack( redChannel.getWidth(), redChannel.getHeight());
 		
 		for(int n=1; n<=redChannel.getSize(); n++)

@@ -1,10 +1,8 @@
-/**
- * 
- */
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.*;
+import ij.measure.Calibration;
 import ij.plugin.*;
 import ij.plugin.frame.Recorder;
 import ij.process.*;
@@ -36,17 +34,20 @@ import lj.LJPrefs;
  * - Adjust the z-offset to deal with images that are too large to load into memory at 
  *   once.
  * - Provide an output directory for the blocks.
+ * TODO: set calibration of image, specifically the X,Y,Z offset
  * 
  * @author Lasse Wollatz
  * 
  **/
 
 public class Subdivide_3D implements PlugIn, ActionListener{
-	/** plugin's name */
+	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	/** plugin's current version */
+	/** plugin's current version **/
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	/** URL linking to documentation **/
+	public static final String PLUGIN_HELP_URL = LJPrefs.PLUGIN_HELP_URL;
 	private static String BC_outDirectory = LJPrefs.LJ_inpDirectory;
 	private static int stepX = 250;
 	private static int stepY = 250;
@@ -63,6 +64,15 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 	JTextField outdirtxt;
 	GenericDialog gd;
 	
+	/*** run
+     * 
+     * @param  command        String 
+     * 
+     * @see    LJPrefs#getMinMax
+     * @see    LJPrefs#savePreferences
+     * @see    LJPrefs#writeProperties
+     * @see    ij.gui.GenericDialog
+     ***/
 	public void run(String command){
 		IJ.showStatus("Creating blocks...");
 		IJ.showProgress(0, 100);
@@ -77,7 +87,7 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		globMin = (double)minmax[0];
     	globMax = (double)minmax[1];
     	
-		
+    	/** create dialog to request values from user: **/
 		gd = new GenericDialog(command+" Subdivide image and save into directory");
 		Font gdFont = gd.getFont();
 		//gd.addStringField("Output directory", BC_outDirectory, 100);
@@ -106,6 +116,8 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		gd.addNumericField("z-offset", z_offset, 0, 4,  "(affects filename only)");
 		gd.addCheckbox("save LungJ header", saveProp);
 		IJ.showStatus("Waiting for User Input...");
+		if (IJ.getVersion().compareTo("1.42p")>=0)
+        	gd.addHelp(PLUGIN_HELP_URL);
 		gd.showDialog();
 		if (gd.wasCanceled()){
 			IJ.showStatus("Plug-In aborted...");
@@ -116,7 +128,6 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		IJ.showStatus("Creating blocks...");
 		IJ.showProgress(1, 100);
 		
-		//BC_outDirectory = gd.getNextString();
 		BC_outDirectory = outdirtxt.getText();
 		Recorder.recordOption("directory", BC_outDirectory);
 		stepX = (int)gd.getNextNumber();
@@ -127,11 +138,14 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		haloZ = (int)gd.getNextNumber();
 		z_offset = (int)gd.getNextNumber();
 		saveProp = gd.getNextBoolean();
+		/** values from user dialog extracted **/
 		
 		LJPrefs.LJ_inpDirectory = BC_outDirectory;
+		/** save preferences for after Fiji restart: **/
 		LJPrefs.savePreferences();
 		
 		ImageProcessor ip = image.getProcessor();
+		Calibration cal = image.getCalibration(); 
 		
 		int x1 = 0;
 		int y1 = 0;
@@ -150,8 +164,8 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 			ip.setSliceNumber(z);
 			IJ.showProgress(z, maxZ);
 			//run("Image Sequence...", "open=["+stackdirectory+"] number=250 file=DigiSens_ sort");
-			for (int x=0; x<maxX; x+=stepX) {
-				for (int y=0; y<maxY; y+=stepY) {
+			for (int y=0; y<maxY; y+=stepY) {
+				for (int x=0; x<maxX; x+=stepX) {
 					
 					xs = stepX+2*haloX;
 					ys = stepY+2*haloY;
@@ -175,9 +189,15 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 					Roi tempRoi = new Roi(x1, y1, xs, ys);
 					image.setRoi(tempRoi);
 					ip.setRoi(tempRoi);
-					int lastSlice = (z+stepZ < maxZ) ? z+stepZ : maxZ;
+					//int lastSlice = (z+stepZ < maxZ) ? z+stepZ : maxZ;
 					//ImagePlus imgblock = new Duplicator().run(image,z+1,lastSlice);
 					ImagePlus imgblock = new Duplicator().run(image,z1+1,z1+zs);
+					Calibration tempcal = cal;
+					//TODO: Origin doesn't get saved with the image as TIFF doesn't support it by default and ImageJ doesn't offer a workaround using the info string
+					tempcal.xOrigin = -1*x1;
+					tempcal.yOrigin = -1*y1;
+					tempcal.zOrigin = -1*z1;
+					imgblock.setCalibration(tempcal);
 					String fileout = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_outDirectory,(z+z_offset),y,x);
 					IJ.saveAsTiff(imgblock,fileout);
 					IJ.showStatus("Creating blocks...");
@@ -188,6 +208,7 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 			}
 		}
 		
+		/** save block properties if requested **/
 		if (saveProp){
 			Properties prefs = new Properties();
 			prefs.put("maxX", Double.toString(maxX));
@@ -212,6 +233,12 @@ public class Subdivide_3D implements PlugIn, ActionListener{
 		IJ.showProgress(100, 100);
 	}
 
+	/*** actionPerformed
+     * triggered if button is pressed. Displays a file open dialog to 
+     * choose the output directory
+     * 
+     * @param  arg0           ActionEvent 
+     ***/
 	@Override
 	public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource() == this.filebtn ){

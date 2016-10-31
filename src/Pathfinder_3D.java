@@ -1,29 +1,32 @@
-
-
-
-
-import lj.LJPrefs;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
+import lj.LJPrefs;
 
+/*** Pathfinder_3D
+ * attempts to find a path between two points using the pixel values like a forcefield.
+ * 
+ * @author Lasse Wollatz
+ ***/
 public class Pathfinder_3D implements PlugIn {
-	/** plugin's name */
+	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	/** plugin's current version */
+	/** plugin's current version **/
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	
 	public void run(String command){
-		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions
+		//generate error message for older versions:
+		if (IJ.versionLessThan("1.48n"))
 			return;
 		IJ.showStatus("Finding Path");
 		
 		
 		//get start point
+		//create dialog to request values from user:
 		GenericDialog gd = new GenericDialog(command+" Define Start and End");
 		gd.addNumericField("x0", 145, 0);
 		gd.addNumericField("y0", 97, 0);
@@ -47,7 +50,7 @@ public class Pathfinder_3D implements PlugIn {
 		double Fm = (double)gd.getNextNumber();
 		double Fb = (double)gd.getNextNumber();
 		int r = (int)gd.getNextNumber();
-		
+		//values from user dialog extracted
 		//get image
 		ImagePlus image = WindowManager.getCurrentImage();
 		int tWidth = image.getWidth();

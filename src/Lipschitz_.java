@@ -42,8 +42,17 @@ import ij.process.ImageProcessor;
 import ij.process.ShortProcessor;
 
 import java.awt.Rectangle;
-import java.util.Date;
 
+/*** Lipschitz_
+ * implements the TWS Lipschitz_ filter
+ * This class has been copied from the TWS and adapted for independent use.
+ * 
+ * @author Trainable WEKA Segmentation
+ * @author Mikulas Stencel
+ * @author Jiri Janacek
+ * @author Ignacio Arganda-Carreras
+ * @version 0.1, 2006/01/12
+ ***/
 public class Lipschitz_ implements PlugInFilter 
 {
 	static final String Lipschitz_Version = "0.1";
@@ -51,6 +60,7 @@ public class Lipschitz_ implements PlugInFilter
 	// the following are the input parameters, with default values assigned to them
 	boolean m_Down    = true;     //  
 	boolean m_TopHat    = false;  // lower Lipschitz cover  
+	/*** slope ***/
 	public double m_Slope = 10;                 // slope
 
 	protected ImagePlus m_imp;
@@ -68,22 +78,25 @@ public class Lipschitz_ implements PlugInFilter
 
 	//-----------------------------------------------------------------------------------
 	
-	public void setDownHat(boolean downHat)
-	{
+	/*** setDownHat
+	 * @param downHat boolean if down hat is to be used
+	 ***/
+	public void setDownHat(boolean downHat){
 		this.m_Down = downHat;
 	}
 	
 	//-----------------------------------------------------------------------------------
 	
-	public void setTopHat(boolean topHat)
-	{
+	/*** setTopHat
+	 * @param topHat boolean if top hat is to be used
+	 ***/
+	public void setTopHat(boolean topHat){
 		this.m_TopHat = topHat;
 	}
 	
 	//-----------------------------------------------------------------------------------
 	
-	public int setup(String arg, ImagePlus imp) 
-	{
+	public int setup(String arg, ImagePlus imp){
 		if (arg.equals("about")) 
 		{
 			showAbout();
@@ -97,8 +110,7 @@ public class Lipschitz_ implements PlugInFilter
 
 	//-----------------------------------------------------------------------------------
 
-	void showAbout() 
-	{
+	void showAbout(){
 		IJ.showMessage("About 2D Lipschitz filter",
 				"version "+Lipschitz_Version+" ("+Lipschitz_Date+")\n"+
 				"Mikulas Stencel, Jiri Janacek GPL2\n"+
@@ -109,8 +121,7 @@ public class Lipschitz_ implements PlugInFilter
 
 	//-----------------------------------------------------------------------------------
 
-	private boolean GUI() 
-	{
+	private boolean GUI(){
 		GenericDialog gd = new GenericDialog("Lipschitz filter v"+Lipschitz_Version);
 		gd.addNumericField("Slope", m_Slope, 2);
 		String[] labels = {"TopDown", "TopHat"};
@@ -122,8 +133,7 @@ public class Lipschitz_ implements PlugInFilter
 
 	//-----------------------------------------------------------------------------------
 
-	private boolean getUserParams(GenericDialog gd) 
-	{
+	private boolean getUserParams(GenericDialog gd){
 		gd.showDialog();
 		// the user presses the Cancel button
 		if (gd.wasCanceled()) return false;
@@ -138,17 +148,19 @@ public class Lipschitz_ implements PlugInFilter
 
 	//-----------------------------------------------------------------------------------
 
-	public void run(ImageProcessor ip) 
-	{
+	public void run(ImageProcessor ip){
 		m_stack = m_imp.getStack();
 		m_scount = m_stack.getSize();
 		
 		if (GUI()) runLipschitz(ip);
 	} // end of 'run' method
 
+	
 	//-----------------------------------------------------------------------------------
-	public void Lipschitz2D(ImageProcessor ip)
-	{     
+	/*** Lipschitz2D
+	 * @param ip ImageProcessor to which to apply the filter
+	 ***/
+	public void Lipschitz2D(ImageProcessor ip){     
 		int slope, slope1, p, p1, p2, p3, p4, maxz; 
 
 		m_roi = ip.getRoi();
@@ -304,12 +316,15 @@ public class Lipschitz_ implements PlugInFilter
 	}
 
 
-	public void runLipschitz(ImageProcessor ip) 
-	{
+	/*** runLipschitz
+	 * @param ip ImageProcessor to which the filter should be applied
+	 * @see #Lipschitz2D
+	 ***/
+	public void runLipschitz(ImageProcessor ip){
 		if (IJ.escapePressed()) return;
 		breaked = false;
-		Date d1, d2;
-		d1 = new Date();
+		//Date d1, d2;
+		//d1 = new Date();
 
 		IJ.showStatus("Initializing...");
 		m_stack_out = m_imp.createEmptyStack(); 

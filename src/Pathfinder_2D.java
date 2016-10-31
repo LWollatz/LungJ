@@ -1,27 +1,26 @@
-
-
-
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
-import ij.plugin.filter.Analyzer;
 import ij.process.ImageProcessor;
-import ij.measure.ResultsTable;
 
-import java.lang.*;
-
+/*** Pathfinder_2D
+ * attempts to find a path between two points using the pixel values like a forcefield.
+ * 
+ * @author Lasse Wollatz
+ ***/
 public class Pathfinder_2D implements PlugIn {
 	
 	public void run(String command){
-		if (IJ.versionLessThan("1.48n"))        // generates an error message for older versions
+		//generate error message for older versions:
+		if (IJ.versionLessThan("1.48n"))
 			return;
 		IJ.showStatus("Applying Mask...");
 		
 		
 		//get start point
+		//create dialog to request values from user:
 		GenericDialog gd = new GenericDialog(command+" Define Start and End");
 		gd.addNumericField("x0", 80, 0);
 		gd.addNumericField("y0", 80, 0);
@@ -41,7 +40,7 @@ public class Pathfinder_2D implements PlugIn {
 		double Fm = (double)gd.getNextNumber();
 		double Fb = (double)gd.getNextNumber();
 		int r = (int)gd.getNextNumber();
-		
+		//values from user dialog extracted
 		//get image
 		ImagePlus image = WindowManager.getCurrentImage();
 		int tWidth = image.getWidth();
@@ -60,8 +59,10 @@ public class Pathfinder_2D implements PlugIn {
 		double Fy = 0;
 		int p = 0;
 		
-		int xp = (int)x1;
-		int yp = (int)y1;
+		//int xp, yp;
+		
+		//int xp = (int)x1;
+		//int yp = (int)y1;
 		
 		for (int t=1; t<=1000; t++){
 			//reset values
@@ -69,8 +70,8 @@ public class Pathfinder_2D implements PlugIn {
 			vy = 0;
 			Fx = 0;
 			Fy = 0;
-			xp = (int)x1;
-			yp = (int)y1;
+			//xp = (int)x1;
+			//yp = (int)y1;
 			//calculate major flow force:
 			dist = Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 			vx += (x2-x1)*Fm/dist;

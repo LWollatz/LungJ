@@ -1,26 +1,41 @@
-import lj.LJPrefs;
 import ij.IJ;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
+import lj.LJPrefs;
 
-
+/*** Test_WEKA_Filter
+ * implements a plug-in to run all the various filters of the Trainable WEKA Segmentation against one image.
+ * useful to compare the effect of different filters.
+ * 
+ * @author Lasse Wollatz
+ * 
+ * @see    <a href="http://imagej.net/Trainable_Weka_Segmentation">Trainable Weka Segmentation</a>
+ ***/
 public class Test_WEKA_Filter implements PlugIn{
+	/** plugin's name **/
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version **/
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	/** URL linking to documentation **/
+	public static final String PLUGIN_HELP_URL = LJPrefs.PLUGIN_HELP_URL;
 	boolean doSave = true;
 	boolean doShades = false;
 	boolean doEnhance = true;
-	
 	int membranesize = 20;
 	
 	public void run(String arg) {
-		
+		String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians","Membrane projections","Variance","Mean","Minimum","Maximum","Median","Anisotropic diffusion","Bilateral","Lipschitz","Kuwahara","Gabor","Derivatives","Laplacian","Structure","Entropy","Neighbors"};
+		boolean[] defaultValues = {true,true,true,true,false,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false};
+		/** create dialog to request values from user: **/
 		GenericDialog gd = new GenericDialog("WEKA Test Settings...");
 		gd.addStringField("Output Directory", LJPrefs.LJ_srcDirectory, 100);
 		gd.addCheckbox("save images", true);
 		gd.addCheckbox("enhance contrast", true);
 		gd.addCheckbox("apply 6 shades", false);
-		String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians","Membrane projections","Variance","Mean","Minimum","Maximum","Median","Anisotropic diffusion","Bilateral","Lipschitz","Kuwahara","Gabor","Derivatives","Laplacian","Structure","Entropy","Neighbors"};
-		boolean[] defaultValues = {true,true,true,true,false,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false};
 		gd.addCheckboxGroup(10, 2, labels, defaultValues);
+		if (IJ.getVersion().compareTo("1.42p")>=0)
+        	gd.addHelp(PLUGIN_HELP_URL);
 		gd.showDialog();
         if (gd.wasCanceled()){
         	return;
@@ -30,7 +45,7 @@ public class Test_WEKA_Filter implements PlugIn{
         doSave = gd.getNextBoolean();
         doEnhance = gd.getNextBoolean();
         doShades = gd.getNextBoolean();
-		
+        /** main values from user dialog extracted **/
         
 		
 		String macro = "";
@@ -313,6 +328,14 @@ public class Test_WEKA_Filter implements PlugIn{
 		IJ.runMacro(macro);
 	}
 	
+	/*** LipschitzMacro ***
+     * creates a string of an ImageJ macro that executes Lipschitz filter on the image 'original'
+     * 
+     * @param  slope               int
+     * @param  topdown             boolean
+     * @param  tophat              boolean
+     * @return                     String
+     ***/
 	private String LipschitzMacro(int slope, boolean topdown, boolean tophat){
 		String options = "";
 		if(topdown){
@@ -337,6 +360,13 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** EntropyMacro ***
+     * creates a string of an ImageJ macro that executes the Entropy filter on the image 'original'
+     * 
+     * @param  radius              int
+     * @param  number              int
+     * @return                     String
+     ***/
 	private String EntropyMacro(int radius, int number){
 		String macro = "/***ENTROPY "+radius+", "+number+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -350,6 +380,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** KuwaharaMacro ***
+     * creates a string of an ImageJ macro that executes the Linear Kuwahara filter on the image 'original'
+     * 
+     * @param  criterion           String
+     * @return                     String
+     ***/
 	private String KuwaharaMacro(String criterion){
 		String macro = "/***KUWAHARA "+criterion+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -363,6 +399,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** LaplaceMacro ***
+     * creates a string of an ImageJ macro that executes the FeatureJ Laplacian filter on the image 'original'
+     * 
+     * @param  smoothing           int
+     * @return                     String
+     ***/
 	private String LaplaceMacro(int smoothing){
 		String macro = "/***LAPLACIAN "+smoothing+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -375,6 +417,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** SobelMacro ***
+     * creates a string of an ImageJ macro that executes the "Find Edges" Sobel filter on the image 'original'
+     * 
+     * @param  sigma               int
+     * @return                     String
+     ***/
 	private String SobelMacro(int sigma){
 		String macro = "/***SOBEL "+sigma+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -389,6 +437,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** GaussMacro ***
+     * creates a string of an ImageJ macro that executes the Gaussian Blur filter on the image 'original'
+     * 
+     * @param  sigma               int
+     * @return                     String
+     ***/
 	private String GaussMacro(int sigma){
 		String macro = "/***GAUSSIAN BLUR "+sigma+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -402,6 +456,13 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** GaussDifMacro ***
+     * creates a string of an ImageJ macro that executes the Gaussian Difference filter on the image 'original'
+     * 
+     * @param  sigma1              int
+     * @param  sigma2              int
+     * @return                     String
+     ***/
 	private String GaussDifMacro(int sigma1, int sigma2){
 		String macro = "/***DIFFERENCE OF GAUSSIANS "+sigma1+"-"+sigma2+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -424,6 +485,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** HesseMacro ***
+     * creates a string of an ImageJ macro that executes the Hessian filters on the image 'original'
+     * 
+     * @param  sigma               int
+     * @return                     String
+     ***/
 	private String HesseMacro(int sigma){
 		String macro = "/***HESSIAN "+sigma+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -540,6 +607,17 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** AnisotropicDiffusionMacro ***
+     * creates a string of an ImageJ macro that executes the Anisotropic Diffusion filter on the image 'original'
+     * 
+     * @param  number              int
+     * @param  smoothings          int
+     * @param  a1                  double
+     * @param  a2                  double
+     * @param  dt                  int
+     * @param  edge                int
+     * @return                     String
+     ***/
 	private String AnisotropicDiffusionMacro(int number, int smoothings, double a1, double a2, int dt, int edge){
 		String macro = "/***ANISOTROPIC DIFFUSION "+smoothings+", "+a1+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -556,6 +634,13 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** Bilateral ***
+     * creates a string of an ImageJ macro that executes the Bilateral filter on the image 'original'
+     * 
+     * @param  spatial             int
+     * @param  range               int
+     * @return                     String
+     ***/
 	private String Bilateral(int spatial, int range){
 		String macro = "/***BILATERAL FILTER "+spatial+", "+range+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -572,6 +657,15 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** Derivatives ***
+     * creates a string of an ImageJ macro that executes the FeatureJ Derivatives filter on the image 'original'
+     * 
+     * @param  dx                  int
+     * @param  dy                  int
+     * @param  dz                  int
+     * @param  sigma               int
+     * @return                     String
+     ***/
 	private String Derivatives(int dx, int dy, int dz, int sigma){
 		String macro = "/***DERIVATIVES dx"+dx+", dy"+dy+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -594,6 +688,13 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** Structure ***
+     * creates a string of an ImageJ macro that executes the FeatureJ Structure filter on the image 'original'
+     * 
+     * @param  smoothing           int
+     * @param  integration         int
+     * @return                     String
+     ***/
 	private String Structure(int smoothing, int integration){
 		String macro = "/***STRUCTURE "+smoothing+", "+integration+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -610,6 +711,13 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** MembraneMacro ***
+     * creates a string of an ImageJ macro that executes the Membrane Projections of the image 'original'
+     * 
+     * @param  membrane            int
+     * @param  patchsize           int
+     * @return                     String
+     ***/
 	private String MembraneMacro(int membrane, int patchsize){
 		String macro = "/***MEMBRANE PROJECTION "+membrane+","+patchsize+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -662,6 +770,13 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** NeighborMacro ***
+     * creates a string of an ImageJ macro that executes the Neighbors filter on the image 'original'
+     * 
+     * @param  minsig              int
+     * @param  maxsig              int
+     * @return                     String
+     ***/
 	private String NeighborMacro(int minsig, int maxsig){
 		String macro = "/***NEIGHBORS "+minsig+" to "+maxsig+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -684,6 +799,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** MinimumMacro ***
+     * creates a string of an ImageJ macro that executes the Minimum filter on the image 'original'
+     * 
+     * @param  radius              int
+     * @return                     String
+     ***/
 	private String MinimumMacro(int radius){
 		String macro = "/***MINIMUM "+radius+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -697,6 +818,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** MaximumMacro ***
+     * creates a string of an ImageJ macro that executes the Maximum filter on the image 'original'
+     * 
+     * @param  radius              int
+     * @return                     String
+     ***/
 	private String MaximumMacro(int radius){
 		String macro = "/***MAXIMUM "+radius+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -710,6 +837,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** VarianceMacro ***
+     * creates a string of an ImageJ macro that executes the Variance filter on the image 'original'
+     * 
+     * @param  radius              int
+     * @return                     String
+     ***/
 	private String VarianceMacro(int radius){
 		String macro = "/***VARIANCE "+radius+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -723,6 +856,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** MeanMacro ***
+     * creates a string of an ImageJ macro that executes the Mean filter on the image 'original'
+     * 
+     * @param  radius              int
+     * @return                     String
+     ***/
 	private String MeanMacro(int radius){
 		String macro = "/***MEAN "+radius+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -736,6 +875,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** MedianMacro ***
+     * creates a string of an ImageJ macro that executes the Median filter on the image 'original'
+     * 
+     * @param  radius              int
+     * @return                     String
+     ***/
 	private String MedianMacro(int radius){
 		String macro = "/***MEDIAN "+radius+"***/\n";
 		macro += "selectWindow('original');\n";
@@ -749,6 +894,12 @@ public class Test_WEKA_Filter implements PlugIn{
 		return macro;
 	}
 	
+	/*** FinalMacro ***
+     * creates a string for a macro that applies final filters and saves the image as requested by the user
+     * 
+     * @param  filename            String
+     * @return                     String
+     ***/
 	private String FinalMacro(String filename){
 		String macro = "";
 		if (doShades){

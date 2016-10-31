@@ -1,30 +1,38 @@
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.gui.GenericDialog;
 import ij.gui.HistogramWindow;
-import ij.gui.Plot;
 import ij.plugin.PlugIn;
-import ij.process.ImageProcessor;
-import ij.process.StackStatistics;
-import lj.process.VirtualBlockStatistics;
 
-import lj.LJPrefs;
-
-import java.awt.Color;
-import java.awt.Graphics;
 import java.io.IOException;
 import java.util.Properties;
 
+import lj.LJPrefs;
+import lj.process.VirtualBlockStatistics;
 
 
-
+/*** Block_Histogram
+ * creates the histogram of a 3D block image.
+ * 
+ * - Run the plug-in
+ * - Provide a directory path containing 3D blocks with a LungJ
+ *   property file available
+ * - Choose the number of histogram bins, the range of the histogram
+ *   and if the property file should be updated.
+ * - Press OK.
+ * - The blocks will be analysed and a histogram of the full block
+ *   will be shown, just like the histogram of a normal image.
+ * 
+ * @author Lasse Wollatz  
+ ***/
 public class Block_Histogram implements PlugIn{
-	/** plugin's name */
+	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	/** plugin's current version */
+	/** plugin's current version **/
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	/** URL linking to documentation **/
+	public static final String PLUGIN_HELP_URL = LJPrefs.PLUGIN_HELP_URL;
 	private static String BC_inDirectory = LJPrefs.LJ_outDirectory;
 	private static int maxX = 1;
 	private static int maxY = 1;
@@ -40,9 +48,21 @@ public class Block_Histogram implements PlugIn{
 	private boolean usePrefs = true;
 	private boolean doUpdate = true;
 	private int nBins = 256;
-	private int[] histogram = null;
-	private long[] longHistogram = null;
 	
+	/*** run
+     * requests a directory and uses VirtualBlockStatistics to get a
+     * histogram. It then displays the histogram and saves results if
+     * requested.
+     * 
+     * @param  command        String 
+     * 
+     * @see    LJPrefs#readProperties
+     * @see    LJPrefs#getPref
+     * @see    LJPrefs#writeProperties
+     * @see    lj.process.VirtualBlockStatistics
+     * @see    ij.gui.GenericDialog
+     * @see    ij.gui.HistogramWindow
+     ***/
 	public void run(String command){
 		double min = globMin;
 		double max = globMax;
@@ -50,7 +70,7 @@ public class Block_Histogram implements PlugIn{
 		IJ.showStatus("Getting data...");
 		IJ.showProgress(0, 100);
 		
-		/** create dialog box **/
+		/**create dialog to request values from user: **/
 		GenericDialog gd = new GenericDialog(command+" Histogram of 3D Blocks");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
 		gd.addNumericField("Bins", nBins, 4);
@@ -61,6 +81,8 @@ public class Block_Histogram implements PlugIn{
 		gd.addCheckbox("Update Properties.txt", doUpdate);
 		
 		IJ.showStatus("Waiting for user input...");
+		if (IJ.getVersion().compareTo("1.42p")>=0)
+        	gd.addHelp(PLUGIN_HELP_URL);
 		gd.showDialog();
 		if (gd.wasCanceled()){
 			IJ.showStatus("Plug In cancelled...");
@@ -68,7 +90,7 @@ public class Block_Histogram implements PlugIn{
         	return;
         }
 		
-		/** getting user input and reading image information from preference file **/
+		/** getting user input **/
 		IJ.showStatus("Getting data...");
 		BC_inDirectory = gd.getNextString();
 		nBins = (int) gd.getNextNumber();
@@ -84,6 +106,7 @@ public class Block_Histogram implements PlugIn{
 			e.printStackTrace();
 		}
 		
+		/** reading image information from preference file **/
 		maxX = LJPrefs.getPref(prefs, "maxX", maxX);
 		maxY = LJPrefs.getPref(prefs, "maxY", maxY);
 		maxZ = LJPrefs.getPref(prefs, "maxZ", maxZ);
@@ -93,7 +116,6 @@ public class Block_Histogram implements PlugIn{
 		haloX = LJPrefs.getPref(prefs, "haloX", haloX);
 		haloY = LJPrefs.getPref(prefs, "haloY", haloY);
 		haloZ = LJPrefs.getPref(prefs, "haloZ", haloZ);
-		
 		globMin = (float)LJPrefs.getPref(prefs, "minVal", globMin);
 		globMax = (float)LJPrefs.getPref(prefs, "maxVal", globMax);
 		if (usePrefs){
@@ -101,167 +123,14 @@ public class Block_Histogram implements PlugIn{
 			max = globMax;
 		}
 		
-		
-		//ImagePlus imgout = null;
+		/** update Status **/
 		IJ.showStatus("Reading blocks...");
 		IJ.showProgress(0, 100);
-		int prog = 0;
-		int diffz = (int)Math.ceil(maxZ/(float)stepZ);
-		//IJ.log(String.valueOf(diffz)+"="+String.valueOf(maxZ)+"/"+String.valueOf(stepZ));
-		int diffx = (int)Math.ceil(maxX/(float)stepX);
-		//IJ.log(String.valueOf(diffx)+"="+String.valueOf(maxX)+"/"+String.valueOf(stepX));
-		int diffy = (int)Math.ceil(maxY/(float)stepY);
-		//IJ.log(String.valueOf(diffy)+"="+String.valueOf(maxY)+"/"+String.valueOf(stepY));
-		//IJ.log(String.valueOf(diffx)+"*"+String.valueOf(diffy)+"*"+String.valueOf(diffz));
-		int maxProg = (diffy*diffx*diffz)*100/99;
 		
-		double[] Xs = new double[nBins];
-		long[] Ys = new long[nBins];
-		double[] YsG = new double[nBins];
-		double[] YsB = new double[nBins];
-		
-		double measuredMin = Double.MAX_VALUE;
-		double measuredMax = -Double.MAX_VALUE;
-
-		
-		long plotYmax = 0;
-		
-		for (int i=0; i<nBins; i++){
-			Xs[i] = (float)(i*(max-min)/(nBins-1)+min);
-		}
-		
-		
-		
-//		
-//		
-//		/** loop over image blocks **/
-//		for (int z=0; z<maxZ; z+=stepZ) {
-//			for (int x=0; x<maxX; x+=stepX) {
-//				for (int y=0; y<maxY; y+=stepY) {
-//					/** read in each block **/
-//					String filein = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_inDirectory,z,y,x);
-//					ImagePlus imgblock = IJ.openImage(filein);
-//					
-//					/** get values from block **/
-//					ImageStack stack = imgblock.getStack();
-//					int width = imgblock.getWidth();
-//					int height = imgblock.getHeight();
-//					int n = width*height;
-//					int images = imgblock.getStackSize();
-//					
-//					if(imgblock.getBitDepth() == 24){
-//						for (int img=1; img<=images; img++) {
-//							ImageProcessor ip = stack.getProcessor(img);
-//							for (int iy=0; iy<height; iy++){
-//					    		for (int ix=0; ix<width; ix++){
-//					    			int[] pixel = new int[3];
-//					    			ip.getPixel(ix, iy,pixel);
-//					    			int[] box = new int[3];
-//					    			//IJ.log(String.valueOf(pixel[0])+"|"+String.valueOf(pixel[1])+"|"+String.valueOf(pixel[2]));
-//					    			box[0] = (int) Math.round(((double)pixel[0]-min)*(nBins-1)/(max-min));
-//					    			box[1] = (int) Math.round(((double)pixel[1]-min)*(nBins-1)/(max-min));
-//					    			box[2] = (int) Math.round(((double)pixel[2]-min)*(nBins-1)/(max-min));
-//					    			if (box[0] >= nBins){box[0] = nBins-1;}
-//					    			if (box[1] >= nBins){box[1] = nBins-1;}
-//					    			if (box[2] >= nBins){box[2] = nBins-1;}
-//					    			if (box[0] < 0){box[0] = 0;}
-//					    			if (box[1] < 0){box[1] = 0;}
-//					    			if (box[2] < 0){box[2] = 0;}
-//					    			Ys[box[0]] += 1;
-//					    			YsG[box[1]] += 1;
-//					    			YsB[box[2]] += 1;
-//					    			if (Ys[box[0]] > plotYmax){
-//										plotYmax = (long) Ys[box[0]];
-//									}
-//					    			if (YsG[box[1]] > plotYmax){
-//										plotYmax = (long) YsG[box[1]];
-//									}
-//					    			if (YsB[box[2]] > plotYmax){
-//										plotYmax = (long) YsB[box[2]];
-//									}
-//					    			pixel = null;
-//					    			box = null;
-//					    		}
-//							}
-//						}
-//					}else{
-//						double v = 0;
-//						for (int img=1; img<=images; img++) {
-//							ImageProcessor ip = stack.getProcessor(img);
-//							for (int i=0; i<n; i++) {
-//								v = ip.getf(i);
-//								int box = (int) Math.round((v-min)*(nBins-1)/(max-min));
-//								if (box >= nBins){box = nBins-1;}
-//				    			if (box < 0){box = 0;}
-//								Ys[box] += 1;
-//								if (Ys[box] > plotYmax){
-//									plotYmax = (long) Ys[box];
-//								}
-//								if (v < measuredMin){
-//									measuredMin = v;
-//								}
-//								if (v > measuredMax){
-//									measuredMax = v;
-//								}
-//								//Xs[box] = box*(max-min)/255+min; //preassign automatically at start?
-//							}
-//							ip = null;
-//						}
-//					}
-//					/** done with block! try to free memory again**/
-//					imgblock = null;
-//					stack = null;
-//					filein = null;
-//					System.gc();
-//					
-//					/** show progress **/
-//					IJ.showStatus("Reading blocks...");
-//					prog += 1;
-//					IJ.showProgress(prog, maxProg);
-//					//IJ.log(prog+"/"+maxProg);
-//					
-//				}
-//			}
-//		}
-//		IJ.showProgress(99, 100);
-//		
-//		IJ.log(String.valueOf(plotYmax));
-//		
-//		/*
-//		Plot plot = LJPrefs.plotHistogram(Xs, Ys, (long)(plotYmax*1.1));
-//		
-//		plot.addLabel(0, 1.2, "Count: " + String.valueOf(maxX*maxY*maxZ));
-//		plot.addLabel(0, 1.25, "Mean: " + "");
-//		plot.addLabel(0, 1.3, "StdDev: " + "");
-//		plot.addLabel(0, 1.35, "Bins: " + String.valueOf(nBins));
-//		
-//		plot.addLabel(0.5, 1.2, "Min: " + min + " (" + String.valueOf(measuredMin)+ ")");
-//		plot.addLabel(0.5, 1.25, "Max: " + max + " (" + String.valueOf(measuredMax)+ ")");
-//		plot.addLabel(0.5, 1.3, "Mode: " + "");
-//		plot.addLabel(0.5, 1.35, "Bin Width: " + "");
-//		
-//		plot.setAxisYLog(true);
-//		
-//		plot.show();
-//		*/
-//		
-//		int x = 0;
-//		int y = 0;
-//		int z = 0;
-//		String filein = String.format("%1$s\\%2$04d_%3$04d_%4$04d.tif",BC_inDirectory,z,y,x);
-//		ImagePlus imp2 = IJ.openImage(filein);
-//		imp2.show();
-//		//ImagePlus imp2 = imp; //sample image
-//		//if (customHistogram && !stackHistogram && imp.getStackSize()>1)
-//		//imp2 = new ImagePlus("Temp", imp.getProcessor());
-//		VirtualBlockStatistics stats = new VirtualBlockStatistics(imp2, nBins, min, max, Ys, (long)maxX*(long)maxY*(long)maxZ, maxX, maxY, measuredMin, measuredMax);
-//		stats.histYMax = (int)plotYmax;
-//		longHistogram = Ys;
-//		copyHistogram(nBins);
-//		stats.histogram = histogram;
-//		stats.longPixelCount = (long)maxX*(long)maxY*(long)maxZ;
+		/** generate statistics **/
 		VirtualBlockStatistics stats = new VirtualBlockStatistics(BC_inDirectory,nBins,min,max);
 		
+		/** update the image property file **/
 		if (doUpdate){
 			prefs = new Properties();
 			prefs.put("maxX", Double.toString(maxX));
@@ -285,7 +154,7 @@ public class Block_Histogram implements PlugIn{
 			}
 		}
 		
-		
+		/** load an image block as the Histogram needs to be attached to an image. **/
 		int x = 0;
 		int y = 0;
 		int z = 0;
@@ -293,28 +162,12 @@ public class Block_Histogram implements PlugIn{
 		ImagePlus imp2 = IJ.openImage(filein);
 		imp2.show();
 		
+		/** display the histogram **/
 		new HistogramWindow("Histogram of "+BC_inDirectory, imp2, stats);
 		
-		
+		/** finalise **/
 		imp2.close();
-		
-    	//IJ.setThreshold(globMin,globMax,"BLACK_AND_WHITE_LUT");
-		//imgout.show();
-		//IJ.setMinAndMax(globMin, globMax);
-		
 		IJ.showStatus("Histogram created");
 		IJ.showProgress(100, 100);
-		
-	}
-	
-	private void copyHistogram(int nbins) {
-		histogram = new int[nbins];
-		for (int i=0; i<nbins; i++) {
-			long count = longHistogram[i];
-			if (count<=Integer.MAX_VALUE)
-				histogram[i] = (int)count;
-			else
-				histogram[i] = Integer.MAX_VALUE;
-		}
 	}
 }

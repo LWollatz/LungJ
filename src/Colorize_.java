@@ -6,42 +6,56 @@ import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 import ij.util.Tools;
 
-import lj.LJPrefs;
-
 import java.awt.Color;
 
-/** 
- * Combines a set of segmented images into a colour image.
- * run("Colour by Segment"," image=[sample.tif] color1=[#000000] color2=[#FFFFFF] color3=[#009999] color4=[#FF6666]");
- * 
- * - The original image should be a hyperstack with each feature segmentation appearing 
- *   in a separate frame.
- * - Colorize_ allows to choose a colour for each frame.
- * - Once colours have been chosen, a new image is produced, overlaying each frame with 
- *   the specified colour and combining them into a single RGB stack, ignoring black 
- *   pixels as background.
- *   
- * @author Lasse Wollatz
- *   
- **/
+import lj.LJPrefs;
 
+
+/*** Colorize_
+ * Combines a set of segmented images into a colour image.
+ * <code>run("Colour by Segment"," image=[sample.tif]
+ * color1=[#000000] color2=[#FFFFFF] color3=[#009999]
+ * color4=[#FF6666]");</code>
+ * 
+ * - The original image should be a hyperstack with each feature
+ *   segmentation appearing in a separate frame.
+ * - Colorize_ allows to choose a colour for each frame.
+ * - Once colours have been chosen, a new image is produced,
+ *   overlaying each frame with the specified colour and combining
+ *   them into a single RGB stack, ignoring black pixels as
+ *   background.
+ * 
+ * @author Lasse Wollatz  
+ ***/
 public class Colorize_ implements PlugIn{
-	/** plugin's name */
+	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	/** plugin's current version */
+	/** plugin's current version **/
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
 	static Color[] LJColors = LJPrefs.LJ_Colors;
 	
+	
+	/*** run
+	 * 
+	 * @param  command        String
+	 * 
+	 * @see   LJPrefs#retrieveOption
+	 * @see   LJPrefs#getColor
+	 * @see   LJPrefs#savePreferences
+	 * @see   LJPrefs#recordRun
+	 ***/
 	public void run(String command){
-		if (IJ.versionLessThan("1.49s")) {       // generates an error message for older versions
+		/** generate error message for older versions: **/
+		if (IJ.versionLessThan("1.49s")) {
 			IJ.showStatus("Plug-In unable to run.");
 			return;
 		}
-		IJ.showStatus("Colorizing Image...");
-		IJ.register(this.getClass());
-		//TODO: make recordable
 		
+		IJ.showStatus("Colorizing Image...");
+		//IJ.register(this.getClass()); //check if required
+		
+		//TODO: make recordable
 		String arguments = "";
 		if (IJ.isMacro() && Macro.getOptions() != null && !Macro.getOptions().trim().isEmpty()) { 
 			arguments = Macro.getOptions().trim();
@@ -60,12 +74,12 @@ public class Colorize_ implements PlugIn{
 			return;
 		}
 		if (IJ.isMacro()){
-			//get active image:
+			/** get active image: **/
 			String title = null;
 			title = LJPrefs.retrieveOption(arguments, "image", title);
 			image = WindowManager.getImage(title);
 		}else{
-			//get active image:
+			/** get active image: **/
 			image = WindowManager.getCurrentImage();
 		}
 		//options += " image="+image.getTitle();

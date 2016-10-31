@@ -1,33 +1,36 @@
-import java.io.IOException;
-import java.util.Properties;
-
-import lj.LJPrefs;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 import ij.process.ImageProcessor;
 
-/**
- * Combines 3D blocks in a directory into a single image.
- * run("3D Blocks - Concatenate", "input=[C:\\myblocks\\threshold]");
+import java.io.IOException;
+import java.util.Properties;
+
+import lj.LJPrefs;
+
+/*** Concatenate_3D
+ * combines 3D blocks in a directory into a single image.
+ * <code>run("3D Blocks - Concatenate", 
+ * "input=[C:\\myblocks\\threshold]");</code>
  * 
- * - Ensure that all the image-blocks are inside the directory and that the 
- *   `properties.txt’ file is available.
+ * - Ensure that all the image-blocks are inside the directory and
+ *   that the `properties.txt’ file is available.
  * - Call Concatenate_3D and provide the full path to the directory.
- * - The function will then load the blocks one after the other, stitch them together 
- *   into one image and display the output.
+ * - The function will then load the blocks one after the other,
+ *   stitch them together into one image and display the output.
  * 
- * @author Lasse Wollatz
- * 
- **/
+ * @author Lasse Wollatz  
+ ***/
 
 public class Concatenate_3D implements PlugIn{
-	/** plugin's name */
+	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	/** plugin's current version */
+	/** plugin's current version **/
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
-	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	//public static final String IMPLEMENTATION_VERSION = Concatenate_3D.class.getPackage().getImplementationVersion();
+	/** URL linking to documentation **/
+	public static final String PLUGIN_HELP_URL = LJPrefs.PLUGIN_HELP_URL;
 	private static String BC_inDirectory = LJPrefs.LJ_outDirectory;
 	private static int maxX = 1;
 	private static int maxY = 1;
@@ -41,7 +44,15 @@ public class Concatenate_3D implements PlugIn{
 	private static double globMax = 1;
 	private static double globMin = 0;
 	
-	
+	/*** run
+     * 
+     * @param  command        String 
+     * 
+     * @see    #paste
+     * @see    LJPrefs#readProperties
+     * @see    LJPrefs#getPref
+     * @see    ij.gui.GenericDialog
+     ***/
 	public void run(String command){
 		IJ.showStatus("Getting data...");
 		IJ.showProgress(0, 100);
@@ -50,6 +61,8 @@ public class Concatenate_3D implements PlugIn{
 		GenericDialog gd = new GenericDialog(command+" Concatenate imageblocks created by subdivide");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
 		IJ.showStatus("Waiting for user input...");
+		if (IJ.getVersion().compareTo("1.42p")>=0)
+        	gd.addHelp(PLUGIN_HELP_URL);
 		gd.showDialog();
 		if (gd.wasCanceled()){
 			IJ.showStatus("Plug In cancelled...");
@@ -147,7 +160,6 @@ public class Concatenate_3D implements PlugIn{
 		
 		
 		IJ.showProgress(90, 100);
-    	//IJ.setThreshold(globMin,globMax,"BLACK_AND_WHITE_LUT");
 		imgout.show();
 		IJ.setMinAndMax(globMin, globMax);
 		IJ.showStatus("Concatenated blocks");
@@ -155,19 +167,23 @@ public class Concatenate_3D implements PlugIn{
 		
 	}
 	
-	/** takes an image stack and pastes it into another image stack at the given top left position
-	 * @param img
-	 *        image block to paste into canvas image
-	 * @param destimg
-	 *        destination image or canvas to past image block into.
-	 * @param px
-	 *        x coordinate of destimg where x=0 of img is
-	 * @param py
-	 *        y coordinate of destimg where y=0 of img is
-	 * @param pz
-	 *        z coordinate of destimg where z=0 of img is
-	 * @return
-	 */
+	/*** paste
+     * takes an image stack and pastes it into another image stack at the
+     * given top left position
+     * 
+     * @param  img            ImagePlus image block to paste into canvas
+     *                        image
+     * @param  destimg        ImagePlus destination image or canvas to
+     *                        past image block into.
+     * @param  px             int x coordinate of destimg where x=0 of img
+     *                        is
+     * @param  py             int y coordinate of destimg where y=0 of img
+     *                        is
+     * @param  pz             int z coordinate of destimg where z=0 of img
+     *                        is
+     * 
+     * @return                ImagePlus image canvas with img pasted into
+     ***/
 	private ImagePlus paste(ImagePlus img, ImagePlus destimg, int px, int py, int pz){
 		ImageProcessor ipo = destimg.getProcessor();
 		
@@ -221,6 +237,25 @@ public class Concatenate_3D implements PlugIn{
 		return destimg;
 		
 	}
+	
+	/*** paste
+     * takes an image stack with halos and pastes it into another image stack
+     * at the given top left position, ignoring the halos.
+     * 
+     * @param  img            ImagePlus image block to paste into <code>destimg</code>
+     * @param  destimg        ImagePlus image canvas
+     * @param  px             int x coordinate of destimg where x=0 of img is
+     * @param  py             int y coordinate of destimg where y=0 of img is
+     * @param  pz             int z coordinate of destimg where z=0 of img is
+     * @param  sx1            int x coordinate of destimg where halo starts
+     * @param  sx2            int x coordinate of destimg where halo ends
+     * @param  sy1            int y coordinate of destimg where halo starts
+     * @param  sy2            int y coordinate of destimg where halo ends
+     * @param  sz1            int z coordinate of destimg where halo starts
+     * @param  sz2            int z coordinate of destimg where halo ends
+     * 
+     * @return                ImagePlus image canvas with img pasted into
+     ***/
 	private ImagePlus paste(ImagePlus img, ImagePlus destimg, int px, int py, int pz, int sx1, int sx2, int sy1, int sy2, int sz1, int sz2){
 		ImageProcessor ipo = destimg.getProcessor();
 		

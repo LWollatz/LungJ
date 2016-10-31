@@ -1,3 +1,7 @@
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.plugin.PlugIn;
+
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -21,16 +25,24 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import lj.LJPrefs;
-import ij.gui.GenericDialog;
-import ij.plugin.PlugIn;
 
-
+/*** LungJ_Settings
+ * provides a dialog to change default values in LungJ. These default
+ * values are used in all functions including the generation of the
+ * default code in Run_Macro_3D.
+ * 
+ * @author Lasse Wollatz  
+ * 
+ * @see    Run_Macro_3D   
+ ***/
 public class LungJ_Settings implements PlugIn, ActionListener{
-	/** plugin's name */
+	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	/** plugin's current version */
+	/** plugin's current version **/
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	/** URL linking to documentation **/
+	public static final String PLUGIN_HELP_URL = LJPrefs.PLUGIN_HELP_URL;
 	
 	private static String clsDir = LJPrefs.LJ_clsDirectory;
 	private final Border ColPrevBorder = new MatteBorder(1, 1, 1, 1, (Color) new Color(0, 0, 0));
@@ -41,23 +53,28 @@ public class LungJ_Settings implements PlugIn, ActionListener{
 	GridBagConstraints cCol = new GridBagConstraints();
 	GenericDialog gd;
 	JButton filebtn, clsbtn;
-	JComboBox cmbClassifier1;
+	JComboBox cmbClassifier1 = new JComboBox();
 	JTextField inpdirtxt;
 	
 	
 
 	
 	public void run(String arg) {
-		
-		showDialog();
-        
-		
-
-	}
+        showDialog();
+    }
 	
-	// Called by ImageJ after setup.
+	/*** showDialog ***
+     * Creates and shows a user dialog to set LungJ preferences and saves them.
+     * 
+     * @return                     int
+     * 
+     * @see    LJPrefs#loadClassifier
+     * @see    LJPrefs#getColor
+     * @see    LJPrefs#savePreferences
+     * @see    ij.gui.GenericDialog
+     ***/
     public int showDialog() {
-    	// The dialog
+    	/** create dialog to request values from user: **/
         GenericDialog gd = new GenericDialog("LungJ Settings...");
         GridBagConstraints c = new GridBagConstraints();
         Font gdFont = gd.getFont();
@@ -95,7 +112,7 @@ public class LungJ_Settings implements PlugIn, ActionListener{
 		String[] classifiers = new String[LJPrefs.LJ_classifiers.size()];
 		classifiers = LJPrefs.LJ_classifiers.toArray(classifiers);
 		File model = new File(LJPrefs.LJ_clsDirectory);
-        cmbClassifier1 = new JComboBox();
+        //cmbClassifier1 = new JComboBox();
         cmbClassifier1.setModel(new DefaultComboBoxModel(classifiers));
         cmbClassifier1.setSelectedItem(model.getName());
         c.fill = GridBagConstraints.HORIZONTAL;
@@ -181,6 +198,8 @@ public class LungJ_Settings implements PlugIn, ActionListener{
         gd.doLayout();
         gd.addHelp("https://bitbucket.org/lwollatz/lungj/wiki/Home");
         gd.hideCancelButton();
+        if (IJ.getVersion().compareTo("1.42p")>=0)
+        	gd.addHelp(PLUGIN_HELP_URL);
         gd.showDialog();
         
      
@@ -189,10 +208,11 @@ public class LungJ_Settings implements PlugIn, ActionListener{
         }
         
         /**GET VALUES**/
-        //MAIN DIRECTORY
-        LJPrefs.LJ_inpDirectory = inpdirtxt.getText();
-        //APPLY WEKA CLASSIFIER
-		LJPrefs.LJ_makeMap = gd.getNextBoolean();
+		//MAIN DIRECTORY
+        LJPrefs.LJ_inpDirectory = inpdirtxt.getText(); 
+		//APPLY WEKA CLASSIFIER
+		LJPrefs.LJ_makeMap = gd.getNextBoolean(); 
+		//values from user dialog extracted
         File file = new File(LJPrefs.LJ_clsDirectory);
 		File folder = file.getParentFile();
 		LJPrefs.LJ_clsDirectory = folder.getPath() + "\\" + cmbClassifier1.getItemAt(cmbClassifier1.getSelectedIndex());
@@ -200,12 +220,22 @@ public class LungJ_Settings implements PlugIn, ActionListener{
     	LJPrefs.LJ_makeMask = gd.getNextBoolean();
     	LJPrefs.LJ_threshold = gd.getNextNumber()/100;
     	//note that colours and classifier directory have already been copied...
+		//save preferences for after Fiji restart:
     	LJPrefs.savePreferences();
-        
         return 0;  
     }
     
-    
+    /*** actionPerformed
+     * actionPerformed triggered if button is pressed. Displays a file
+     * open dialog for either
+     *                       - the WEKA-classifier model directory, or
+     *                       - the input directory for the 3D-Block Macro
+     *                         processor
+     * 
+     * @param  arg0           ActionEvent ActionEvent
+     * 
+     * @see    LJPrefs#loadClassifier
+     ***/
     public void actionPerformed(ActionEvent arg0) {
 		if(arg0.getSource() == this.clsbtn ){
 			JFileChooser chooser = new JFileChooser(LJPrefs.LJ_clsDirectory);
@@ -217,6 +247,8 @@ public class LungJ_Settings implements PlugIn, ActionListener{
 			if(returnVal == JFileChooser.APPROVE_OPTION)
 	        {
 				clsDir = chooser.getSelectedFile().getPath();
+				IJ.log(clsDir);
+				//clsDir = chooser.getSelectedFile().getParent();
 				LJPrefs.LJ_clsDirectory = clsDir;
 				LJPrefs.loadClassifier();
 				String[] classifiers = new String[LJPrefs.LJ_classifiers.size()];

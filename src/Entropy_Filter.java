@@ -8,12 +8,17 @@ import ij.process.ByteProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-/**
- * This class implements a circular entropy filter
+/*** Entropy_Filter
+ * class implements a circular entropy filter
+ * This class has been copied from the TWS and adapted for independent use.
  * 
- */
-public class Entropy_Filter implements PlugInFilter
-{
+ * @author Trainable WEKA Segmentation
+ * @author m-ezzat
+ * @author imagejan
+ * @author iarganda
+ * @author dscho
+ ***/
+public class Entropy_Filter implements PlugInFilter{
 	/** original image */
 	ImagePlus origImg = null;
 	/** radius to use (in pixels) */
@@ -25,8 +30,7 @@ public class Entropy_Filter implements PlugInFilter
 	 * Main method when called as a plugin filter
 	 * @param ip input image
 	 */
-	public void run(ImageProcessor ip) 
-	{
+	public void run(ImageProcessor ip){
 		applyEntropy(ip, radius, numBins);			
 	}
 
@@ -35,8 +39,7 @@ public class Entropy_Filter implements PlugInFilter
 	 * @param arg filter arguments
 	 * @param imp input image
 	 */
-	public int setup(String arg, ImagePlus imp) 
-	{
+	public int setup(String arg, ImagePlus imp) {
 		if (arg.equals("about"))
 		{
 			showAbout(); 
@@ -72,11 +75,7 @@ public class Entropy_Filter implements PlugInFilter
 	 * @param numBins number of bins to use in the histogram
 	 * @return entropy image (32-bit)
 	 */
-	public FloatProcessor getEntropy(
-			ImageProcessor ip, 
-			int radius,
-			int numBins)
-	{
+	public FloatProcessor getEntropy(ImageProcessor ip, int radius, int numBins){
 		final double log2=Math.log(2.0);
 		ip.resetMinAndMax();
 		final ByteProcessor bp = (ByteProcessor) ip.convertToByte(true);
@@ -122,11 +121,7 @@ public class Entropy_Filter implements PlugInFilter
 	 * @param radius radius to use (in pixels)
 	 * @param numBins number of bins to use in the histogram
 	 */
-	public void applyEntropy(
-			ImageProcessor ip, 
-			int radius, 
-			int numBins)
-	{
+	public void applyEntropy(ImageProcessor ip, int radius, int numBins){
 		final FloatProcessor fp = getEntropy(ip, radius, numBins);
 		
 		ImageProcessor ip2;
@@ -160,8 +155,7 @@ public class Entropy_Filter implements PlugInFilter
 	/**
 	 * Display filter information
 	 */
-	void showAbout() 
-	{
+	void showAbout(){
 		IJ.showMessage("Entropy filter...",
 				"Circular entropy filter by I. Arganda-Carreras\n"+
 				"ImageJ local entropy filter. Output is 32-bit\n");

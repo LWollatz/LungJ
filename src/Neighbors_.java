@@ -10,15 +10,25 @@ import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 
-
+/*** Neighbors_
+ * implements the TWS Neighbors_ filter
+ * This class has been copied from the TWS and adapted for independent use.
+ * 
+ * @author Trainable WEKA Segmentation
+ * @author iarganda
+ * @author ctrueden
+ * @author m-ezzat
+ * @author dscho
+ * 
+ * @author Lasse Wollatz
+ ***/
 public class Neighbors_ implements PlugIn{
 	
 	ImagePlus originalImage = null;
 	int width = 0;
 	int height = 0;
 	
-	public void run(String arg) 
-	{
+	public void run(String arg){
 		if (arg.equals("about"))
 		{
 			//TODO: showAbout(); 
@@ -53,12 +63,12 @@ public class Neighbors_ implements PlugIn{
 	}
 	
 	/**
-	 * Add 8 neighbors of the original image as features
+	 * Add 8 neighbours of the original image as features
+	 * @param minSigma    int specifying the minimum neighbour offset
+	 * @param maxSigma    int specifying the maximum neighbour offset
+	 * @see trainableSegmentation.FeatureStack#addNeighbors
 	 */
-	public void addNeighbors(
-			final int minSigma,
-			final int maxSigma)
-	{
+	public void addNeighbors(final int minSigma,final int maxSigma){
 		// Test: add neighbors of original image
 				
 		ImagePlus[] channels = extractChannels(originalImage);
@@ -101,22 +111,21 @@ public class Neighbors_ implements PlugIn{
 	}
 	
 	/**
-	 * Calculate 8 neighbors  concurrently
+	 * Calculate 8 neighbours  concurrently
 	 * @param originalImage original input image
+	 * @param minSigma    int specifying the minimum neighbour offset
+	 * @param maxSigma    int specifying the maximum neighbour offset
 	 * @return result image
+	 * @see trainableSegmentation.FeatureStack#getNeighbors
 	 */
-	public Callable<ImagePlus> getNeighbors(
-			final ImagePlus originalImage,
-			final int minSigma,
-			final int maxSigma)
-	{
+	public Callable<ImagePlus> getNeighbors(final ImagePlus originalImage,final int minSigma,final int maxSigma){
 		if (Thread.currentThread().isInterrupted()) 
 			return null;
 		
 		return new Callable<ImagePlus>(){
 			public ImagePlus call(){
 		
-				// Test: add neighbors of original image
+				// Test: add neighbours of original image
 				ImagePlus[] channels = extractChannels(originalImage);
 
 				ImagePlus[] results = new ImagePlus[ channels.length ];
@@ -156,9 +165,9 @@ public class Neighbors_ implements PlugIn{
 	 * Extract channels from input image if it is RGB
 	 * @param originalImage input image
 	 * @return array of channels
+	 * @see trainableSegmentation.FeatureStack#extractChannels
 	 */
-	ImagePlus[] extractChannels(final ImagePlus originalImage) 
-	{
+	ImagePlus[] extractChannels(final ImagePlus originalImage){
 		final int width = originalImage.getWidth();
 		final int height = originalImage.getHeight();
 		ImagePlus[] channels;
@@ -189,10 +198,10 @@ public class Neighbors_ implements PlugIn{
 	/**
 	 * Merge input channels if they are more than 1
 	 * @param channels results channels
-	 * @return result image 
+	 * @return result image
+	 * @see trainableSegmentation.FeatureStack#mergeResultChannels
 	 */
-	ImagePlus mergeResultChannels(final ImagePlus[] channels) 
-	{
+	ImagePlus mergeResultChannels(final ImagePlus[] channels) {
 		if(channels.length > 1)
 		{						
 			ImageStack mergedColorStack = mergeStacks(channels[0].getImageStack(), channels[1].getImageStack(), channels[2].getImageStack());
@@ -215,9 +224,9 @@ public class Neighbors_ implements PlugIn{
 	 * @param greenChannel image stack representing the green channel
 	 * @param blueChannel image stack representing the blue channel
 	 * @return RGB merged stack
+	 * @see trainableSegmentation.FeatureStack#mergeStacks
 	 */
-	ImageStack mergeStacks(ImageStack redChannel, ImageStack greenChannel, ImageStack blueChannel)
-	{
+	ImageStack mergeStacks(ImageStack redChannel, ImageStack greenChannel, ImageStack blueChannel){
 		final ImageStack colorStack = new ImageStack( redChannel.getWidth(), redChannel.getHeight());
 		
 		for(int n=1; n<=redChannel.getSize(); n++)
@@ -240,10 +249,10 @@ public class Neighbors_ implements PlugIn{
 	 * @param ip input image
 	 * @param x x- pixel coordinate
 	 * @param y y- pixel coordinate
-	 * @return pixel vale
+	 * @return pixel value
+	 * @see trainableSegmentation.FeatureStack#getPixelMirrorConditions
 	 */
-	double getPixelMirrorConditions(ImageProcessor ip, int x, int y)
-	{
+	double getPixelMirrorConditions(ImageProcessor ip, int x, int y){
 		int x2 = x < 0 ? -x : x;
 		int y2 = y < 0 ? -y : y;
 		

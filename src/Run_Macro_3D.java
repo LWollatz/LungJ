@@ -1,18 +1,18 @@
-import java.io.IOException;
-import java.util.Properties;
-
-import lj.LJPrefs;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
 import ij.gui.GenericDialog;
 import ij.plugin.PlugIn;
 
-/**
- * Runs a macro for each 3D block in a directory and saves the resulting image blocks to 
+import java.io.IOException;
+import java.util.Properties;
+
+import lj.LJPrefs;
+
+/*** Run_Macro_3D
+ * runs a macro for each 3D block in a directory and saves the resulting image blocks to 
  * a new directory.
- * run("3D Blocks - Run Macro", "input=[C:\\myblocks\\original] output=[C:\\myblocks\\threshold] text1=[var dirin = 'C:\\\\myblocks\\\\original'; open(dirin+'\\\\'+filename); run('Apply Binary Threshold', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack'); run('8-bit'); ]");
+ * <code>run("3D Blocks - Run Macro", "input=[C:\\myblocks\\original] output=[C:\\myblocks\\threshold] text1=[var dirin = 'C:\\\\myblocks\\\\original'; open(dirin+'\\\\'+filename); run('Apply Binary Threshold', 'threshold=30 minimum='+globMin+' maximum='+globMax+' stack'); run('8-bit'); ]");</code>
  * 
  * - A directory with image blocks is required as created by Subdivide_3D or by a 
  *   previous run of this function.
@@ -32,15 +32,15 @@ import ij.plugin.PlugIn;
  *   in the log.
  * 
  * @author Lasse Wollatz
- * 
- **/
-
+ ***/
 public class Run_Macro_3D implements PlugIn{
-	/** plugin's name */
+	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
-	/** plugin's current version */
+	/** plugin's current version **/
 	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
 	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	/** URL linking to documentation **/
+	public static final String PLUGIN_HELP_URL = LJPrefs.PLUGIN_HELP_URL;
 	private static String BC_inDirectory = LJPrefs.LJ_inpDirectory;
 	private static String BC_outDirectory = LJPrefs.LJ_outDirectory;
 	//private static String code = "var dirin = " + BC_inDirectory + ";\n open(dirin+'\\'+filename);\n run('Create Threshold Mask', 'threshold=55 minimum='+globMin+' maximum='+globMax+' stack');";
@@ -60,7 +60,17 @@ public class Run_Macro_3D implements PlugIn{
 	private static int errCount = 0;
 	
 	
-	
+	/*** run
+     * 
+     * @param  command        String 
+     * 
+     * @see    #process
+     * @see    LJPrefs#savePreferences
+     * @see    LJPrefs#readProperties
+     * @see    LJPrefs#getPref
+     * @see    LJPrefs#writeProperties
+     * @see    ij.gui.GenericDialog
+     ***/
 	public void run(String command){
 		//TODO: fix macro recorder to record escape characters correctly over three levels
 		
@@ -96,24 +106,30 @@ public class Run_Macro_3D implements PlugIn{
     		code += "run('8-bit');\n";
     		code += "run('Multiply...', 'value=255 stack');\n";
     	}
-		
+    	
+    	/** create dialog to request values from user: **/
 		GenericDialog gd = new GenericDialog(command+" Run macro on 3D blocks");
 		gd.addStringField("Input directory", BC_inDirectory, 100);
 		gd.addStringField("Output directory", BC_outDirectory, 100);
 		gd.addMessage("Macrocode (provides variables filename, globMin and globMax)");
 		gd.addTextAreas(code, null, 10, 100);
+		if (IJ.getVersion().compareTo("1.42p")>=0)
+        	gd.addHelp(PLUGIN_HELP_URL);
 		gd.showDialog();
 		if (gd.wasCanceled()){
         	return;
         }
 		BC_inDirectory = gd.getNextString();
-		LJPrefs.LJ_inpDirectory = BC_inDirectory;
 		BC_outDirectory = gd.getNextString();
-		LJPrefs.LJ_outDirectory = BC_outDirectory;
 		code = gd.getNextText();
+		/** values from user dialog extracted **/
 		
-		LJPrefs.savePreferences(); //save preferences for after Fiji restart.
+		/** save preferences for after Fiji restart: **/
+		LJPrefs.LJ_inpDirectory = BC_inDirectory;
+		LJPrefs.LJ_outDirectory = BC_outDirectory;
+		LJPrefs.savePreferences();
 		
+		/** read image properties **/
 		Properties prefs = new Properties();
 		try {
 			prefs = LJPrefs.readProperties(BC_inDirectory + "\\properties.txt");
@@ -121,7 +137,6 @@ public class Run_Macro_3D implements PlugIn{
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
 		maxX = LJPrefs.getPref(prefs, "maxX", maxX);
 		maxY = LJPrefs.getPref(prefs, "maxY", maxY);
 		maxZ = LJPrefs.getPref(prefs, "maxZ", maxZ);
@@ -134,7 +149,7 @@ public class Run_Macro_3D implements PlugIn{
 		globMinIn = (float)LJPrefs.getPref(prefs, "minVal", globMinIn);
 		globMaxIn = (float)LJPrefs.getPref(prefs, "maxVal", globMaxIn);
 		
-		//ImagePlus imgin = null;
+		
 		ImagePlus imgout = null;
 		float globMax = -Float.MAX_VALUE;
 		float globMin = Float.MAX_VALUE;
@@ -185,9 +200,9 @@ public class Run_Macro_3D implements PlugIn{
 		if (errCount > 0){
 			IJ.error(String.format("%1$s files failed",errCount));
 		}
-		
-		
 		IJ.showProgress(99, 100);
+		
+		/** save image properties **/
 		prefs = new Properties();
 		prefs.put("maxX", Double.toString(maxX));
 		prefs.put("maxY", Double.toString(maxY));
@@ -212,20 +227,19 @@ public class Run_Macro_3D implements PlugIn{
 		
 	}
 	
+	/*** process
+     * executes macro code and returns the top image
+     * 
+     * @param  code                String with macro to execute
+     * @return                     ImagePlus
+     ***/
 	private ImagePlus process(String code){
 		//ImagePlus imgin, String code
 		//ImageProcessor ipi = imgin.getProcessor();
-		
 		//imgin.show();
-		
-		
 		//TODO: how can I intercept macro errors?
 		IJ.runMacro(code);
-		
 		ImagePlus imgout = WindowManager.getCurrentImage();
-		
-		
-		
 		return imgout;
 		
 	}

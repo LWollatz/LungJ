@@ -1,6 +1,3 @@
-import java.util.Enumeration;
-import java.util.Properties;
-
 import ij.IJ;
 import ij.ImagePlus;
 import ij.WindowManager;
@@ -8,28 +5,35 @@ import ij.gui.GenericDialog;
 import ij.measure.Calibration;
 import ij.plugin.PlugIn;
 
-/** 
- * Consistently labels the slices of a hyperstack.
- * 
- * - Provide names for each frame. leave the name blank if slices should not be 
- *   distinguished by their frame.
- * - Provide names for each channel. leave the name blank if slices should not be 
- *   distinguished by their channel.
- * - Provide a separating string (default is ` - ’)
- * - Choose if the slice number (z-value) should be included in the slice name. If 
- *   so, provide a starting value and an increment value as well as a unit if useful
- *   
- * @author Lasse Wollatz
- *   
- **/
+import lj.LJPrefs;
 
+/*** Label_Hyperstack
+ * consistently labels the slices of a hyperstack.
+ * 
+ * - Provide names for each frame. leave the name blank if slices
+ *   should not be distinguished by their frame.
+ * - Provide names for each channel. leave the name blank if slices
+ *   should not be distinguished by their channel.
+ * - Provide a separating string (default is ` - ’)
+ * - Choose if the slice number (z-value) should be included in the
+ *   slice name. If so, provide a starting value and an increment
+ *   value as well as a unit if useful.
+ * 
+ * @author Lasse Wollatz  
+ ***/
 public class Label_Hyperstack implements PlugIn{
+	/** plugin's name **/
+	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;
+	/** plugin's current version **/
+	public static final String PLUGIN_VERSION = LJPrefs.VERSION;
+	//public static final String IMPLEMENTATION_VERSION = LungJ_.class.getPackage().getImplementationVersion();
+	/** URL linking to documentation **/
+	public static final String PLUGIN_HELP_URL = LJPrefs.PLUGIN_HELP_URL;
 	//TODO: future work: detect patterns in current image labeling to pre-fill textboxes, or just store user preferences
 	//TODO:              handle case of too many frames more elegant 
 	
 	public void run(String command){
 		IJ.showStatus("Labeling Hyperstack");
-		//IJ.register(this.getClass());
 		ImagePlus image = WindowManager.getCurrentImage();
 		
 		int tChannels = image.getNChannels();
@@ -43,6 +47,7 @@ public class Label_Hyperstack implements PlugIn{
 		Double yres = cal.pixelHeight; //yres contains the voxel height in units 
 		Double zres = cal.pixelDepth; //zres contains the voxel depth in units 
 		//String unit = ij.measure.getUnit();
+		
 		
 		int a = 0;
 		int b = 0;
@@ -140,6 +145,8 @@ public class Label_Hyperstack implements PlugIn{
 		gd.addMessage("Settings:");
 		gd.addStringField("Seperator", seperator, 5);
 		IJ.showStatus("Waiting for User Input...");
+		if (IJ.getVersion().compareTo("1.42p")>=0)
+        	gd.addHelp(PLUGIN_HELP_URL);
 		gd.showDialog();
 		if (gd.wasCanceled()){
 			IJ.showProgress(100, 100);
