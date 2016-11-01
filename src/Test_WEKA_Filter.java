@@ -25,8 +25,8 @@ public class Test_WEKA_Filter implements PlugIn{
 	int membranesize = 20;
 	
 	public void run(String arg) {
-		String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians","Membrane projections","Variance","Mean","Minimum","Maximum","Median","Anisotropic diffusion","Bilateral","Lipschitz","Kuwahara","Gabor","Derivatives","Laplacian","Structure","Entropy","Neighbors"};
-		boolean[] defaultValues = {true,true,true,true,false,true,true,true,true,true,true,true,true,true,false,true,true,true,true,false};
+		String[] labels = {"Gaussian blur","Sobel","Hessian","Difference of gaussians","Membrane projections","Variance","Mean","Minimum","Maximum","Median","Anisotropic diffusion","Bilateral","(Lipschitz)","Kuwahara","(Gabor)","Derivatives","Laplacian","Structure","Entropy","Neighbors"};
+		boolean[] defaultValues = {true,true,true,true,true,true,true,true,true,true,true,true,false,true,false,true,true,true,true,true};
 		/** create dialog to request values from user: **/
 		GenericDialog gd = new GenericDialog("WEKA Test Settings...");
 		gd.addStringField("Output Directory", LJPrefs.LJ_srcDirectory, 100);
@@ -195,7 +195,8 @@ public class Test_WEKA_Filter implements PlugIn{
 		/**Lipschitz**/
 		if(gd.getNextBoolean()){
 			macro += "\n/****LIPSCHITZ****/\n";
-			macro += LipschitzMacro(5, true, false);
+			macro += "\n/*(currently broken)*/\n";
+			/*macro += LipschitzMacro(5, true, false);
 			macro += LipschitzMacro(10, true, false);
 			macro += LipschitzMacro(15, true, false);
 			macro += LipschitzMacro(20, true, false);
@@ -211,7 +212,7 @@ public class Test_WEKA_Filter implements PlugIn{
 			macro += LipschitzMacro(10, true, true);
 			macro += LipschitzMacro(15, true, true);
 			macro += LipschitzMacro(20, true, true);
-			macro += LipschitzMacro(25, true, true);
+			macro += LipschitzMacro(25, true, true);*/
 		}
 
 		/**Kuwahara**/
@@ -221,10 +222,16 @@ public class Test_WEKA_Filter implements PlugIn{
 			macro += KuwaharaMacro("Variance / Mean");
 			macro += KuwaharaMacro("Variance / Mean^2");
 		}
-
-		//TODO: Gabor
+		
+		/**Gabor**/
+		//TODO: check parameters
 		if(gd.getNextBoolean()){
-
+			macro += "\n/****GABOR****/\n";
+			macro += "\n/*(currently broken)*/\n";
+			/*macro += GaborMacro(1, 8, 8, 8, 8);
+			macro += GaborMacro(2, 8, 8, 8, 8);
+			macro += GaborMacro(4, 8, 8, 8, 8);
+			macro += GaborMacro(8, 8, 8, 8, 8);*/
 		}
 
 		/**Derivatives**/
@@ -318,8 +325,9 @@ public class Test_WEKA_Filter implements PlugIn{
 			macro += EntropyMacro(4,256);
 			macro += EntropyMacro(8,256);
 		}
-
-		//TODO: Neighbors
+		
+		/**Neighbors**/
+		macro += "\n/****NEIGHBORS****/\n";
 		if(gd.getNextBoolean()){
 			macro += NeighborMacro(1, 8);
 		}
@@ -356,6 +364,26 @@ public class Test_WEKA_Filter implements PlugIn{
 		}
 		macro += FinalMacro(fname+"_"+slope);
 		macro += "rename('Lipschitz "+slope+", "+options+"');\n";
+		
+		return macro;
+	}
+	
+	/*** GaborMacro ***
+     * creates a string of an ImageJ macro that executes the Weka Gabor filter on the image 'original'
+     * 
+     * @param  sigma               int
+     * @return                     String
+     ***/
+	private String GaborMacro(int sigma, int gamma, int psi, int frequency, int nangles){
+		String macro = "/***GABOR FILTER "+sigma+"***/\n";
+		macro += "selectWindow('original');\n";
+		macro += "run('Duplicate...', 'title=Gabor duplicate');\n";
+		macro += "selectWindow('Gabor');\n";
+		macro += "run('Gabor', 'sigma="+sigma+" gamma="+gamma+" psi="+psi+" frequency="+frequency+" nangles="+nangles+"');\n";
+		//run("Gabor", "sigma=1 gamma=8 psi=8 frequency=8 nangles=8");
+		
+		macro += FinalMacro("gabor"+sigma);
+		macro += "rename('Gabor "+sigma+"');\n";
 		
 		return macro;
 	}
