@@ -1,4 +1,3 @@
-[![LICENSE](https://img.shields.io/badge/license-creative%20commons%20attribution%204.0-blue.svg)](https://creativecommons.org/licenses/by/4.0/)
 [![DOI](https://img.shields.io/badge/doi-10.5258%2FSOTON%2F401280-blue.svg)](https://doi.org/10.5258/SOTON/401280)
 # LungJ README #
 
@@ -14,6 +13,7 @@
 * Trainable Weka Segmentation Plugin
 * Flood Fill (3D) Plugin
 * 3D Viewer Plugin
+* FeatureJ (http://imagej.net/FeatureJ)
 * Fiji (advised as it provides many extra tools including the Trainable Weka Segmentation and Flood Fill (3D))
 
 ### How do I get set up? ###
