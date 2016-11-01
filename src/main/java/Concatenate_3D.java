@@ -15,7 +15,7 @@ import lj.LJPrefs;
  * "input=[C:\\myblocks\\threshold]");</code>
  * 
  * - Ensure that all the image-blocks are inside the directory and
- *   that the `properties.txt’ file is available.
+ *   that the `properties.txt` file is available.
  * - Call Concatenate_3D and provide the full path to the directory.
  * - The function will then load the blocks one after the other,
  *   stitch them together into one image and display the output.

@@ -462,7 +462,7 @@ public class Average_ROI_Colour implements PlugIn{
 		 *
 		 * adapted from http://psydok.sulb.uni-saarland.de/volltexte/2004/268/html/surfstat/t.htm
 		 *              (Students T-Verteilung)
-		 *         by   Hans-Jürgen Andreß 10. September 2001
+		 *         by   Hans-JÃ¼rgen AndreÃŸ 10. September 2001
 		 *         last accessed: 22. July 2015
 		 * which is 
 		 * adapted from http://surfstat.newcastle.edu.au/

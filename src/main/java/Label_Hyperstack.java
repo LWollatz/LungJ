@@ -14,7 +14,7 @@ import lj.LJPrefs;
  *   should not be distinguished by their frame.
  * - Provide names for each channel. leave the name blank if slices
  *   should not be distinguished by their channel.
- * - Provide a separating string (default is ` - ’)
+ * - Provide a separating string (default is ` - `)
  * - Choose if the slice number (z-value) should be included in the
  *   slice name. If so, provide a starting value and an increment
  *   value as well as a unit if useful.
