@@ -28,13 +28,29 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 
+/** License Statement
+ * Copyright 2016 Lasse Wollatz
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
 /*** LJPrefs
  * main LungJ class, providing important global variables, 
  * plug-in user preferences and 
  * important functions
  * 
  * @author Lasse Wollatz
- * @version 21 Oct 2016 15:01:56
  ***/
 public class LJPrefs{
 	//TODO: clean this mess up!
@@ -43,7 +59,7 @@ public class LJPrefs{
 	/** name of this plug-in **/
 	public static final String PLUGIN_NAME = "LungJ";
 	/** version number of this plug-in **/
-	public static final String VERSION = "0.5.0";
+	public static final String VERSION = "0.5.1";
 	/** Java version used to compile **/
 	public static final String PLUGIN_JAVA_VERSION = "1.6.0_24";
 	/** ImageJ version used to compile **/

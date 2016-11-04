@@ -20,16 +20,33 @@ import javax.swing.JTextField;
 
 import lj.LJPrefs;
 
-/**
+/** License Statement
+ * Copyright 2016 Lasse Wollatz
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
+
+/*** Subdivide_3D
  * Divides a 3D image into 3D blocks and saves them into a directory along with header 
  * information in a txt file.
- * run("3D Blocks - Create", "directory=[C:\myblocks\original] width=250 height=250 depth=250 z-offset=0 save");
+ * <code>run("3D Blocks - Create", "directory=[C:\myblocks\original] width=250 height=250 depth=250 z-offset=0 save");</code>
  * 
  * - Open a large image in ImageJ. If the image is too large to load, load as many slices
  *   as possible.
  * - Choose the size of the output blocks. It is advised to make the blocks cubic if they
  *   are intended for use with 3D algorithms but to make them mere subsets of the 
- *   original stack, if used with 2D algorithms. This will reduce the number of artefacts
+ *   original stack, if used with 2D algorithms. This will reduce the number of artifacts
  *   from boundary assumptions.
  * - Adjust the z-offset to deal with images that are too large to load into memory at 
  *   once.
@@ -38,8 +55,7 @@ import lj.LJPrefs;
  * 
  * @author Lasse Wollatz
  * 
- **/
-
+ ***/
 public class Subdivide_3D implements PlugIn, ActionListener{
 	/** plugin's name **/
 	public static final String PLUGIN_NAME = LJPrefs.PLUGIN_NAME;

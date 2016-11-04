@@ -13,6 +13,22 @@ import javax.swing.event.HyperlinkListener;
 
 import lj.LJPrefs;
 
+/** License Statement
+ * Copyright 2016 Lasse Wollatz
+ * 
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * 
+ * 
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ **/
 
 /*** Help
  * displays a help dialog with information about the plugin
@@ -83,14 +99,14 @@ public class Help implements PlugIn {
 						+ "<h2>Citing &amp; Referencing</h2>"
 						+ "<p>When you use this plugin for any of your academic work, please cite "+PLUGIN_NAME+" like<br/>"
 						+ PLUGIN_AUTHOR+" ("+PLUGIN_PubYear+"). <i>"+PLUGIN_NAME+"</i> [Computer software]. DOI:<a href="+PLUGIN_PubURL+">"+PLUGIN_PubURL.replace("http://dx.doi.org/", "")+"</a>.<br/>"
-						+ "<br/>in BibTeX:<br/>"
+						/*+ "<br/>in BibTeX:<br/>"
 						+ "@Misc{lungj,<br/>"
 						+ "	&nbsp;&nbsp;author =   {"+PLUGIN_AUTHOR_Bib+"},<br/>"
 						+ "	&nbsp;&nbsp;title =    {{"+PLUGIN_NAME+"}},<br/>"
 						+ "	&nbsp;&nbsp;year = {"+PLUGIN_PubYear+"},<br/>"
 						+ "	&nbsp;&nbsp;publisher =    {{University of Southampton}},<br/>"
 						+ "	&nbsp;&nbsp;howpublished = {[Computer software] \\url{"+PLUGIN_PubURL+"}}<br/>"
-						+ "	}<br/>"
+						+ "	}<br/>"*/
 						+ "</p>"
 						+ "<h2>Requirements</h2>"
 						+ "<ul>"
