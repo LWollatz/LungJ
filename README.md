@@ -1,11 +1,10 @@
+[![](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0.html)
 [![DOI](https://img.shields.io/badge/doi-10.5258%2FSOTON%2F401280-blue.svg)](https://doi.org/10.5258/SOTON/401280)
 # LungJ README #
 
 ### What is this repository for? ###
 
-* providing a Plug-In for Fiji / ImageJ for segmenting images, too large to process in RAM at once as well as several other tools for image segmentation & processing.
-* current version: 0.5.0
-* last stable version: 0.3.0
+providing a Plug-In for Fiji / ImageJ for segmenting images, too large to process in RAM at once as well as several other tools for image segmentation & processing.
 
 ### Requirements ###
 
