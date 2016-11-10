@@ -11,3 +11,6 @@ Thumbs.db
 /logoleft.bmp
 /logosmall.bmp
 /target/
+doc
+jre
+jdk1.8.0_40

@@ -44,7 +44,7 @@ import lj.LJPrefs;
  *   background and is ideal for mathematical operations! The image
  *   type is not modified.
  * - On re-opening the image, make sure to adjust the window-size
- *   under Image>Adjust>Window/Level... as this is not the default
+ *   under Image/Adjust/Window/Level... as this is not the default
  *   for 8-bit images.
  * 
  * @author Lasse Wollatz  

@@ -46,7 +46,7 @@ import lj.LJPrefs;
  *   after each selection)
  * - Make sure that the selected regions are representative of the
  *   whole area.
- * - with the ROI Manager open, run LungJ>Average ROI Colour.
+ * - with the ROI Manager open, run LungJ/Average ROI Colour.
  * - The output will be a results table giving you information about
  *   the mean value, the standard deviation and the likelihood that
  *   this is the average value of your region. As well a plot

@@ -14,11 +14,11 @@
 
 	<groupId>net.imagej</groupId>
 	<artifactId>LungJ</artifactId>
-	<version>0.5.1-SNAPSHOT</version>
+	<version>0.5.1</version>
 
-	<name>LungJ</name>
+	<name>LungJ/LungJ_</name>
 	<description>Plug-In for segmenting images, too large to process in RAM at once as well as several other tools for image segmentation and processing.</description>
-
+	
 	<repositories>
 		<repository>
 			<id>imagej.public</id>

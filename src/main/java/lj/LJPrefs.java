@@ -61,7 +61,7 @@ public class LJPrefs{
 	/** version number of this plug-in **/
 	public static final String VERSION = "0.5.1";
 	/** Java version used to compile **/
-	public static final String PLUGIN_JAVA_VERSION = "1.6.0_24";
+	public static final String PLUGIN_JAVA_VERSION = "1.8.0_40";
 	/** ImageJ version used to compile **/
 	public static final String PLUGIN_IJ_VERSION = "1.51d";
 	/** Trainable Weka Segmentation version compatible with **/
@@ -123,7 +123,7 @@ public class LJPrefs{
 	/** default Colorize colour 5 **/
 	public static Color  LJ_Color5 =   getPref("LJ.COLOR5", new Color(204, 0, 0));    		//Bloodvessels
 	/** default Colorize colours 
-	 * @see .Colorize_
+	 * see .Colorize_
 	 **/
 	@SuppressWarnings("javadoc")
 	public static Color[] LJ_Colors = {LJ_bgColor, LJ_Color1, LJ_Color2, LJ_Color3, LJ_Color4};
